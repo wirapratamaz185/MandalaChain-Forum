@@ -1,0 +1,336 @@
+[debug] [2024-03-19T01:56:07.500Z] ----------------------------------------------------------------------
+[debug] [2024-03-19T01:56:07.503Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2024-03-19T01:56:07.504Z] CLI Version:   13.5.1
+[debug] [2024-03-19T01:56:07.505Z] Platform:      win32
+[debug] [2024-03-19T01:56:07.505Z] Node Version:  v18.17.1
+[debug] [2024-03-19T01:56:07.506Z] Time:          Tue Mar 19 2024 09:56:07 GMT+0800 (Central Indonesia Time)
+[debug] [2024-03-19T01:56:07.506Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-03-19T01:56:07.631Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-03-19T01:56:07.632Z] > authorizing via signed-in user (wira.pratama@undiksha.ac.id)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  D:\ALL ABOUT UNDIKSHA\SEMESTER 6 (MAGANG)\FORUM - MANDALACHAIN\next_discussion_platform
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2024-03-19T01:56:11.990Z] Using project from CLI flag: forum-mandala
+[debug] [2024-03-19T01:56:11.993Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/forum-mandala [none]
+[debug] [2024-03-19T01:56:12.576Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/forum-mandala 200
+[debug] [2024-03-19T01:56:12.576Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/forum-mandala {"projectId":"forum-mandala","projectNumber":"856586585414","displayName":"forum-mandala","name":"projects/forum-mandala","resources":{"hostingSite":"forum-mandala","realtimeDatabaseInstance":"forum-mandala-default-rtdb"},"state":"ACTIVE","etag":"1_91334c0a-bc4e-4829-bbd6-b5030432df9c"}
+[info] i  Using project forum-mandala (forum-mandala) 
+[info] 
+=== Database Setup
+[info] i  database: ensuring required API firebasedatabase.googleapis.com is enabled... 
+[debug] [2024-03-19T01:56:12.588Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/firebasedatabase.googleapis.com [none]
+[debug] [2024-03-19T01:56:12.588Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/firebasedatabase.googleapis.com x-goog-quota-user=projects/forum-mandala
+[debug] [2024-03-19T01:56:14.195Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/firebasedatabase.googleapis.com 200
+[debug] [2024-03-19T01:56:14.195Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/firebasedatabase.googleapis.com [omitted]
+[info] +  database: required API firebasedatabase.googleapis.com is enabled 
+[info] 
+[debug] [2024-03-19T01:56:14.198Z] >>> [apiv2][query] GET https://firebasedatabase.googleapis.com/v1beta/projects/forum-mandala/locations/-/instances/forum-mandala-default-rtdb [none]
+[debug] [2024-03-19T01:56:15.717Z] <<< [apiv2][status] GET https://firebasedatabase.googleapis.com/v1beta/projects/forum-mandala/locations/-/instances/forum-mandala-default-rtdb 200
+[debug] [2024-03-19T01:56:15.718Z] <<< [apiv2][body] GET https://firebasedatabase.googleapis.com/v1beta/projects/forum-mandala/locations/-/instances/forum-mandala-default-rtdb {"name":"projects/856586585414/locations/asia-southeast1/instances/forum-mandala-default-rtdb","project":"projects/856586585414","databaseUrl":"https://forum-mandala-default-rtdb.asia-southeast1.firebasedatabase.app","type":"DEFAULT_DATABASE","state":"ACTIVE"}
+[info] 
+[info] Firebase Realtime Database Security Rules allow you to define how your data should be
+[info] structured and when your data can be read from and written to.
+[info] 
+[debug] [2024-03-19T01:56:19.846Z] >>> [apiv2][query] GET https://forum-mandala-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json [none]
+[debug] [2024-03-19T01:56:20.103Z] <<< [apiv2][status] GET https://forum-mandala-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json 200
+[debug] [2024-03-19T01:56:20.103Z] <<< [apiv2][body] GET https://forum-mandala-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json [stream]
+[info] +  Database Rules for forum-mandala-default-rtdb have been written to database.rules.json. 
+[info] Future modifications to database.rules.json will update Realtime Database Security Rules when you run
+[info] firebase deploy.
+[info] 
+=== Firestore Setup
+[debug] [2024-03-19T01:56:20.109Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/firestore.googleapis.com [none]
+[debug] [2024-03-19T01:56:20.109Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/firestore.googleapis.com x-goog-quota-user=projects/forum-mandala
+[debug] [2024-03-19T01:56:21.678Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/firestore.googleapis.com 200
+[debug] [2024-03-19T01:56:21.679Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/firestore.googleapis.com [omitted]
+[debug] [2024-03-19T01:56:21.681Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/forum-mandala/databases/(default) [none]
+[debug] [2024-03-19T01:56:21.904Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/forum-mandala/databases/(default) 200
+[debug] [2024-03-19T01:56:21.905Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/forum-mandala/databases/(default) {"name":"projects/forum-mandala/databases/(default)","uid":"757f910f-eac3-4c5c-9e18-8c2f609aee60","createTime":"2024-03-19T01:52:25.234014Z","updateTime":"2024-03-19T01:52:25.234014Z","locationId":"asia-southeast2","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2024-03-19T01:52:25.234014Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"zet","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","etag":"INLuzbmc/4QDMIyT69ab/4QD"}
+[debug] [2024-03-19T01:56:21.905Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-03-19T01:56:21.905Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-03-19T01:56:21.906Z] > authorizing via signed-in user (wira.pratama@undiksha.ac.id)
+[debug] [2024-03-19T01:56:21.906Z] [iam] checking project forum-mandala for permissions ["firebase.projects.get"]
+[debug] [2024-03-19T01:56:21.907Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/forum-mandala:testIamPermissions [none]
+[debug] [2024-03-19T01:56:21.907Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/forum-mandala:testIamPermissions x-goog-quota-user=projects/forum-mandala
+[debug] [2024-03-19T01:56:21.907Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/forum-mandala:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-03-19T01:56:23.106Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/forum-mandala:testIamPermissions 200
+[debug] [2024-03-19T01:56:23.107Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/forum-mandala:testIamPermissions {"permissions":["firebase.projects.get"]}
+[info] 
+[info] Firestore Security Rules allow you to define how and when to allow
+[info] requests. You can keep these rules in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-03-19T01:56:24.596Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/forum-mandala/releases pageSize=10&pageToken=
+[debug] [2024-03-19T01:56:25.065Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/forum-mandala/releases 200
+[debug] [2024-03-19T01:56:25.065Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/forum-mandala/releases {"releases":[{"name":"projects/forum-mandala/releases/cloud.firestore","rulesetName":"projects/forum-mandala/rulesets/50549268-9082-40ec-8c01-44996a9e4764","createTime":"2024-03-19T01:52:35.142274Z","updateTime":"2024-03-19T01:52:35.142274Z"}]}
+[debug] [2024-03-19T01:56:25.066Z] Found ruleset: projects/forum-mandala/rulesets/50549268-9082-40ec-8c01-44996a9e4764
+[debug] [2024-03-19T01:56:25.066Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/forum-mandala/rulesets/50549268-9082-40ec-8c01-44996a9e4764 [none]
+[debug] [2024-03-19T01:56:25.754Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/forum-mandala/rulesets/50549268-9082-40ec-8c01-44996a9e4764 200
+[debug] [2024-03-19T01:56:25.754Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/forum-mandala/rulesets/50549268-9082-40ec-8c01-44996a9e4764 [omitted]
+[info] 
+[info] Firestore indexes allow you to perform complex queries while
+[info] maintaining performance that scales with the size of the result
+[info] set. You can keep index definitions in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-03-19T01:56:27.151Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/forum-mandala/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2024-03-19T01:56:27.159Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/forum-mandala/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2024-03-19T01:56:27.325Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/forum-mandala/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2024-03-19T01:56:27.325Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/forum-mandala/databases/(default)/collectionGroups/-/indexes {"indexes":[{"name":"projects/forum-mandala/databases/(default)/collectionGroups/posts/indexes/CICAgOjXh4EK","queryScope":"COLLECTION","fields":[{"fieldPath":"communityId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"DESCENDING"},{"fieldPath":"name","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}],"state":"CREATING"},{"name":"projects/forum-mandala/databases/(default)/collectionGroups/comments/indexes/CICAgJiUpoMK","queryScope":"COLLECTION","fields":[{"fieldPath":"postId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"DESCENDING"},{"fieldPath":"name","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}],"state":"CREATING"}]}
+[debug] [2024-03-19T01:56:27.345Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/forum-mandala/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[debug] [2024-03-19T01:56:27.345Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/forum-mandala/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/forum-mandala/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[info] 
+=== Functions Setup
+[debug] [2024-03-19T01:56:27.369Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-03-19T01:56:27.370Z] > authorizing via signed-in user (wira.pratama@undiksha.ac.id)
+[debug] [2024-03-19T01:56:27.370Z] [iam] checking project forum-mandala for permissions ["firebase.projects.get"]
+[debug] [2024-03-19T01:56:27.370Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/forum-mandala:testIamPermissions [none]
+[debug] [2024-03-19T01:56:27.370Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/forum-mandala:testIamPermissions x-goog-quota-user=projects/forum-mandala
+[debug] [2024-03-19T01:56:27.370Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/forum-mandala:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-03-19T01:56:28.529Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/forum-mandala:testIamPermissions 200
+[debug] [2024-03-19T01:56:28.530Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/forum-mandala:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-03-19T01:56:28.530Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com [none]
+[debug] [2024-03-19T01:56:28.530Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/forum-mandala
+[debug] [2024-03-19T01:56:28.534Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/runtimeconfig.googleapis.com [none]
+[debug] [2024-03-19T01:56:28.534Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/forum-mandala
+[debug] [2024-03-19T01:56:30.061Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/runtimeconfig.googleapis.com 200
+[debug] [2024-03-19T01:56:30.061Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2024-03-19T01:56:30.065Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com 200
+[debug] [2024-03-19T01:56:30.065Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com [omitted]
+[debug] [2024-03-19T01:56:30.066Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com:enable [none]
+[debug] [2024-03-19T01:56:30.066Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com:enable x-goog-quota-user=projects/forum-mandala
+[debug] [2024-03-19T01:56:31.899Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com:enable 200
+[debug] [2024-03-19T01:56:31.900Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com:enable [omitted]
+[debug] [2024-03-19T01:56:41.913Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com [none]
+[debug] [2024-03-19T01:56:41.913Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/forum-mandala
+[debug] [2024-03-19T01:56:43.472Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com 200
+[debug] [2024-03-19T01:56:43.473Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/forum-mandala/services/cloudfunctions.googleapis.com [omitted]
+[info] 
+Detected existing codebase(s): default
+
+[info] 
+Overwriting codebase default...
+
+[info] +  Wrote functions/package.json 
+[info] +  Wrote functions/.eslintrc.js 
+[info] +  Wrote functions/tsconfig.json 
+[info] +  Wrote functions/tsconfig.dev.json 
+[info] +  Wrote functions/src/index.ts 
+[info] +  Wrote functions/.gitignore 
+[info] 
+=== Hosting Setup
+[debug] [2024-03-19T01:58:03.854Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/forum-mandala [none]
+[debug] [2024-03-19T01:58:04.310Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/forum-mandala 200
+[debug] [2024-03-19T01:58:04.310Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/forum-mandala {"projectId":"forum-mandala","projectNumber":"856586585414","displayName":"forum-mandala","name":"projects/forum-mandala","resources":{"hostingSite":"forum-mandala","realtimeDatabaseInstance":"forum-mandala-default-rtdb"},"state":"ACTIVE","etag":"1_91334c0a-bc4e-4829-bbd6-b5030432df9c"}
+[info] 
+[info] Your public directory is the folder (relative to your project directory) that
+[info] will contain Hosting assets to be uploaded with firebase deploy. If you
+[info] have a build process for your assets, use your build's output directory.
+[info] 
+[debug] [2024-03-19T01:58:15.247Z] >>> [apiv2][query] GET https://www.gstatic.com/firebasejs/releases.json [none]
+[debug] [2024-03-19T01:58:15.441Z] <<< [apiv2][status] GET https://www.gstatic.com/firebasejs/releases.json 200
+[debug] [2024-03-19T01:58:15.442Z] <<< [apiv2][body] GET https://www.gstatic.com/firebasejs/releases.json {"current":{"version":"10.9.0","browserURL":"https://www.gstatic.com/firebasejs/10.9.0/firebase.js","packageURL":"https://www.gstatic.com/firebasejs/10.9.0/firebase.tgz"},"live":{"version":"10.9","browserURL":"https://www.gstatic.com/firebasejs/live/10.9/firebase.js","packageURL":"https://www.gstatic.com/firebasejs/live/10.9/firebase.tgz"},"components":{"analytics":"https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js","app":"https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js","app-check":"https://www.gstatic.com/firebasejs/10.9.0/firebase-app-check.js","auth":"https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js","auth/cordova":"https://www.gstatic.com/firebasejs/10.9.0/firebase-auth/cordova.js","auth/web-extension":"https://www.gstatic.com/firebasejs/10.9.0/firebase-auth/web-extension.js","functions":"https://www.gstatic.com/firebasejs/10.9.0/firebase-functions.js","firestore":"https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js","firestore/lite":"https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore/lite.js","installations":"https://www.gstatic.com/firebasejs/10.9.0/firebase-installations.js","storage":"https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js","performance":"https://www.gstatic.com/firebasejs/10.9.0/firebase-performance.js","remote-config":"https://www.gstatic.com/firebasejs/10.9.0/firebase-remote-config.js","messaging":"https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging.js","messaging/sw":"https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging/sw.js","database":"https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js","firestore.memory":"https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.memory.js"}}
+[info] +  Wrote public/index.html 
+[info] 
+[info] i  Detected a .git folder at D:\ALL ABOUT UNDIKSHA\SEMESTER 6 (MAGANG)\FORUM - MANDALACHAIN\next_discussion_platform 
+[info] i  Authorizing with GitHub to upload your service account to a GitHub repository's secrets store. 
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://github.com/login/oauth/authorize?client_id=89cf50f02ac6aaed3484&state=1059746679&redirect_uri=http%3A%2F%2Flocalhost%3A9005&scope=read%3Auser%20repo%20public_repo
+[info] 
+[info] Waiting for authentication...
+[debug] [2024-03-19T01:58:58.761Z] >>> [apiv2][query] POST https://github.com/login/oauth/access_token [none]
+[debug] [2024-03-19T01:58:58.762Z] >>> [apiv2][body] POST https://github.com/login/oauth/access_token [stream]
+[debug] [2024-03-19T01:58:59.406Z] <<< [apiv2][status] POST https://github.com/login/oauth/access_token 200
+[debug] [2024-03-19T01:58:59.406Z] <<< [apiv2][body] POST https://github.com/login/oauth/access_token {"access_token":"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","token_type":"bearer","scope":"read:user,repo"}
+[debug] [2024-03-19T01:58:59.421Z] >>> [apiv2][query] GET https://api.github.com/user [none]
+[debug] [2024-03-19T01:58:59.949Z] <<< [apiv2][status] GET https://api.github.com/user 200
+[debug] [2024-03-19T01:58:59.949Z] <<< [apiv2][body] GET https://api.github.com/user {"login":"wirapratamaz","id":89260515,"node_id":"MDQ6VXNlcjg5MjYwNTE1","avatar_url":"https://avatars.githubusercontent.com/u/89260515?v=4","gravatar_id":"","url":"https://api.github.com/users/wirapratamaz","html_url":"https://github.com/wirapratamaz","followers_url":"https://api.github.com/users/wirapratamaz/followers","following_url":"https://api.github.com/users/wirapratamaz/following{/other_user}","gists_url":"https://api.github.com/users/wirapratamaz/gists{/gist_id}","starred_url":"https://api.github.com/users/wirapratamaz/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/wirapratamaz/subscriptions","organizations_url":"https://api.github.com/users/wirapratamaz/orgs","repos_url":"https://api.github.com/users/wirapratamaz/repos","events_url":"https://api.github.com/users/wirapratamaz/events{/privacy}","received_events_url":"https://api.github.com/users/wirapratamaz/received_events","type":"User","site_admin":false,"name":null,"company":null,"blog":"","location":"Bali","email":null,"hireable":null,"bio":null,"twitter_username":null,"public_repos":63,"public_gists":0,"followers":45,"following":78,"created_at":"2021-08-20T13:35:57Z","updated_at":"2024-03-07T12:31:20Z","private_gists":0,"total_private_repos":13,"owned_private_repos":12,"disk_usage":96928,"collaborators":2,"two_factor_authentication":true,"plan":{"name":"free","space":976562499,"collaborators":0,"private_repos":10000}}
+[info] 
+[info] +  Success! Logged into GitHub as wirapratamaz 
+[info] 
+[debug] [2024-03-19T01:59:02.872Z] >>> [apiv2][query] GET https://api.github.com/repos//actions/secrets/public-key type=owner
+[debug] [2024-03-19T01:59:03.357Z] <<< [apiv2][status] GET https://api.github.com/repos//actions/secrets/public-key 404
+[debug] [2024-03-19T01:59:03.357Z] <<< [apiv2][body] GET https://api.github.com/repos//actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T01:59:04.589Z] >>> [apiv2][query] GET https://api.github.com/repos//actions/secrets/public-key type=owner
+[debug] [2024-03-19T01:59:05.022Z] <<< [apiv2][status] GET https://api.github.com/repos//actions/secrets/public-key 404
+[debug] [2024-03-19T01:59:05.022Z] <<< [apiv2][body] GET https://api.github.com/repos//actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T01:59:05.933Z] >>> [apiv2][query] GET https://api.github.com/repos//actions/secrets/public-key type=owner
+[debug] [2024-03-19T01:59:06.420Z] <<< [apiv2][status] GET https://api.github.com/repos//actions/secrets/public-key 404
+[debug] [2024-03-19T01:59:06.420Z] <<< [apiv2][body] GET https://api.github.com/repos//actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:06:49.185Z] >>> [apiv2][query] GET https://api.github.com/repos/https://github.com/wirapratamaz/Forum-MandalaChain/actions/secrets/public-key type=owner
+[debug] [2024-03-19T02:06:49.647Z] <<< [apiv2][status] GET https://api.github.com/repos/https://github.com/wirapratamaz/Forum-MandalaChain/actions/secrets/public-key 404
+[debug] [2024-03-19T02:06:49.648Z] <<< [apiv2][body] GET https://api.github.com/repos/https://github.com/wirapratamaz/Forum-MandalaChain/actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:06:59.742Z] >>> [apiv2][query] GET https://api.github.com/repos/https://github.com/wirapratamaz/Forum-MandalaChain/actions/secrets/public-key type=owner
+[debug] [2024-03-19T02:07:00.182Z] <<< [apiv2][status] GET https://api.github.com/repos/https://github.com/wirapratamaz/Forum-MandalaChain/actions/secrets/public-key 404
+[debug] [2024-03-19T02:07:00.182Z] <<< [apiv2][body] GET https://api.github.com/repos/https://github.com/wirapratamaz/Forum-MandalaChain/actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:08:55.595Z] >>> [apiv2][query] GET https://api.github.com/repos/https://github.com/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key type=owner
+[debug] [2024-03-19T02:08:56.058Z] <<< [apiv2][status] GET https://api.github.com/repos/https://github.com/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key 404
+[debug] [2024-03-19T02:08:56.058Z] <<< [apiv2][body] GET https://api.github.com/repos/https://github.com/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:08:57.244Z] >>> [apiv2][query] GET https://api.github.com/repos/https://github.com/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key type=owner
+[debug] [2024-03-19T02:08:57.659Z] <<< [apiv2][status] GET https://api.github.com/repos/https://github.com/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key 404
+[debug] [2024-03-19T02:08:57.659Z] <<< [apiv2][body] GET https://api.github.com/repos/https://github.com/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:10:09.841Z] >>> [apiv2][query] GET https://api.github.com/repos/https://github.com/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key type=owner
+[debug] [2024-03-19T02:10:10.296Z] <<< [apiv2][status] GET https://api.github.com/repos/https://github.com/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key 404
+[debug] [2024-03-19T02:10:10.297Z] <<< [apiv2][body] GET https://api.github.com/repos/https://github.com/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:10:17.391Z] >>> [apiv2][query] GET https://api.github.com/repos//actions/secrets/public-key type=owner
+[debug] [2024-03-19T02:10:17.807Z] <<< [apiv2][status] GET https://api.github.com/repos//actions/secrets/public-key 404
+[debug] [2024-03-19T02:10:17.807Z] <<< [apiv2][body] GET https://api.github.com/repos//actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:10:34.101Z] >>> [apiv2][query] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key type=owner
+[debug] [2024-03-19T02:10:34.576Z] <<< [apiv2][status] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key 403
+[debug] [2024-03-19T02:10:34.577Z] <<< [apiv2][body] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key {"message":"Must have admin rights to Repository.","documentation_url":"https://docs.github.com/rest/actions/secrets#get-a-repository-public-key"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:10:35.549Z] >>> [apiv2][query] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key type=owner
+[debug] [2024-03-19T02:10:35.979Z] <<< [apiv2][status] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key 403
+[debug] [2024-03-19T02:10:35.979Z] <<< [apiv2][body] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key {"message":"Must have admin rights to Repository.","documentation_url":"https://docs.github.com/rest/actions/secrets#get-a-repository-public-key"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:10:36.837Z] >>> [apiv2][query] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key type=owner
+[debug] [2024-03-19T02:10:37.246Z] <<< [apiv2][status] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key 403
+[debug] [2024-03-19T02:10:37.246Z] <<< [apiv2][body] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key {"message":"Must have admin rights to Repository.","documentation_url":"https://docs.github.com/rest/actions/secrets#get-a-repository-public-key"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:10:47.715Z] >>> [apiv2][query] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key type=owner
+[debug] [2024-03-19T02:10:48.158Z] <<< [apiv2][status] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key 403
+[debug] [2024-03-19T02:10:48.158Z] <<< [apiv2][body] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key {"message":"Must have admin rights to Repository.","documentation_url":"https://docs.github.com/rest/actions/secrets#get-a-repository-public-key"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:10:50.076Z] >>> [apiv2][query] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key type=owner
+[debug] [2024-03-19T02:10:50.510Z] <<< [apiv2][status] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key 403
+[debug] [2024-03-19T02:10:50.510Z] <<< [apiv2][body] GET https://api.github.com/repos/wirapratamaz185/MandalaChain-Forum/actions/secrets/public-key {"message":"Must have admin rights to Repository.","documentation_url":"https://docs.github.com/rest/actions/secrets#get-a-repository-public-key"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-19T02:11:38.058Z] ----------------------------------------------------------------------
+[debug] [2024-03-19T02:11:38.059Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\User\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2024-03-19T02:11:38.060Z] CLI Version:   13.5.1
+[debug] [2024-03-19T02:11:38.060Z] Platform:      win32
+[debug] [2024-03-19T02:11:38.060Z] Node Version:  v18.17.1
+[debug] [2024-03-19T02:11:38.061Z] Time:          Tue Mar 19 2024 10:11:38 GMT+0800 (Central Indonesia Time)
+[debug] [2024-03-19T02:11:38.061Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-03-19T02:11:38.128Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-03-19T02:11:38.129Z] > authorizing via signed-in user (wira.pratama@undiksha.ac.id)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  D:\ALL ABOUT UNDIKSHA\SEMESTER 6 (MAGANG)\FORUM - MANDALACHAIN\next_discussion_platform
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
