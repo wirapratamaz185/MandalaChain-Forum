@@ -1,7 +1,7 @@
 import { defaultMenuItem } from "@/atoms/directoryMenuAtom";
 import { auth } from "@/firebase/clientApp";
 import useDirectory from "@/hooks/useDirectory";
-import { Flex, Image } from "@chakra-ui/react";
+import { Flex, Image, Text } from "@chakra-ui/react";
 import React from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Directory from "./Directory/Directory";
@@ -60,15 +60,9 @@ const Navbar: React.FC = () => {
         cursor="pointer"
       >
         {/* Logo which is always visible */}
-        <Image src="/images/logo.svg" height="30px" alt="Website logo" ml={1} />
-
-        {/* Logo name not visible on mobile */}
-        <Image
-          src="/images/logo_text.svg"
-          height="30px"
-          display={{ base: "none", md: "unset" }}
-          alt="Website text logo"
-        />
+        <Image src="/images/mandalachain.jpeg" height="30px" alt="" ml={1} />
+        {/* Text next to the logo */}
+        <Text ml={2}>Mandala Chain</Text>
       </Flex>
       {/* Community directory only visible when user is logged in */}
       {user && <Directory />}

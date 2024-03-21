@@ -136,7 +136,7 @@ const SignUp = () => {
       </Button>
 
       <Flex fontSize="9pt" justifyContent="center">
-        <Text mr={1}>Already a Clown? </Text>
+        <Text mr={1}>Already a Mandala? </Text>
         <Text
           color="red.500"
           fontWeight={700}
