@@ -92,16 +92,16 @@ const CommunityIcon = ({ imageURL }: CommunityIconProps) => {
     />
   ) : (
     // if the community icon is not available, then display a default icon
-    <Icon
-      as={HiArrowCircleUp}
-      fontSize={64}
-      color="red.500"
-      border="3px solid white"
-      borderRadius="full"
-      bg="white"
-      shadow="md"
-    />
-  );
+    // <Icon
+    //   as={HiArrowCircleUp}
+    //   fontSize={64}
+    //   color="red.500"
+    //   border="3px solid white"
+    //   borderRadius="full"
+    //   bg="white"
+    //   shadow="md"
+    // />
+  // );
 };
 
 /**
@@ -109,6 +109,8 @@ const CommunityIcon = ({ imageURL }: CommunityIconProps) => {
  */
 type CommunityNameProps = {
   id: string;
+  name: string;
+  password: string;
 };
 
 /**

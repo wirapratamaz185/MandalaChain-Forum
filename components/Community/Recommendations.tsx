@@ -49,13 +49,7 @@ const Recommendations: React.FC = () => {
 };
 export default Recommendations;
 
-/**
- * Displays the header for the Recommendations component.
- * Header includes the title "Top Communities" and a banner image with a gradient.
- * @returns {React.FC} - Recommendations header component
- */
 const SuggestionsHeader: React.FC = () => {
-  const bannerImage = "/images/banners/large.png";
   return (
     <Flex
       align="flex-end"
@@ -64,7 +58,6 @@ const SuggestionsHeader: React.FC = () => {
       height="70px"
       borderRadius="10px 10px 0px 0px"
       fontWeight={700}
-      bgImage="url(/images/banners/large.png)"
       backgroundSize="cover"
       bgColor={"blue.500"}
     >

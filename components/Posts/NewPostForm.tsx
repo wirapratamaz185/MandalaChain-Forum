@@ -1,6 +1,6 @@
 import { Community } from "@/atoms/communitiesAtom";
 import { Post } from "@/atoms/postsAtom";
-import { firestore, storage } from "@/firebase/clientApp";
+import { storage } from "@/firebase/clientApp";
 import useCustomToast from "@/hooks/useCustomToast";
 import useSelectFile from "@/hooks/useSelectFile";
 import {
@@ -13,13 +13,6 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { User } from "firebase/auth";
-import {
-  addDoc,
-  collection,
-  serverTimestamp,
-  Timestamp,
-  updateDoc,
-} from "firebase/firestore";
 import { getDownloadURL, ref, uploadString } from "firebase/storage";
 import { useRouter } from "next/router";
 import React, { useState } from "react";

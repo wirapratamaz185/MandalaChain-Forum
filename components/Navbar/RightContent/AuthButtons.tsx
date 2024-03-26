@@ -24,15 +24,6 @@ const AuthButtons: React.FC = () => {
       >
         Log In
       </Button>
-      <Button
-        height="28px"
-        display={{ base: "none", md: "flex" }} // on mobile, this button is not displayed
-        width={{ base: "70px", md: "110px" }} // on mobile the width is 70px, on desktop 110px
-        mr={2} // margin right
-        onClick={() => setAuthModalState({ open: true, view: "signup" })} // When clicked execute this function, the modal is opened in the sign up view
-      >
-        Sign Up
-      </Button>
     </>
   );
 };

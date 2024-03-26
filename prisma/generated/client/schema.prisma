@@ -1,0 +1,25 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  // binaryTargets   = ["windows", "debian-openssl-1.1.x"]
+  output   = "../prisma/generated/client"
+}
+
+model Community {
+ id          String    @id @default(auto()) @map("_id") @db.ObjectId
+ name        String
+ creatorId String
+ createdAt   DateTime @default(now())
+ numberOfMembers Int
+ privacyType String
+}
+
+model CommunitySnippet {
+ id          String    @id @default(auto()) @map("_id") @db.ObjectId
+ communityId String
+ isAdmin     Boolean
+}

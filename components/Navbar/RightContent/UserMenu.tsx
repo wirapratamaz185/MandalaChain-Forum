@@ -223,16 +223,10 @@ const UserMenuList: React.FC<UserMenuListProps> = ({
                 onClick={logout}
               />
             </>
-          ) : (
-            <>
-              <CustomMenuButton
-                icon={<MdOutlineLogin />}
-                text="Log In / Sign Up"
-                onClick={() => setAuthModalState({ open: true, view: "login" })}
-              />
-            </>
-          )}
-        </Stack>
+            ) : (
+              <></>
+            )}
+          </Stack>
       </Flex>
     </MenuList>
   );

@@ -1,4 +1,4 @@
-import { auth, firestore } from "@/firebase/clientApp";
+import { auth } from "@/firebase/clientApp";
 import useCustomToast from "@/hooks/useCustomToast";
 import {
   Box,
@@ -17,13 +17,15 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { doc, runTransaction, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/router";
 import React, { ChangeEvent, FC, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { IconType } from "react-icons";
 import { BsFillEyeFill, BsFillPersonFill } from "react-icons/bs";
 import { HiLockClosed } from "react-icons/hi";
+import { PrismaClient, Prisma } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 /**
  * Options for the community type that can be created.
@@ -63,16 +65,6 @@ type CreateCommunityModalProps = {
   handleClose: () => void;
 };
 
-/**
- * Modal for creating communities.
- * @param {boolean} open - controls whether the modal is open or closed by its state
- * @param {() => void} handleClose - handles closing the modal
- *
- * @returns {React.FC} - modal for creating communities
- *
- * @requires CommunityTypeOptionProps - options for the community type that can be created
- * @requires CommunityNameSection - section for entering the name of the community to be created
- */
 const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
   open,
   handleClose,
@@ -87,50 +79,18 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
   const router = useRouter();
   const showToast = useCustomToast();
 
-  /**
-   * Handles changes in the input element which takes the name of the community to be created.
-   *
-   * If the community name entered is above the limit:
-   *  - Exists if the community name is too long (above the limit).
-   *
-   * If the community name entered is within the limit:
-   *  - Updates the state of `communityName` which allows the creation of the community with the inputted name
-   *  - Updates the number of characters remaining based on the number of characters used so far.
-   * @param {React.ChangeEvent<HTMLInputElement>} event - change in HTML input field
-   */
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.value.length > communityNameLengthLimit) return; // community is not created if the name is above the limit
     setCommunityName(event.target.value); // updates the state of `communityName`
     setCharRemaining(communityNameLengthLimit - event.target.value.length); // computing remaining characters for community names
   };
 
-  /**
-   * Only 1 checkbox can be toggled as only 1 community type can be created.
-   * If a community type checkbox is toggled,
-   * toggling another checkbox would untoggle the previous one.
-   * @param {React.ChangeEvent<HTMLInputElement>} event - change in HTML input field
-   */
   const onCommunityTypeChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setCommunityType(event.target.name);
   };
 
-  /**
-   * Creates a new community in Firestore with the given community name and privacy type,
-   * and adds the current user as the community creator and member.
-   *
-   * Does not allow creating a community if:
-   *  - It contains special characters
-   *  - If the the name is too short
-   *  - If the name is already taken
-   *
-   * @async
-   *
-   * @throws {Error} If the community name contains special characters or is too short, or if the community name is already taken.
-   *
-   * @returns {void}
-   */
   const handleCreateCommunity = async () => {
     if (error) setError("");
     // prevents community from being created if it has special characters
@@ -148,48 +108,31 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
     setLoading(true);
 
     try {
-      // check if community exists by using document reference
-      // takes firestore object, name of collection in db, and the id (community names are unique)
-      const communityDocRef = doc(firestore, "communities", communityName);
-      /**
-       * if one transaction fails they all fail
-       */
-      await runTransaction(firestore, async (transaction) => {
-        const communityDoc = await transaction.get(communityDocRef);
-        if (communityDoc.exists()) {
-          // if community exists
-          throw new Error(
-            `The community ${communityName} is already taken. Try a different name! `
-          );
-        }
-
-        // create community
-        transaction.set(communityDocRef, {
-          creatorId: user?.uid,
-          createdAt: serverTimestamp(),
-          numberOfMembers: 1,
-          privacyType: communityType,
-        });
-
-        // create community snippet on user
-        transaction.set(
-          // path: collection/document/collection/...
-          doc(firestore, `users/${user?.uid}/communitySnippets`, communityName),
-          {
-            communityId: communityName,
-            isAdmin: true,
-          }
-        );
+      const response = await fetch("/api/createcommunity", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          communityName,
+          communityType,
+          creatorId: user,
+        }),
       });
 
-      router.push(`/community/${communityName}`);
-      handleClose(); // closes the modal
-    } catch (error: any) {
-      console.log("Error: handleCreateCommunity", error);
-      setError(error.message);
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      router.push(`/community/${data.community.id}`);
       showToast({
-        title: "Community not Created",
-        description: "There was an error creating your community",
+        title: "Community created successfully",
+        status: "success",
+      });
+    } catch (error) {
+      showToast({
+        title: "Something went wrong",
         status: "error",
       });
     } finally {
@@ -263,16 +206,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
     </>
   );
 };
-export default CreateCommunityModal;
 
-/**
- * @param {string} name - name of the community type on the form (public, private or restricted)
- * @param {IconType} icon - icon of the community type
- * @param {string} label - label of the community type
- * @param {string} description - description of the community type
- * @param {boolean} isChecked - whether the checkbox for selecting community is checked or not
- * @param {React.ChangeEvent<HTMLInputElement>} onChange - change in HTML input field
- */
 type CommunityTypeOptionProps = {
   name: string;
   icon: IconType;
@@ -282,18 +216,6 @@ type CommunityTypeOptionProps = {
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
-/**
- * Displays a checkbox for selecting a community type.
- * It takes some props to determine the community type.
- * Shows the icon, label, description, and whether the checkbox is checked or not.
- * @param {string} name - name of the community type on the form (public, private or restricted)
- * @param {IconType} icon - icon of the community type
- * @param {string} label - label of the community type
- * @param {string} description - description of the community type
- * @param {boolean} isChecked - whether the checkbox for selecting community is checked or not
- * @param {React.ChangeEvent<HTMLInputElement>} onChange - change in HTML input field
- * @returns
- */
 const CommunityTypeOption: FC<CommunityTypeOptionProps> = ({
   name,
   icon,
@@ -338,17 +260,6 @@ interface CommunityTypeOptionsProps {
   onCommunityTypeChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-/**
- * Section of the modal for selecting community type.
- * Contains community types that can be created.
- * Only 1 community type can be created hence only 1 box can be checked
- * Checking another box (community type) will uncheck the previous box.
- * @param {CommunityTypeOptionProps[]} options - array of community type options
- *
- * @returns {React.FC} - section for selecting community type
- *
- * @requires CommunityTypeOption - displays a checkbox for selecting a community type
- */
 const CommunityTypeOptions: React.FC<CommunityTypeOptionsProps> = ({
   options,
   communityType,
@@ -371,12 +282,7 @@ const CommunityTypeOptions: React.FC<CommunityTypeOptionsProps> = ({
   );
 };
 
-/**
- * @param {string} communityName - name of the community
- * @param {React.ChangeEvent<HTMLInputElement>} handleChange - change in HTML input field
- * @param {number} charRemaining - number of characters remaining for the community name
- * @param {string} error - error message section for entering community name
- */
+
 interface CommunityNameSectionProps {
   communityName: string;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -439,3 +345,5 @@ const CommunityNameSection: React.FC<CommunityNameSectionProps> = ({
     </Box>
   );
 };
+
+export default CreateCommunityModal;

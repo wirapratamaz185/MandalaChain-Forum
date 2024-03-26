@@ -15,9 +15,7 @@ import {
 import React, { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRecoilState } from "recoil";
-import AuthInputs from "./AuthInputs";
 import OAuthButtons from "./OAuthButtons";
-import ResetPassword from "./ResetPassword";
 
 /**
  * Displays an authentication modal while `open` is `true`.
@@ -80,12 +78,6 @@ const AuthModal: React.FC = () => {
         />
         <ModalContent borderRadius={10}>
           {/* Dynamically display header depending on the authentication state */}
-          <ModalHeader textAlign="center">
-            {modalState.view === "login" && "Login"}
-            {modalState.view === "signup" && "Sign Up"}
-            {modalState.view === "resetPassword" && "Reset Password"}
-          </ModalHeader>
-
           <ModalCloseButton />
 
           <ModalBody
@@ -107,12 +99,8 @@ const AuthModal: React.FC = () => {
                   <OAuthButtons />
                   {/* <Text color='gray.500' fontWeight={700}>OR</Text> */}
                   <Divider />
-                  <AuthInputs />
                 </>
-              ) : (
-                // If user is trying to reset password
-                <ResetPassword />
-              )}
+              ) : null}
             </Flex>
           </ModalBody>
         </ModalContent>

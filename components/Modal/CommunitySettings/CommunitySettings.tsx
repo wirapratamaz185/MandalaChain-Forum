@@ -1,5 +1,5 @@
 import { Community, communityState } from "@/atoms/communitiesAtom";
-import { auth, firestore, storage } from "@/firebase/clientApp";
+import { auth, storage } from "@/firebase/clientApp";
 import useCustomToast from "@/hooks/useCustomToast";
 import useSelectFile from "@/hooks/useSelectFile";
 import {
