@@ -1,7 +1,6 @@
 import { Community } from "@/atoms/communitiesAtom";
 import { Box, Button, Flex, Icon, Image, Text } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { HiArrowCircleUp } from "react-icons/hi";
 import useCommunityData from "@/hooks/useCommunityData";
 import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -17,20 +16,6 @@ type HeaderProps = {
   communityData: Community;
 };
 
-/**
- * Displays a community header which is responsive.
- * Community header contains:
- *  - Community logo
- *  - Community name
- *  - Subscribe and unsubscribe button
- * @param {communityData} - data required to be displayed
- *
- * @returns {React.FC<HeaderProps>} - Header component
- *
- * @requires CommunityIcon - Displays the community icon.
- * @requires CommunityName - Displays the name of the community.
- * @requires JoinOrLeaveButton - Displays the subscribe and unsubscribe button.
- */
 const Header: React.FC<HeaderProps> = ({ communityData }) => {
   const { communityStateValue, onJoinOrLeaveCommunity, loading } =
     useCommunityData();
@@ -46,9 +31,8 @@ const Header: React.FC<HeaderProps> = ({ communityData }) => {
           <CommunityIcon
             imageURL={communityStateValue.currentCommunity?.imageURL}
           />
-
           <Flex padding="10px 16px" width="100%">
-            <CommunityName id={communityData.id} />
+            <CommunityName id={communityData.id} name={""} password={""} />
             <Flex direction="row" flexGrow={1} align="end" justify="end">
               <CommunitySettings communityData={communityData} />
               <JoinOrLeaveButton
@@ -91,17 +75,19 @@ const CommunityIcon = ({ imageURL }: CommunityIconProps) => {
       shadow="md"
     />
   ) : (
-    // if the community icon is not available, then display a default icon
-    // <Icon
-    //   as={HiArrowCircleUp}
-    //   fontSize={64}
-    //   color="red.500"
-    //   border="3px solid white"
-    //   borderRadius="full"
-    //   bg="white"
-    //   shadow="md"
-    // />
-  // );
+    // if the community icon is not available, then display the default icon
+    <Flex
+      borderRadius="full"
+      boxSize="66px"
+      bg="red.500"
+      color="white"
+      align="center"
+      justify="center"
+      shadow="md"
+    >
+      <Icon as={FiSettings} fontSize="30px" />
+    </Flex>
+  );
 };
 
 /**

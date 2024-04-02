@@ -9,19 +9,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String      @id @default(uuid()) @db.Uuid
+}
+
 model Community {
   id               String             @id @default(uuid()) @db.Uuid
-  name             String
-  creatorId        String
+  creatorId        String          
   createdAt        DateTime           @default(now())
   numberOfMembers  Int
   privacyType      String
-  CommunitySnippet CommunitySnippet[]
 }
 
 model CommunitySnippet {
   id          String    @id @default(uuid()) @db.Uuid
   communityId String    @db.Uuid
   isAdmin     Boolean
-  community   Community @relation(fields: [communityId], references: [id])
 }

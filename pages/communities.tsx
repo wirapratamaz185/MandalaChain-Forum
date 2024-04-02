@@ -3,11 +3,9 @@ import CommunityItem from "@/components/Community/CommunityItem";
 import PersonalHome from "@/components/Community/PersonalHome";
 import PageContent from "@/components/Layout/PageContent";
 import CommunityLoader from "@/components/Loaders/CommunityLoader";
-import { firestore } from "@/firebase/clientApp";
 import useCommunityData from "@/hooks/useCommunityData";
 import useCustomToast from "@/hooks/useCustomToast";
 import { Button, Flex, Stack } from "@chakra-ui/react";
-import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
@@ -29,19 +27,15 @@ const Communities: React.FC = () => {
    */
   const getCommunities = async (numberOfExtraPosts: number) => {
     setLoading(true);
+    // rwrite with prisma posgresql
     try {
-      const communityQuery = query(
-        collection(firestore, "communities"),
-        orderBy("numberOfMembers", "desc"),
-        limit(5 + numberOfExtraPosts)
-      );
-      console.log("communityQuery", communityQuery);
-      const communityDocs = await getDocs(communityQuery);
-      const communities = communityDocs.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setCommunities(communities as Community[]);
+      const numberOfExtraPosts = 5;
+      const response = await fetch(`/api/community/get?order=desc&limit=${5 + numberOfExtraPosts}`, {
+        method: "GET",
+      });
+      const data = await response.json();
+      console.log("data", data);
+      setCommunities(data.communities as Community[]);
     } catch (error) {
       console.log("Error: getCommunityRecommendations", error);
       showToast({
@@ -52,10 +46,21 @@ const Communities: React.FC = () => {
     } finally {
       setLoading(false);
     }
+
+
+
+    // try {
+    //   const communityQuery = query(
+    //     collection(firestore, "communities"),
+    //     orderBy("numberOfMembers", "desc"),
+    //     limit(5 + numberOfExtraPosts)
+    //   );
+    
   };
 
   useEffect(() => {
     getCommunities(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

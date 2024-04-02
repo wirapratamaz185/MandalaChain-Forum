@@ -5,8 +5,8 @@ import Header from "@/components/Community/Header";
 import NotFound from "@/components/Community/NotFound";
 import PageContent from "@/components/Layout/PageContent";
 import Posts from "@/components/Posts/Posts";
-import { firestore } from "@/firebase/clientApp";
-import { doc, getDoc } from "@firebase/firestore";
+// import { firestore } from "@/firebase/clientApp";
+// import { doc, getDoc } from "@firebase/firestore";
 import { GetServerSidePropsContext } from "next";
 import React, { useEffect } from "react";
 import { useSetRecoilState } from "recoil";
@@ -66,31 +66,59 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
  */
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   // get the community data and pass it to the client
+  // fetch API get community
   try {
-    const communityDocRef = doc(
-      firestore,
-      "communities",
-      context.query.communityId as string
-    );
-    const communityDoc = await getDoc(communityDocRef);
-
-    if (!communityDoc.exists()) {
-      // if the document does not exist, return notFound property
+    const response = await fetch(`http://localhost:3000/api/community/get`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        communityId: context.query.communityId as string,
+      },
+    });
+    const data = await response.json();
+    console.log(data);
+    
+    if (!data) {
       return { props: {} };
     }
 
     return {
       props: {
         communityData: JSON.parse(
-          safeJsonStringify({ id: communityDoc.id, ...communityDoc.data() })
+          safeJsonStringify({ id: data.id, ...data })
         ),
       },
     };
   } catch (error) {
-    // todo: add error page
     console.log("Error: getServerSideProps", error);
     return { props: {} };
   }
+
+  // try {
+  //   const communityDocRef = doc(
+  //     firestore,
+  //     "communities",
+  //     context.query.communityId as string
+  //   );
+  //   const communityDoc = await getDoc(communityDocRef);
+
+  //   if (!communityDoc.exists()) {
+  //     // if the document does not exist, return notFound property
+  //     return { props: {} };
+  //   }
+
+  //   return {
+  //     props: {
+  //       communityData: JSON.parse(
+  //         safeJsonStringify({ id: communityDoc.id, ...communityDoc.data() })
+  //       ),
+  //     },
+  //   };
+  // } catch (error) {
+  //   // todo: add error page
+  //   console.log("Error: getServerSideProps", error);
+  //   return { props: {} };
+  // }
 }
 
 export default CommunityPage;

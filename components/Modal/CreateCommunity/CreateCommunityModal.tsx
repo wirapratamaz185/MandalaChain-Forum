@@ -23,9 +23,6 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { IconType } from "react-icons";
 import { BsFillEyeFill, BsFillPersonFill } from "react-icons/bs";
 import { HiLockClosed } from "react-icons/hi";
-import { PrismaClient, Prisma } from "@prisma/client";
-
-const prisma = new PrismaClient();
 
 /**
  * Options for the community type that can be created.
@@ -108,7 +105,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
     setLoading(true);
 
     try {
-      const response = await fetch("/api/createcommunity", {
+      const response = await fetch("/api/community/post", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -116,21 +113,32 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
         body: JSON.stringify({
           communityName,
           communityType,
-          creatorId: user,
         }),
       });
+      console.log("Response:", response);
 
       if (!response.ok) {
+        console.log("help");
         throw new Error(`HTTP Error: ${response.statusText}`);
       }
 
       const data = await response.json();
-      router.push(`/community/${data.community.id}`);
-      showToast({
-        title: "Community created successfully",
-        status: "success",
-      });
+
+      console.log(data);
+
+      if (typeof data === 'object' && data !== null) {
+        router.push(`/community/${data.id as any}`);
+        showToast({
+          title: "Community created successfully",
+          status: "success",
+        });
+      } else {
+        throw new Error('Unexpected API response: ' + JSON.stringify(data));
+      }
     } catch (error) {
+      console.log("================================================")
+      console.error("Error creating community", error);
+      console.log("================================================")
       showToast({
         title: "Something went wrong",
         status: "error",
