@@ -155,7 +155,7 @@ const SuggestedCommunitiesList: React.FC = () => {
                         <Icon
                           as={IoPeopleCircleOutline}
                           fontSize={34}
-                          color="red.500"
+                          color="blue.500"
                           mr={1}
                         />
                       )}

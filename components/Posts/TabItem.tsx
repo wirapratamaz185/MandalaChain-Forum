@@ -39,9 +39,9 @@ const TabItem: React.FC<TabItemProps> = ({
       p="14px 0px"
       cursor="pointer"
       _hover={{ bg: "gray.50", boxShadow: "lg" }}
-      color={selected ? "red.500" : "gray.500"}
+      color={selected ? "blue.500" : "gray.500"}
       borderWidth="1px"
-      borderColor={selected ? "red.500" : "gray.200"}
+      borderColor={selected ? "blue.500" : "gray.200"}
       borderRadius={10}
       onClick={() => setSelectedTab(item.title)}
       shadow="md"

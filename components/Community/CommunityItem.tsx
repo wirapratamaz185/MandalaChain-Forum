@@ -105,7 +105,7 @@ const CommunityItemNameIconSection = ({
             mr={4}
           />
         )}
-        <Text fontSize={16}>{community.id}</Text>
+        <Text fontSize={16}>{community.name}</Text>
       </Flex>
     </Flex>
   );

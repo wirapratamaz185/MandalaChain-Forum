@@ -111,8 +111,8 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          communityName,
-          communityType,
+          name: communityName,
+          communityType: communityType,
         }),
       });
       console.log("Response:", response);
@@ -330,12 +330,12 @@ const CommunityNameSection: React.FC<CommunityNameSectionProps> = ({
         _hover={{
           bg: "white",
           border: "1px solid",
-          borderColor: "red.500",
+          borderColor: "blue.500",
         }}
         _focus={{
           outline: "none",
           border: "1px solid",
-          borderColor: "red.500",
+          borderColor: "blue.500",
         }}
       />
       <Text

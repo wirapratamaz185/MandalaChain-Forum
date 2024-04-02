@@ -14,11 +14,6 @@ import MenuListItem from "./MenuListItem";
 type CommunitiesProps = {};
 
 /**
- * In the `Directory` component, a list of communities the user is subscribed to is displayed.
- * The list is sectioned into two parts: `Privileged` and `Subscribed Communities`:
- *  - `Privileged` communities are communities the user is an admin of.
- *  - `Subscribed Communities` are communities the user is a member of.
- *
  * @returns {React.FC<CommunitiesProps>} - React Functional Component
  *
  * @requires ./MenuListItem - menu item for each community
@@ -64,7 +59,7 @@ const Communities: React.FC<CommunitiesProps> = () => {
               icon={IoPeopleCircleOutline}
               displayText={snippet.communityId}
               link={`/community/${snippet.communityId}`}
-              iconColor={"red.500"}
+              iconColor={"blue.500"}
               imageURL={snippet.imageURL}
             />
           ))}
@@ -80,7 +75,7 @@ const Communities: React.FC<CommunitiesProps> = () => {
             icon={IoPeopleCircleOutline}
             displayText={snippet.communityId}
             link={`/community/${snippet.communityId}`}
-            iconColor={"red.500"}
+            iconColor={"blue.500"}
             imageURL={snippet.imageURL}
           />
         ))}

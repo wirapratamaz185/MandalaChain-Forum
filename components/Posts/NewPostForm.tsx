@@ -368,7 +368,7 @@ const PostCreateError: React.FC<Props> = ({ error }) => {
       {error && (
         <Alert status="error">
           <AlertIcon />
-          <Text mr={2} fontWeight={600} color="red.500">
+          <Text mr={2} fontWeight={600} color="blue.500">
             There has been an error when creating your post
           </Text>
         </Alert>

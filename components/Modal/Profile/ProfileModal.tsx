@@ -362,12 +362,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
                       _hover={{
                         bg: "white",
                         border: "1px solid",
-                        borderColor: "red.500",
+                        borderColor: "blue.500",
                       }}
                       _focus={{
                         bg: "white",
                         border: "1px solid",
-                        borderColor: "red.500",
+                        borderColor: "blue.500",
                       }}
                       borderRadius={10}
                     />

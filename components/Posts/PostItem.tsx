@@ -95,7 +95,7 @@ const PostItem: React.FC<PostItemProps> = ({
    * Will call the `handleDelete` from prop (usePosts hook).
    * This function provides the error handling for the delete functionality.
    * Each component may choose to the error handling differently.
-   * Core functionality is shared.
+   * Core functionality is shablue.
    * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} event - click event on delete button to prevent from post being selected
    */
   const handleDelete = async (
@@ -116,10 +116,10 @@ const PostItem: React.FC<PostItemProps> = ({
         description: "Your post has been deleted",
         status: "success",
       });
-      // if the user deletes post from the single post page, they should be redirected to the post's community page
+      // if the user deletes post from the single post page, they should be blueirected to the post's community page
       if (singlePostPage) {
         // if the post is on the single post page
-        router.push(`/community/${post.communityId}`); // redirect to the community page
+        router.push(`/community/${post.communityId}`); // blueirect to the community page
       }
     } catch (error: any) {
       setError(error.message);
@@ -262,10 +262,10 @@ const VoteSection: React.FC<VoteSectionProps> = ({
       {/* like button */}
       <Icon
         as={userVoteValue === 1 ? IoArrowUpCircleSharp : IoArrowUpCircleOutline}
-        color={userVoteValue === 1 ? "red.500" : "gray.500"}
+        color={userVoteValue === 1 ? "blue.500" : "gray.500"}
         fontSize={22}
         cursor="pointer"
-        _hover={{ color: "red.300" }}
+        _hover={{ color: "blue.300" }}
         onClick={(event) => onVote(event, post, 1, post.communityId)}
       />
       {/* number of likes  */}
@@ -279,8 +279,8 @@ const VoteSection: React.FC<VoteSectionProps> = ({
             ? IoArrowDownCircleSharp
             : IoArrowDownCircleOutline
         }
-        color={userVoteValue === -1 ? "red.500" : "gray.500"}
-        _hover={{ color: "red.300" }}
+        color={userVoteValue === -1 ? "blue.500" : "gray.500"}
+        _hover={{ color: "blue.300" }}
         fontSize={22}
         cursor="pointer"
         onClick={(event) => onVote(event, post, -1, post.communityId)}
@@ -343,7 +343,7 @@ const PostDetails = ({ showCommunityImage, post }: PostDetailsProps) => {
               as={IoPeopleCircleOutline}
               mr={1}
               fontSize="18pt"
-              color="red.500"
+              color="blue.500"
             />
           )}
           <Link href={`/community/${post.communityId}`}>

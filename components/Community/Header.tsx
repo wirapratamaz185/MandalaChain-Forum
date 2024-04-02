@@ -10,7 +10,7 @@ import IconItem from "../atoms/Icon";
 import CommunitySettingsModal from "../Modal/CommunitySettings/CommunitySettings";
 
 /**
- * @param {communityData} - data required to be displayed
+ * @param {communityData} - data requiblue to be displayed
  */
 type HeaderProps = {
   communityData: Community;
@@ -24,10 +24,10 @@ const Header: React.FC<HeaderProps> = ({ communityData }) => {
   ); // check if the user is already subscribed to the community
   return (
     <Flex direction="column" width="100%" height="120px">
-      <Box height="30%" bg="red.500" />
+      <Box height="30%" bg="blue.500" />
       <Flex justify="center" bg="white" flexGrow={1}>
         <Flex width="95%" maxWidth="1200px" align="center">
-          {/* using state instead of fetching from db as no refresh of the page is required */}
+          {/* using state instead of fetching from db as no refresh of the page is requiblue */}
           <CommunityIcon
             imageURL={communityStateValue.currentCommunity?.imageURL}
           />
@@ -70,7 +70,7 @@ const CommunityIcon = ({ imageURL }: CommunityIconProps) => {
       borderRadius="full"
       boxSize="66px"
       alt="Community icons"
-      color="red.500"
+      color="blue.500"
       border="3px solid white"
       shadow="md"
     />
@@ -79,7 +79,7 @@ const CommunityIcon = ({ imageURL }: CommunityIconProps) => {
     <Flex
       borderRadius="full"
       boxSize="66px"
-      bg="red.500"
+      bg="blue.500"
       color="white"
       align="center"
       justify="center"

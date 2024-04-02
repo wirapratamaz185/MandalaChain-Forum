@@ -110,7 +110,7 @@ const AboutCommunity: React.FC<AboutCommunityProps> = ({ communityData }) => (
     <Flex direction="column" flexGrow={1}>
       {/* number of subscribers and date created */}
       <Text fontWeight={700}>Subscribers</Text>
-      <Text>{communityData.numberOfMembers.toLocaleString()}</Text>
+      <Text>{communityData.numberOfMembers ? communityData.numberOfMembers.toLocaleString() : 'Loading...'}</Text>
     </Flex>
 
     {/* when the community was created */}

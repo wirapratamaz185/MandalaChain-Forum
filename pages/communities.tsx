@@ -35,7 +35,7 @@ const Communities: React.FC = () => {
       });
       const data = await response.json();
       console.log("data", data);
-      setCommunities(data.communities as Community[]);
+      setCommunities(data as Community[]);
     } catch (error) {
       console.log("Error: getCommunityRecommendations", error);
       showToast({
@@ -46,9 +46,6 @@ const Communities: React.FC = () => {
     } finally {
       setLoading(false);
     }
-
-
-
     // try {
     //   const communityQuery = query(
     //     collection(firestore, "communities"),
@@ -82,6 +79,7 @@ const Communities: React.FC = () => {
                   const isJoined = !!communityStateValue.mySnippets.find(
                     (snippet) => snippet.communityId === community.id
                   );
+                  // console.log("isJoined", isJoined);
                   return (
                     <CommunityItem
                       key={index}

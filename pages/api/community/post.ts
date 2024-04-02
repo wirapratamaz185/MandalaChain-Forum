@@ -11,7 +11,7 @@ export default async function handle(
 ) : Promise<void> {
   console.log("handle function called");
 
-  const { communityType, creatorId } = req.body;
+  const { name, communityType } = req.body;
 
   // Generate a raw UUId and format it
   const rawUUID = uuidv4();
@@ -20,6 +20,7 @@ export default async function handle(
   try {
     const community = await prisma.community.create({
       data: {
+        name,
         privacyType: communityType,
         creatorId: formattedUUID,
         numberOfMembers: 0, // Add the numberOfMembers property with a default value
@@ -29,7 +30,8 @@ export default async function handle(
         creatorId: true,
         numberOfMembers: true,
         privacyType: true,
-        id: true
+        id: true,
+        name: true,
       },
     });
     console.log("Community created:", community);

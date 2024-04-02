@@ -9,23 +9,6 @@ import RightContent from "./RightContent/RightContent";
 import SearchInput from "./SearchInput";
 
 /**
- * Creates a navbar component which contains the following elements:
- *
- * 	- Logo which is visible on mobile and desktop sizes
- * 	- Logo name which is visible only on desktop sizes
- * 	- Search bar which is visible on mobile and desktop sizes and resizes dynamically
- *  - Directory of communities that the user is subscribed to (only displayed when authenticated)
- *
- *
- * Navbar changes depending on whether the user is authenticated.
- * If the user is authenticated, it will display the:
- *  - User menu with name or username
- *  - Buttons (create post, notifications, messages, etc)
- *  - Community directory menu which would display all the subscribed communities and create community option
- *
- * If the user is not authenticated, it will display the:
- *  - Authentication buttons (log in and sing up)
- *  - User menu with different options
  * @returns {React.FC} - Navbar component
  *
  * @requires ./RightContent - content displaying authentication buttons or actions

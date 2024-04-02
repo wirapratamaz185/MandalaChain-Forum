@@ -20,13 +20,13 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  updateDoc,
-} from "firebase/firestore";
+// import {
+//   collection,
+//   doc,
+//   getDoc,
+//   getDocs,
+//   updateDoc,
+// } from "firebase/firestore";
 import {
   deleteObject,
   getDownloadURL,
@@ -149,7 +149,6 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
           return snippet;
         }),
       }));
-    } catch (error) {
       console.log("Error: onUploadImage", error);
       showToast({
         title: "Image not Updated",

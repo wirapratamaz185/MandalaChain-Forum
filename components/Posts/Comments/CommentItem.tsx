@@ -4,7 +4,7 @@ import React from "react";
 import { CgProfile } from "react-icons/cg";
 
 /**
- * Required props for CommentItem component
+ * Requiblue props for CommentItem component
  * @param {Comment} comment - comment object
  * @param {onDeleteComment} onDeleteComment - function to handle deleting comment
  * @param {loadingDelete} loadingDelete - is the comment being deleted
@@ -87,12 +87,12 @@ const CommentItem: React.FC<CommentItemProps> = ({
           >
             {userId === comment.creatorId && (
               <>
-                <Text fontSize="10pt" _hover={{ color: "red.500" }}>
+                <Text fontSize="10pt" _hover={{ color: "blue.500" }}>
                   Edit
                 </Text>
                 <Text
                   fontSize="10pt"
-                  _hover={{ color: "red.500" }}
+                  _hover={{ color: "blue.500" }}
                   onClick={() => onDeleteComment(comment)}
                 >
                   Delete
