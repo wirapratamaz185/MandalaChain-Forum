@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { authModalState } from "@/atoms/authModalAtom";
-import { auth } from "@/firebase/clientApp";
 import {
   Divider,
   Flex,
@@ -13,7 +12,6 @@ import {
   Text,
 } from "@chakra-ui/react";
 import React, { useEffect } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { useRecoilState } from "recoil";
 import OAuthButtons from "./OAuthButtons";
 
@@ -41,13 +39,6 @@ import OAuthButtons from "./OAuthButtons";
  */
 const AuthModal: React.FC = () => {
   const [modalState, setModalState] = useRecoilState(authModalState);
-  /**
-   * Keeps track of whether a user is authenticated via Firebase.
-   * It returns the `user` details, if it fails then `null` is stored.
-   * While communicating with Firebase, `loading` (boolean) is set to `true` and
-   * once the communication is complete it is set to `false`.
-   * `error` is null until an error takes place while communicating with Firebase.
-   */
   const [user, loading, error] = useAuthState(auth);
 
   /**

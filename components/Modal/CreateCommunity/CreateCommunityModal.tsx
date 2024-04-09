@@ -1,4 +1,3 @@
-import { auth } from "@/firebase/clientApp";
 import useCustomToast from "@/hooks/useCustomToast";
 import {
   Box,
@@ -19,7 +18,6 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React, { ChangeEvent, FC, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { IconType } from "react-icons";
 import { BsFillEyeFill, BsFillPersonFill } from "react-icons/bs";
 import { HiLockClosed } from "react-icons/hi";

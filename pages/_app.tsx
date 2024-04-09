@@ -4,6 +4,7 @@ import { theme } from "@/chakra/theme";
 import Layout from "@/components/Layout/Layout";
 import { RecoilRoot } from "recoil";
 import Head from "next/head";
+import { SessionProvider } from "next-auth/react";
 
 /**
  * Represents the entire application.
@@ -12,7 +13,10 @@ import Head from "next/head";
  * @param param0 - every page and component is a child of this component
  * @returns App component
  */
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ 
+  Component, pageProps: {
+    session, ...pageProps
+  } }: AppProps) {
   return (
     <RecoilRoot>
       <ChakraProvider theme={theme}>

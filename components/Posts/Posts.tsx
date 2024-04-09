@@ -1,31 +1,18 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Community } from "@/atoms/communitiesAtom";
 import { Post } from "@/atoms/postsAtom";
-import { auth, firestore } from "@/firebase/clientApp";
 import usePosts from "@/hooks/usePosts";
 import { Stack } from "@chakra-ui/react";
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import PostItem from "./PostItem";
 import PostLoader from "../Loaders/PostLoader";
 import useCustomToast from "@/hooks/useCustomToast";
 
-/**
- * @param {Community} communityData - Community object from firebase
- */
 type PostsProps = {
   communityData: Community;
 };
 
-/**
- * Displays all the posts in a community.
- * Displays a list of `PostItem` components.
- * While the posts are being fetched, displays a loading skeleton.
- * @param {Community} communityData - Community object from firebase
- *
- * @returns {React.FC<PostsProps>} - Posts component
- */
+
 const Posts: React.FC<PostsProps> = ({ communityData }) => {
   const [user] = useAuthState(auth);
   const [loading, setLoading] = useState(false);

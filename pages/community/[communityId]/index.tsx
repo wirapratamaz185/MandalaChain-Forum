@@ -5,8 +5,6 @@ import Header from "@/components/Community/Header";
 import NotFound from "@/components/Community/NotFound";
 import PageContent from "@/components/Layout/PageContent";
 import Posts from "@/components/Posts/Posts";
-// import { firestore } from "@/firebase/clientApp";
-// import { doc, getDoc } from "@firebase/firestore";
 import { GetServerSidePropsContext } from "next";
 import React, { useEffect } from "react";
 import { useSetRecoilState } from "recoil";

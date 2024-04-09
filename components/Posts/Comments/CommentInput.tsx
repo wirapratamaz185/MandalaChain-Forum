@@ -1,17 +1,8 @@
 import ProfileModal from "@/components/Modal/Profile/ProfileModal";
 import AuthButtons from "@/components/Navbar/RightContent/AuthButtons";
 import { Flex, Textarea, Button, Text, Stack } from "@chakra-ui/react";
-import { User } from "firebase/auth";
 import React, { useState } from "react";
 
-/**
- * Required props for CommentInput component
- * @param {string} commentText - text of the comment
- * @param {setCommentText} setCommentText - function to set the comment text
- * @param {User} user - User object from firebase
- * @param {boolean} createLoading - is the comment being created
- * @param {onCreateComment} onCreateComment - function to handle creating comment
- */
 type CommentInputProps = {
   commentText: string;
   setCommentText: (value: string) => void;
@@ -20,24 +11,6 @@ type CommentInputProps = {
   onCreateComment: (commentText: string) => void;
 };
 
-/**
- * Input box for creating a comment by inputting text.
- * The component displays:
- *  - Textarea for inputting comment text
- *  - Button for creating the comment
- *
- * If the user is not logged in, the component displays:
- *  - Text prompting the user to log in or sign up
- *  - AuthButtons component
- *
- * @param {string} commentText - text of the comment
- * @param {setCommentText} setCommentText - function to set the comment text
- * @param {User} user - User object from firebase
- * @param {boolean} createLoading - is the comment being created
- * @param {onCreateComment} onCreateComment - function to handle creating comment
- *
- * @returns {React.FC<CommentInputProps>} - input box for creating a comment
- */
 const CommentInput: React.FC<CommentInputProps> = ({
   commentText,
   setCommentText,

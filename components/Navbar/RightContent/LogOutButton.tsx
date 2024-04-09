@@ -1,6 +1,4 @@
-import { auth } from "@/firebase/clientApp";
 import { Button } from "@chakra-ui/react";
-import { signOut } from "firebase/auth";
 import React from "react";
 
 /**

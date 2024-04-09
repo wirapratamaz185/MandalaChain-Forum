@@ -1,5 +1,4 @@
 import { Community, communityState } from "@/atoms/communitiesAtom";
-import { auth, storage } from "@/firebase/clientApp";
 import useCustomToast from "@/hooks/useCustomToast";
 import useSelectFile from "@/hooks/useSelectFile";
 import {
@@ -20,21 +19,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-// import {
-//   collection,
-//   doc,
-//   getDoc,
-//   getDocs,
-//   updateDoc,
-// } from "firebase/firestore";
-import {
-  deleteObject,
-  getDownloadURL,
-  ref,
-  uploadString,
-} from "firebase/storage";
 import React, { useRef, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { BsFillPeopleFill } from "react-icons/bs";
 import { useRecoilState } from "recoil";
 

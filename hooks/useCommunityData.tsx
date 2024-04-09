@@ -1,22 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { authModalState } from "@/atoms/authModalAtom";
 import {
   Community,
   CommunitySnippet,
   communityState,
 } from "@/atoms/communitiesAtom";
-import { auth, firestore } from "@/firebase/clientApp";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  increment,
-  writeBatch,
-} from "firebase/firestore";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import useCustomToast from "./useCustomToast";
 
@@ -35,7 +24,6 @@ const useCommunityData = () => {
     useRecoilState(communityState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const setAuthModalState = useSetRecoilState(authModalState);
   const router = useRouter();
   const showToast = useCustomToast();
 
@@ -51,11 +39,6 @@ const useCommunityData = () => {
     communityData: Community,
     isJoined: boolean
   ) => {
-    // open the authentication modal if the user is not logged in
-    if (!user) {
-      setAuthModalState({ open: true, view: "login" });
-      return;
-    }
 
     setLoading(true);
 

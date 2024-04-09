@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Post, postState } from "@/atoms/postsAtom";
-import { firestore } from "@/firebase/clientApp";
 import useCustomToast from "@/hooks/useCustomToast";
 import {
   Box,
@@ -11,49 +10,17 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { User } from "firebase/auth";
-import {
-  collection,
-  doc,
-  getDocs,
-  increment,
-  orderBy,
-  query,
-  serverTimestamp,
-  Timestamp,
-  where,
-  writeBatch,
-} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useSetRecoilState } from "recoil";
 import CommentInput from "./CommentInput";
 import CommentItem, { Comment } from "./CommentItem";
 
-/**
- * Required props for Comments component
- * @param {User} user - User object from firebase
- * @param {Post} selectedPost - Post object from firebase
- * @param {string} communityId - id of the community
- */
 type CommentsProps = {
   user?: User;
   selectedPost: Post | null;
   communityId: string;
 };
 
-/**
- * Displays all the comments for a post.
- * Allows user to create, edit and delete comments.
- *
- * If there are no comments, displays a message.
- * Show loading skeleton while fetching comments.
- * If everything is loaded, show the comments.
- * @param {User} user - User object from firebase
- * @param {Post} selectedPost - Post object from firebase
- * @param {string} communityId - id of the community
- *
- * @returns {React.FC<CommentsProps>} - Comments component
- */
 const Comments: React.FC<CommentsProps> = ({
   user,
   selectedPost,

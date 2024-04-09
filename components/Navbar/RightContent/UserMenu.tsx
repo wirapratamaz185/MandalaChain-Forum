@@ -1,7 +1,6 @@
 import { authModalState } from "@/atoms/authModalAtom";
 import CustomMenuButton from "@/components/atoms/CustomMenuButton";
 import ProfileModal from "@/components/Modal/Profile/ProfileModal";
-import { auth } from "@/firebase/clientApp";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
   Flex,
@@ -13,7 +12,6 @@ import {
   Text,
   Image,
 } from "@chakra-ui/react";
-import { signOut, User } from "firebase/auth";
 import React, { useState } from "react";
 import { CgProfile } from "react-icons/cg";
 import { MdAccountCircle, MdOutlineLogin } from "react-icons/md";

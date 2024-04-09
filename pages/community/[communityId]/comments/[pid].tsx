@@ -5,26 +5,13 @@ import PageContent from "@/components/Layout/PageContent";
 import PostLoader from "@/components/Loaders/PostLoader";
 import Comments from "@/components/Posts/Comments/Comments";
 import PostItem from "@/components/Posts/PostItem";
-import { auth, firestore } from "@/firebase/clientApp";
 import useCommunityData from "@/hooks/useCommunityData";
 import useCustomToast from "@/hooks/useCustomToast";
 import usePosts from "@/hooks/usePosts";
 import { Stack } from "@chakra-ui/react";
-// import { doc, getDoc } from "@firebase/firestore";
-import { User } from "firebase/auth";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 
-/**
- * Displays a single post.
- * Contains:
- *  - PostItem component
- *  - About component
- *  - Comments component
- *
- * @returns {React.FC} - Single post page with all components
- */
 const PostPage: React.FC = () => {
   const { postStateValue, setPostStateValue, onDeletePost, onVote } =
     usePosts();
@@ -36,14 +23,6 @@ const PostPage: React.FC = () => {
   const [postExists, setPostExists] = useState(true);
   const [postLoading, setPostLoading] = useState(false);
 
-  /**
-   * The necessary data for this page should be passed as props from the previous page.
-   * If the user navigates to this page directly (using link), the data will not be available.
-   * This function fetches the data from Firebase and populates the state.
-   * The function checks if the post exists.
-   *
-   * @param {string} postId  - Post ID for the post to be fetched
-   */
   const fetchPost = async (postId: string) => {
     setPostLoading(true);
     try {
@@ -75,16 +54,7 @@ const PostPage: React.FC = () => {
       setPostLoading(false);
     }
   };
-  /**
-   * Fetch post data if the state is empty and the post ID is available.
-   * This is to prevent fetching the post data when the user is on the community page.
-   * The post data is already available in the state.
-   *
-   * Runs when the page is loaded, when the post ID changes, and when the post state changes.
-   * Checks if the post data is available in the state (when the user navigates to this page from another page).
-   * If the post state is empty due the user navigating to the page directly, it will fetch the post data.
-   * if the post data is not valid, it will redirect to the `404` page.
-   */
+  
   useEffect(() => {
     const { pid } = router.query;
 

@@ -1,5 +1,4 @@
 import { Box, Flex, Icon, Spinner, Stack, Text } from "@chakra-ui/react";
-import { Timestamp } from "firebase/firestore";
 import React from "react";
 import { CgProfile } from "react-icons/cg";
 

@@ -8,8 +8,8 @@ import { ComponentStyleConfig } from "@chakra-ui/theme";
  *  - `oauth`: button specifically for authentication providers
  *
  * @param props The component props, which are passed through to the underlying `button` element.
- * @param children The component children, which are rendered as the
- * @returns {ComponentStyleConfig} - The rendered `button` element
+ * @param children The component children, which are rendeblue as the
+ * @returns {ComponentStyleConfig} - The rendeblue `button` element
  * @see https://chakra-ui.com/docs/theming/component-style
  */
 export const Button: ComponentStyleConfig = {
@@ -37,17 +37,17 @@ export const Button: ComponentStyleConfig = {
     solid: {
       // Default button
       color: "white",
-      bg: "red.500",
+      bg: "blue.500",
       _hover: {
-        bg: "red.400",
+        bg: "blue.400",
       },
     },
     outline: {
-      color: "red.500",
+      color: "blue.500",
       border: "1px solid",
-      borderColor: "red.500",
+      borderColor: "blue.500",
       _hover: {
-        bg: "red.50",
+        bg: "blue.50",
       },
     },
     oauth: {
@@ -56,7 +56,7 @@ export const Button: ComponentStyleConfig = {
       borderColor: "gray.300",
       _hover: {
         bg: "gray.50",
-        borderColor: "red.400",
+        borderColor: "blue.400",
       },
     },
     action: {
@@ -65,7 +65,7 @@ export const Button: ComponentStyleConfig = {
       borderColor: "white",
       _hover: {
         bg: "gray.50",
-        borderColor: "red.400",
+        borderColor: "blue.400",
       },
     },
   },

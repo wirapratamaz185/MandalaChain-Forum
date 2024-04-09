@@ -1,4 +1,3 @@
-import { auth, firestore, storage } from "@/firebase/clientApp";
 import useCustomToast from "@/hooks/useCustomToast";
 import useSelectFile from "@/hooks/useSelectFile";
 import {
@@ -18,23 +17,8 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import {
-  query,
-  collection,
-  where,
-  getDocs,
-  writeBatch,
-  doc,
-} from "firebase/firestore";
-import {
-  deleteObject,
-  getDownloadURL,
-  ref,
-  uploadString,
-} from "firebase/storage";
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
-import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
 import { MdAccountCircle } from "react-icons/md";
 
 type ProfileModalProps = {
