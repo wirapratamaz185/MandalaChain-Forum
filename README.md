@@ -1,6 +1,6 @@
 ## **Run Project**
 ```sh
-npm run dev
+yarn dev
 ```
 This should run the project on `localhost:3000`
 
