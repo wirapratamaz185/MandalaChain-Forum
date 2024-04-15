@@ -1,3 +1,4 @@
+// src/pages/api/comments/{commentId}
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
@@ -6,15 +7,21 @@ import { ApiError } from "../../../utils/response/baseError";
 
 const prisma = new PrismaClient();
 
-export default async function PATCH(
+export default async function DELETE_COMMENT(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  if (req.method !== "PATCH") {
+  if (req.method !== "DELETE") {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  const { username, imageUrl } = req.body;
+  const { commentId } = req.query;
+
+  if (typeof commentId !== "string") {
+    return res
+      .status(400)
+      .json(ApiResponse.error("Comment ID must be a string"));
+  }
 
   let userId: string;
   try {
@@ -38,41 +45,39 @@ export default async function PATCH(
   }
 
   try {
-    // Update the user's profile
-    const updatedUser = await prisma.user.update({
+    // Check if the comment exists and belongs to the user
+    const comment = await prisma.comment.findUnique({
       where: {
-        id: userId,
-      },
-      data: {
-        username: username,
-        imageUrl: imageUrl,
-      },
-      select: {
-        id: true,
-        username: true,
-        imageUrl: true,
+        id: commentId,
       },
     });
+
+    if (!comment) {
+      return res.status(404).json(ApiResponse.error("Comment not found"));
+    }
+
+    if (comment.user_id !== userId) {
+      return res
+        .status(403)
+        .json(ApiResponse.error("You can only delete your own comments"));
+    }
+
+    // Delete the comment
+    await prisma.comment.delete({
+      where: {
+        id: commentId,
+      },
+    });
+
     res
       .status(200)
-      .json(ApiResponse.success(updatedUser, "Profile updated successfully"));
+      .json(ApiResponse.success(null, "Comment deleted successfully"));
   } catch (error) {
-    if (error) {
-      console.error("Known error updating user profile:", error);
-      res
-        .status(500)
-        .json(
-          ApiResponse.error("A known error occurred while updating the profile")
-        );
+    if (error instanceof Error) {
+      console.error("Error deleting comment:", error);
+      res.status(500).json(ApiResponse.error(error.message));
     } else {
-      // Handle unknown errors
-      res
-        .status(500)
-        .json(
-          ApiResponse.error(
-            "An unknown error occurred while updating the profile"
-          )
-        );
+      res.status(500).json(ApiResponse.error("An unknown error occurred"));
     }
   }
 }

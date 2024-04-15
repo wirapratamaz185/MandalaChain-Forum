@@ -18,10 +18,21 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         community_type: true,
-        owner: true,
+        owner: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+          },
+        },
         posts: {
           include: {
-            user: true, // Include the user who created the post
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
             comments: {
               include: {
                 user: true, // Include the user who created the comment
@@ -29,7 +40,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             },
             Bookmark: {
               include: {
-                user: true, // Include the user who bookmarked the post
+                user: {
+                  select: {
+                    id: true,
+                    username: true,
+                  },
+                },
               },
             },
           },

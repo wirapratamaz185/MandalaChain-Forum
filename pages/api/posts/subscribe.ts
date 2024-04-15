@@ -1,4 +1,3 @@
-// src/pages/api/posts/post.ts
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
@@ -7,21 +6,13 @@ import { ApiError } from "../../../utils/response/baseError";
 
 const prisma = new PrismaClient();
 
-export default async function POST(
+export default async function SUBSCRIBED_POSTS(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  if (req.method !== "POST") {
+  if (req.method !== "GET") {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
-
-  const { communityId } = req.query;
-
-  if (typeof communityId !== 'string') {
-    return res.status(400).json(ApiResponse.error("Community ID must be a string"));
-  }
-
-  const { title, body, imageUrl } = req.body;
 
   let userId: string;
   try {
@@ -41,21 +32,24 @@ export default async function POST(
   }
 
   try {
-    const post = await prisma.post.create({
-      data: {
-        title,
-        body,
-        imageUrl,
-        vote: 0,
-        user: {
-          connect: {
-            id: userId,
-          },
-        },
-        community: {
-          connect: {
-            id: communityId,
-          },
+    // Find the communities the user is subscribed to
+    const subscribedCommunities = await prisma.subscriber.findMany({
+      where: {
+        user_id: userId,
+      },
+      select: {
+        community_id: true,
+      },
+    });
+
+    // Extract the community IDs
+    const communityIds = subscribedCommunities.map(sub => sub.community_id);
+
+    // Find the posts from these communities
+    const posts = await prisma.post.findMany({
+      where: {
+        community_id: {
+          in: communityIds,
         },
       },
       select: {
@@ -63,10 +57,13 @@ export default async function POST(
         title: true,
         body: true,
         imageUrl: true,
+        vote: true,
+        created_at: true,
         user: {
           select: {
             id: true,
             username: true,
+            imageUrl: true,
           },
         },
         community: {
@@ -76,11 +73,15 @@ export default async function POST(
           },
         },
       },
+      orderBy: {
+        created_at: 'desc',
+      },
     });
-    res.status(201).json(ApiResponse.success(post, "Post created successfully"));
+
+    res.status(200).json(ApiResponse.success(posts, "Posts retrieved successfully"));
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error creating post:", error);
+      console.error("Error retrieving subscribed posts:", error);
       res.status(500).json(ApiResponse.error(error.message));
     } else {
       res.status(500).json(ApiResponse.error("An unknown error occurred"));

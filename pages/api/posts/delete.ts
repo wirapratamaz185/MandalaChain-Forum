@@ -1,4 +1,3 @@
-// src/pages/api/posts/post.ts
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
@@ -7,21 +6,19 @@ import { ApiError } from "../../../utils/response/baseError";
 
 const prisma = new PrismaClient();
 
-export default async function POST(
+export default async function DELETE(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  if (req.method !== "POST") {
+  if (req.method !== "DELETE") {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  const { communityId } = req.query;
+  const { postId } = req.query;
 
-  if (typeof communityId !== 'string') {
-    return res.status(400).json(ApiResponse.error("Community ID must be a string"));
+  if (typeof postId !== 'string') {
+    return res.status(400).json(ApiResponse.error("Post ID must be a string"));
   }
-
-  const { title, body, imageUrl } = req.body;
 
   let userId: string;
   try {
@@ -41,46 +38,30 @@ export default async function POST(
   }
 
   try {
-    const post = await prisma.post.create({
-      data: {
-        title,
-        body,
-        imageUrl,
-        vote: 0,
-        user: {
-          connect: {
-            id: userId,
-          },
-        },
-        community: {
-          connect: {
-            id: communityId,
-          },
-        },
-      },
-      select: {
-        id: true,
-        title: true,
-        body: true,
-        imageUrl: true,
-        user: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-        community: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+    const post = await prisma.post.findUnique({
+      where: {
+        id: postId,
       },
     });
-    res.status(201).json(ApiResponse.success(post, "Post created successfully"));
+
+    if (!post) {
+      return res.status(404).json(ApiResponse.error("Post not found"));
+    }
+
+    if (post.user_id !== userId) {
+      return res.status(403).json(ApiResponse.error("You are not authorized to delete this post"));
+    }
+
+    await prisma.post.delete({
+      where: {
+        id: postId,
+      },
+    });
+
+    res.status(200).json(ApiResponse.success(null, "Post deleted successfully"));
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error creating post:", error);
+      console.error("Error deleting post:", error);
       res.status(500).json(ApiResponse.error(error.message));
     } else {
       res.status(500).json(ApiResponse.error("An unknown error occurred"));

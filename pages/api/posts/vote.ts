@@ -1,4 +1,3 @@
-// src/pages/api/posts/post.ts
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
@@ -7,7 +6,7 @@ import { ApiError } from "../../../utils/response/baseError";
 
 const prisma = new PrismaClient();
 
-export default async function POST(
+export default async function VOTE(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
@@ -15,13 +14,12 @@ export default async function POST(
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  const { communityId } = req.query;
+  const postId = req.query.id as string;
+  const { vote } = req.body; // Expecting vote to be either 1 (upvote) or -1 (downvote)
 
-  if (typeof communityId !== 'string') {
-    return res.status(400).json(ApiResponse.error("Community ID must be a string"));
+  if (![1, -1].includes(vote)) {
+    return res.status(400).json(ApiResponse.error("Invalid vote value"));
   }
-
-  const { title, body, imageUrl } = req.body;
 
   let userId: string;
   try {
@@ -41,46 +39,30 @@ export default async function POST(
   }
 
   try {
-    const post = await prisma.post.create({
-      data: {
-        title,
-        body,
-        imageUrl,
-        vote: 0,
-        user: {
-          connect: {
-            id: userId,
-          },
+    // Update the vote count by incrementing or decrementing based on the vote value
+    const updatedPost = await prisma.post.update({
+      where: {
+        id: postId,
+      },
+      data: vote === 1 ? {
+        vote: {
+          increment: 1,
         },
-        community: {
-          connect: {
-            id: communityId,
-          },
+      } : {
+        vote: {
+          decrement: 1,
         },
       },
       select: {
         id: true,
-        title: true,
-        body: true,
-        imageUrl: true,
-        user: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-        community: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        vote: true,
       },
     });
-    res.status(201).json(ApiResponse.success(post, "Post created successfully"));
+
+    res.status(200).json(ApiResponse.success(updatedPost, "Vote updated successfully"));
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error creating post:", error);
+      console.error("Error updating vote:", error);
       res.status(500).json(ApiResponse.error(error.message));
     } else {
       res.status(500).json(ApiResponse.error("An unknown error occurred"));

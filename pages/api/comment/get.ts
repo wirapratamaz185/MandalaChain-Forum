@@ -1,3 +1,4 @@
+// src/pages/api/comments/[postId]
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
@@ -6,15 +7,19 @@ import { ApiError } from "../../../utils/response/baseError";
 
 const prisma = new PrismaClient();
 
-export default async function PATCH(
+export default async function GET_COMMENTS(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  if (req.method !== "PATCH") {
+  if (req.method !== "GET") {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  const { username, imageUrl } = req.body;
+  const { postId } = req.query;
+
+  if (typeof postId !== "string") {
+    return res.status(400).json(ApiResponse.error("Post ID must be a string"));
+  }
 
   let userId: string;
   try {
@@ -38,41 +43,36 @@ export default async function PATCH(
   }
 
   try {
-    // Update the user's profile
-    const updatedUser = await prisma.user.update({
+    const comments = await prisma.comment.findMany({
       where: {
-        id: userId,
-      },
-      data: {
-        username: username,
-        imageUrl: imageUrl,
+        post_id: postId,
       },
       select: {
         id: true,
-        username: true,
-        imageUrl: true,
+        text: true,
+        created_at: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            imageUrl: true,
+          },
+        },
+      },
+      orderBy: {
+        created_at: "desc",
       },
     });
+
     res
       .status(200)
-      .json(ApiResponse.success(updatedUser, "Profile updated successfully"));
+      .json(ApiResponse.success(comments, "Comments retrieved successfully"));
   } catch (error) {
-    if (error) {
-      console.error("Known error updating user profile:", error);
-      res
-        .status(500)
-        .json(
-          ApiResponse.error("A known error occurred while updating the profile")
-        );
+    if (error instanceof Error) {
+      console.error("Error retrieving comments:", error);
+      res.status(500).json(ApiResponse.error(error.message));
     } else {
-      // Handle unknown errors
-      res
-        .status(500)
-        .json(
-          ApiResponse.error(
-            "An unknown error occurred while updating the profile"
-          )
-        );
+      res.status(500).json(ApiResponse.error("An unknown error occurred"));
     }
   }
 }

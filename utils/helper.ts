@@ -4,6 +4,8 @@ import { NextResponse, NextRequest } from "next/server";
 import { compare, hash, genSalt } from "bcrypt";
 import { Payload } from "../utils/interface/jwt";
 import { sign, verify } from "jsonwebtoken";
+import { secret } from "./auth/secret";
+import { NextApiRequest } from "next";
 
 export class ApiResponse<T> {
   readonly data: T | null;
@@ -119,24 +121,28 @@ export class JWT {
 }
 
 export const MiddlewareAuthorization = async (
-  req: NextRequest
+  req: NextApiRequest,
+  secret: string
 ): Promise<string | Payload> => {
-  //get Bearer token
-  try {
-    const isAuthToken = req.headers.get("Authorization")?.split(" ")[1];
+  // Extract the token from the Authorization header
+const token = req.headers.authorization?.split(" ")[1];
 
-    if (!isAuthToken) {
-      throw new ApiError("unauthorization", HttpStatusCode.Unauthorized);
-    }
-
-    //decode token jwt
-    const token = await JWT.decodeJWT(
-      isAuthToken,
-      process.env.JWTSECRET as string
-    );
-
-    return token;
-  } catch (error) {
-    throw error;
+  if (!token) {
+    throw new ApiError("unauthorization", HttpStatusCode.Unauthorized);
   }
+
+  // Verify and decode the token
+  let decodedToken;
+  try {
+    decodedToken = await JWT.decodeJWT(token, secret);
+  } catch (error) {
+    throw new ApiError("Invalid or expired token", HttpStatusCode.Unauthorized);
+  }
+
+  console.log("decodedToken:", decodedToken);
+
+  // Get the user id from the decoded token
+  const userId = decodedToken.id;
+
+  return userId;
 };

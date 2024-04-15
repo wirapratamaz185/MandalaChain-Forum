@@ -1,8 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { ApiResponse } from "../../../utils/helper";
-import jwt from "jsonwebtoken";
+import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { secret } from "../../../utils/auth/secret";
+import { ApiError } from "../../../utils/response/baseError";
 
 const prisma = new PrismaClient();
 
@@ -17,29 +17,24 @@ export default async function GET(
   // Extract communityId from the URL params
   const { communityId } = req.query;
 
-  console.log("=====================================");
-  console.log("Create post function called");
-  console.log("communityId:", communityId);
-  console.log("=====================================");
-
-  // Extract the token from the Authorization header
-  const token = req.headers.authorization?.split(" ")[1] || "";
-
-  // Verify and decode the token
-  let decodedToken;
-  try {
-    decodedToken = jwt.verify(token, secret || "") as jwt.JwtPayload;
-  } catch (error) {
-    return res.status(401).json(ApiResponse.error("Invalid or expired token"));
-  }
-
-  console.log("decodedToken:", decodedToken);
-
-  // Get the user id from the decoded token
-  const userId = decodedToken.id;
-
   if (!communityId) {
     return res.status(400).json(ApiResponse.error("Community ID is required"));
+  }
+
+  let userId;
+  try {
+    // Ensure secret is defined before calling MiddlewareAuthorization
+    if (!secret) {
+      throw new ApiError("Secret is undefined", 500);
+    }
+    userId = await MiddlewareAuthorization(req, secret);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return res
+        .status(error.statusCode)
+        .json(ApiResponse.error(error.message));
+    }
+    return res.status(500).json(ApiResponse.error("An unknown error occurred"));
   }
 
   try {
@@ -73,26 +68,27 @@ export default async function GET(
     });
 
     // Map each post to a new object with a cleaner structure
-  const cleanedPosts = posts.map(post => ({
-    id: post.id,
-    title: post.title,
-    body: post.body,
-    imageUrl: post.imageUrl,
-    vote: post.vote,
-    createdAt: post.created_at,
-    user: {
-      id: post.user.id,
-      username: post.user.username,
-    },
-    community: {
-      id: post.community.id,
-      name: post.community.name,
-    },
-  }));
+    const cleanedPosts = posts.map((post) => ({
+      id: post.id,
+      title: post.title,
+      body: post.body,
+      imageUrl: post.imageUrl,
+      vote: post.vote,
+      createdAt: post.created_at,
+      user: {
+        id: post.user.id,
+        username: post.user.username,
+      },
+      community: {
+        id: post.community.id,
+        name: post.community.name,
+      },
+    }));
 
-    res.status(200).json(ApiResponse.success(cleanedPosts, "BASE.SUCCESS", undefined));
+    res
+      .status(200)
+      .json(ApiResponse.success(cleanedPosts, "Post fetch successfully"));
   } catch (error) {
-    console.error("Error retrieving posts:", error);
-    res.status(500).json(ApiResponse.error("Internal Server Error"));
+    res.status(500).json(ApiResponse.error("An unknown error occurred"));
   }
 }

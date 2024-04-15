@@ -1,4 +1,4 @@
-// src/pages/api/posts/post.ts
+// src/pages/api/comments/{postId}
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
@@ -7,7 +7,7 @@ import { ApiError } from "../../../utils/response/baseError";
 
 const prisma = new PrismaClient();
 
-export default async function POST(
+export default async function COMMENT(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
@@ -15,72 +15,79 @@ export default async function POST(
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  const { communityId } = req.query;
+  const { postId } = req.query;
 
-  if (typeof communityId !== 'string') {
-    return res.status(400).json(ApiResponse.error("Community ID must be a string"));
+  if (typeof postId !== "string") {
+    return res.status(400).json(ApiResponse.error("Post ID must be a string"));
   }
 
-  const { title, body, imageUrl } = req.body;
+  const { text } = req.body;
+
+  if (!text || typeof text !== "string") {
+    return res
+      .status(400)
+      .json(ApiResponse.error("Text is required and must be a string"));
+  }
 
   let userId: string;
   try {
     const result = await MiddlewareAuthorization(req, secret!);
-    if (typeof result !== 'string') {
+    if (typeof result !== "string") {
       throw new ApiError("Invalid user ID", 401);
     }
     userId = result;
   } catch (error) {
     if (error instanceof ApiError) {
-      return res.status(error.statusCode).json(ApiResponse.error(error.message));
+      return res
+        .status(error.statusCode)
+        .json(ApiResponse.error(error.message));
     } else if (error instanceof Error) {
       return res.status(500).json(ApiResponse.error(error.message));
     } else {
-      return res.status(500).json(ApiResponse.error("An unknown error occurred"));
+      return res
+        .status(500)
+        .json(ApiResponse.error("An unknown error occurred"));
     }
   }
 
   try {
-    const post = await prisma.post.create({
+    const comment = await prisma.comment.create({
       data: {
-        title,
-        body,
-        imageUrl,
-        vote: 0,
+        text,
         user: {
           connect: {
             id: userId,
           },
         },
-        community: {
+        post: {
           connect: {
-            id: communityId,
+            id: postId,
           },
         },
       },
       select: {
         id: true,
-        title: true,
-        body: true,
-        imageUrl: true,
+        text: true,
         user: {
           select: {
             id: true,
             username: true,
           },
         },
-        community: {
+        post: {
           select: {
             id: true,
-            name: true,
+            title: true,
           },
         },
       },
     });
-    res.status(201).json(ApiResponse.success(post, "Post created successfully"));
+    res
+      .status(201)
+      .json(ApiResponse.success(comment, "Comment created successfully"));
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error creating post:", error);
+      console.error("Error creating comment:", error);
       res.status(500).json(ApiResponse.error(error.message));
     } else {
       res.status(500).json(ApiResponse.error("An unknown error occurred"));
