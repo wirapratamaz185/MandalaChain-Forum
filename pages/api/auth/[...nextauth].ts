@@ -1,3 +1,4 @@
+// [...nextauth].ts
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
@@ -19,8 +20,10 @@ export default NextAuth({
     }),
   ],
   callbacks: {
-    async session({ session, token, user }) {
-      (session.user as { id?: string }).id = user.id;
+    async session({ session, token }) {
+      if (token.sub) {
+        session.user.id = token.sub;
+      }
       return session;
     },
   },

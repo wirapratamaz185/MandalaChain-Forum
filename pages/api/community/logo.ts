@@ -1,13 +1,21 @@
-
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { ApiResponse } from "../../../utils/helper";
-import jwt from "jsonwebtoken";
+import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { secret } from "../../../utils/auth/secret";
-import multer from 'multer';
-import nextConnect from 'next-connect';
+import { ApiError } from "../../../utils/response/baseError";
+import multer from "multer";
+import nextConnect from "next-connect";
 
 const prisma = new PrismaClient();
+
+interface MulterNextApiRequest extends NextApiRequest {
+  file: Express.Multer.File;
+  env: any;
+}
+
+interface ExtendedNextApiRequest extends NextApiRequest {
+  file: Express.Multer.File;
+}
 
 // Configure multer for file uploads
 const upload = multer({
@@ -19,7 +27,9 @@ const upload = multer({
 
 const apiRoute = nextConnect({
   onError(error, req, res) {
-    res.status(501).json({ error: `Sorry something Happened! ${error.message}` });
+    res
+      .status(501)
+      .json({ error: `Sorry something Happened! ${error.message}` });
   },
   onNoMatch(req, res) {
     res.status(405).json({ error: `Method '${req.method}' Not Allowed` });
@@ -27,20 +37,26 @@ const apiRoute = nextConnect({
 });
 
 // Add the middleware to handle file upload
-apiRoute.use(upload.single('image'));
+apiRoute.use(upload.single("image"));
 
-apiRoute.patch(async (req, res) => {
+apiRoute.patch(async (req: MulterNextApiRequest, res: NextApiResponse) => {
   const { communityId } = req.query;
-  const token = req.headers.authorization?.split(" ")[1] || "";
-  let decodedToken;
 
+  let userId;
   try {
-    decodedToken = jwt.verify(token, secret || "");
+    // Ensure secret is defined before calling MiddlewareAuthorization
+    if (!secret) {
+      throw new ApiError("Secret is undefined", 500);
+    }
+    userId = await MiddlewareAuthorization(req as NextApiRequest, secret);
   } catch (error) {
-    return res.status(401).json(ApiResponse.error("Invalid or expired token"));
+    if (error instanceof ApiError) {
+      return res
+        .status(error.statusCode)
+        .json(ApiResponse.error(error.message));
+    }
+    return res.status(500).json(ApiResponse.error("An unknown error occurred"));
   }
-
-  const userId = decodedToken.id;
 
   try {
     const community = await prisma.community.findUnique({
@@ -49,6 +65,7 @@ apiRoute.patch(async (req, res) => {
       },
       select: {
         owner_id: true,
+        imageUrl: true,
       },
     });
 
@@ -57,7 +74,13 @@ apiRoute.patch(async (req, res) => {
     }
 
     if (community.owner_id !== userId) {
-      return res.status(403).json(ApiResponse.error("You are not authorized to change the community logo"));
+      return res
+        .status(403)
+        .json(
+          ApiResponse.error(
+            "You are not authorized to change the community logo"
+          )
+        );
     }
 
     // Check if an image was uploaded
@@ -65,8 +88,12 @@ apiRoute.patch(async (req, res) => {
       return res.status(400).json(ApiResponse.error("No image uploaded"));
     }
 
-    // Here you would handle the file upload to your cloud storage and get the URL
-    // For example, using a function like `uploadImage(req.file.buffer)`
+    // If there's an existing logo, delete it from cloud storage
+    if (community.imageUrl) {
+      await deleteImage(community.imageUrl);
+    }
+
+    // Upload the new image to cloud storage and get the URL
     const imageUrl = await uploadImage(req.file.buffer);
 
     const updatedCommunity = await prisma.community.update({
@@ -88,12 +115,25 @@ apiRoute.patch(async (req, res) => {
       },
     });
 
-    res.status(200).json(ApiResponse.success(updatedCommunity, "BASE.SUCCESS", undefined));
+    res
+      .status(200)
+      .json(
+        ApiResponse.success(
+          updatedCommunity,
+          "Community logo updated successfully"
+        )
+      );
   } catch (error) {
     console.error("Error updating community logo:", error);
-    res.status(500).json(ApiResponse.error("An error occurred while updating the community logo"));
+    res
+      .status(500)
+      .json(
+        ApiResponse.error("An error occurred while updating the community logo")
+      );
   }
 });
+
+// ... existing DELETE method code
 
 export default apiRoute;
 
@@ -103,3 +143,10 @@ export const config = {
     bodyParser: false,
   },
 };
+function deleteImage(imageUrl: string) {
+  throw new Error("Function not implemented.");
+}
+
+function uploadImage(buffer: Buffer) {
+  throw new Error("Function not implemented.");
+}

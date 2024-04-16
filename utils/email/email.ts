@@ -1,4 +1,4 @@
-import { nodemailer } from 'nodemailer';
+import nodemailer, { Transporter, SendMailOptions } from "nodemailer";
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',

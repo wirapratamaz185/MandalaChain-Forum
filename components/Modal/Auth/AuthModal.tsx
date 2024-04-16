@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { authModalState } from "@/atoms/authModalAtom";
 import {
   Divider,
@@ -7,58 +6,43 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalHeader,
   ModalOverlay,
+  ModalHeader,
   Text,
 } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import { useRecoilState } from "recoil";
+import { useSession } from 'next-auth/react';
 import OAuthButtons from "./OAuthButtons";
 
-/**
- * Displays an authentication modal while `open` is `true`.
- * If the `open` is `false`, then the modal is closed.
- * The modal has 3 different views as described by `authModalAtom`:
- *  - `login`: displays the log in view
- *  - `signup`: displays the signup view
- *  - `resetPassword`: displays the reset password view
- *
- * If the user is trying to log in or sign up,
- *  Third party authentication providers are displayed and
- *  sign up or log in forms are displayed.
- * If the user is resetting the password,
- *  only the reset password elements are shown and
- *  Third party authentication providers and log in or sign up forms are not displayed.
- * @returns {React.FC} - authentication modal which has 3 different views
- *
- * @requires ./AuthInputs - display correct form depending on `login` or `signup` state
- * @requires ./OAuthButtons - third party authentication providers such as Google or GitHub
- * @requires ./ResetPassword - display reset password view
- *
- * @see https://chakra-ui.com/docs/components/modal/usage
- */
 const AuthModal: React.FC = () => {
   const [modalState, setModalState] = useRecoilState(authModalState);
-  const [user, loading, error] = useAuthState(auth);
+  const { data: session, status } = useSession();
 
-  /**
-   * If a user is authenticated, the modal will automatically close.
-   * This is used after signing up or logging in as once the user is authenticated,
-   * the modal does not need to be open.
-   */
   useEffect(() => {
-    if (user) handleClose();
-  }, [user]);
+    if (session) handleClose();
+  }, [session]);
 
-  /**
-   * Closes the authentication modal by setting its state to `open` state to false.
-   */
   const handleClose = () => {
     setModalState((prev) => ({
       ...prev,
       open: false,
     }));
   };
+
+  const getTitle = () => {
+    switch (modalState.view) {
+      case 'login':
+        return 'Log In';
+      case 'signup':
+        return 'Sign Up';
+      case 'resetPassword':
+        return 'Reset Password';
+      default:
+        return '';
+    }
+  };
+
   return (
     <>
       <Modal isOpen={modalState.open} onClose={handleClose}>
@@ -68,9 +52,8 @@ const AuthModal: React.FC = () => {
           backdropBlur="5px"
         />
         <ModalContent borderRadius={10}>
-          {/* Dynamically display header depending on the authentication state */}
+          <ModalHeader>{getTitle()}</ModalHeader>
           <ModalCloseButton />
-
           <ModalBody
             display="flex"
             flexDirection="column"
@@ -84,14 +67,14 @@ const AuthModal: React.FC = () => {
               justify="center"
               width="75%"
             >
-              {/* If user is trying to authenticate (log in or sign up) */}
               {modalState.view === "login" || modalState.view === "signup" ? (
                 <>
                   <OAuthButtons />
-                  {/* <Text color='gray.500' fontWeight={700}>OR</Text> */}
-                  <Divider />
+                  <Divider my={4} />
+                  {/* Here you would include your AuthInputs component for login/signup forms */}
                 </>
               ) : null}
+              {/* Here you would include your ResetPassword component if modalState.view === 'resetPassword' */}
             </Flex>
           </ModalBody>
         </ModalContent>
@@ -99,4 +82,5 @@ const AuthModal: React.FC = () => {
     </>
   );
 };
+
 export default AuthModal;

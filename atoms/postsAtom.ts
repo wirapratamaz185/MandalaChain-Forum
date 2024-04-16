@@ -1,6 +1,7 @@
 import { atom } from "recoil";
 
 export type Post = {
+  user: any;
   id?: string; 
   communityId: string;
   creatorId: string;

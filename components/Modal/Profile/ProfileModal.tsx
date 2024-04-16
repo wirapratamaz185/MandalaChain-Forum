@@ -1,3 +1,4 @@
+// components/modal/profile/ProfileModal.tsx
 import useCustomToast from "@/hooks/useCustomToast";
 import useSelectFile from "@/hooks/useSelectFile";
 import {
@@ -20,6 +21,8 @@ import {
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 import { MdAccountCircle } from "react-icons/md";
+import { useSession } from "next-auth/react";
+import { access } from "fs";
 
 type ProfileModalProps = {
   open: boolean;
@@ -27,26 +30,23 @@ type ProfileModalProps = {
 };
 
 const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
-  const [user] = useAuthState(auth);
-  const [updateProfile, updating, error] = useUpdateProfile(auth);
-  const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile(
-    300,
-    300
-  );
+  const { data: session } = useSession();
+  const user = session?.user;
+  const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
+
+  const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile(300, 300);
   const selectFileRef = useRef<HTMLInputElement>(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [deleteImage, setDeleteImage] = useState(false);
   const showToast = useCustomToast();
-  const [userName, setUserName] = useState(user?.displayName || "");
+  const [userName, setUserName] = useState(user?.name || "");
+  const [imageUrl, setImageUrl] = useState(user?.image || ""); // Assuming user image URL is stored in user.image
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
 
-  /**
-   * Closes the modal and resets the states.
-   */
+  // Closes the modal and resets the states.
   const closeModal = () => {
     setSelectedFile("");
-    setDeleteImage(false);
+    setUserName(user?.name || "");
+    setImageUrl(user?.image || "");
     setIsEditing(false);
     handleClose();
   };
@@ -55,40 +55,40 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
    * Update profile image of the currently logged in user.
    * Exists if the user is not logged in or no image is selected.
    */
-  const onUpdateImage = async () => {
-    if (!(user && selectedFile)) {
-      return;
-    }
-    try {
-      setUploadingImage(true);
+  // const onUpdateImage = async () => {
+  //   if (!(user && selectedFile)) {
+  //     return;
+  //   }
+  //   try {
+  //     setUploadingImage(true);
 
-      const imageRef = ref(storage, `users/${user?.uid}/profileImage`); // path to store image
-      await uploadString(imageRef, selectedFile, "data_url"); // upload image
-      const downloadURL = await getDownloadURL(imageRef); // get image url
+  //     const imageRef = ref(storage, `users/${user?.uid}/profileImage`); // path to store image
+  //     await uploadString(imageRef, selectedFile, "data_url"); // upload image
+  //     const downloadURL = await getDownloadURL(imageRef); // get image url
 
-      const success = await updateProfile({
-        photoURL: downloadURL,
-      }); // update profile image url in firestore
-      if (!success) {
-        throw new Error("Failed to update profile image");
-      }
+  //     const success = await updateProfile({
+  //       photoURL: downloadURL,
+  //     }); // update profile image url in firestore
+  //     if (!success) {
+  //       throw new Error("Failed to update profile image");
+  //     }
 
-      showToast({
-        title: "Profile updated",
-        description: "Your profile has been updated",
-        status: "success",
-      });
-    } catch (error) {
-      console.error("Error: onUpdateImage: ", error);
-      showToast({
-        title: "Image not Updated",
-        description: "Failed to update profile image",
-        status: "error",
-      });
-    } finally {
-      setUploadingImage(false);
-    }
-  };
+  //     showToast({
+  //       title: "Profile updated",
+  //       description: "Your profile has been updated",
+  //       status: "success",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error: onUpdateImage: ", error);
+  //     showToast({
+  //       title: "Image not Updated",
+  //       description: "Failed to update profile image",
+  //       status: "error",
+  //     });
+  //   } finally {
+  //     setUploadingImage(false);
+  //   }
+  // };
 
   /**
    * Deletes the profile image of the currently logged in user.
@@ -96,17 +96,17 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
    */
   const onDeleteImage = async () => {
     try {
-      if (!user) {
-        return;
-      }
-      const imageRef = ref(storage, `users/${user?.uid}/profileImage`); // path to store image
-      await deleteObject(imageRef); // delete image
-      const success = await updateProfile({
-        photoURL: "",
-      }); // update profile image url in firestore
-      if (!success) {
-        throw new Error("Failed to delete profile image");
-      }
+      // if (!user) {
+      //   return;
+      // }
+      // const imageRef = ref(storage, `users/${user?.uid}/profileImage`); // path to store image
+      // await deleteObject(imageRef); // delete image
+      // const success = await updateProfile({
+      //   photoURL: "",
+      // }); // update profile image url in firestore
+      // if (!success) {
+      //   throw new Error("Failed to delete profile image");
+      // }
 
       showToast({
         title: "Profile updated",
@@ -123,83 +123,55 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
     }
   };
 
-  /**
-   * Updates the name of the creator of the comments.
-   * Finds all the comments a user has created and updates the creator name.
-   * @param {string} userId - ID of the user whose comments are to be updated
-   * @param {string} newUserName - New name of the user
-   */
-  const updateUserNameInComments = async (
-    userId: string,
-    newUserName: string
-  ) => {
-    const commentsQuery = query(
-      collection(firestore, "comments"),
-      where("creatorId", "==", userId)
-    ); // query to get all comments by the user
-    const commentsSnapshot = await getDocs(commentsQuery); // get all comments by the user
+  // Update profile name and image of the currently logged in user.
+  const onUpdateProfile = async () => {
+    if (!token) {
+      showToast({
+        title: "Authentication Error",
+        description: "You must be logged in to update your profile",
+        status: "error",
+      });
+      return;
+    }
 
-    const batch = writeBatch(firestore); // create batch to update multiple documents
-
-    commentsSnapshot.forEach((commentDoc) => {
-      const commentRef = doc(firestore, "comments", commentDoc.id);
-      batch.update(commentRef, { creatorDisplayText: newUserName });
-    }); // update all comments
-
-    await batch.commit(); // commit batch
-  };
-
-  // Function to update creatorUsername in posts
-  /**
-   * Updates the name of the creator of the posts.
-   * Finds all the posts a user has created and updates the creator name.
-   */
-  const updateUserNameInPosts = async (userId: string, newUserName: string) => {
-    const postsQuery = query(
-      collection(firestore, "posts"),
-      where("creatorId", "==", userId)
-    ); // query to get all posts by the user
-    const postsSnapshot = await getDocs(postsQuery);
-
-    const batch = writeBatch(firestore); // create batch to update multiple documents
-
-    postsSnapshot.forEach((postDoc) => {
-      const postRef = doc(firestore, "posts", postDoc.id);
-      batch.update(postRef, { creatorUsername: newUserName });
-    }); // update all posts
-
-    await batch.commit();
-  };
-
-  /**
-   * Update profile name of the currently logged in user.
-   * Updates:
-   *  - `displayName` in `users` collection
-   *  - `creatorDisplayText` in `comments` collection
-   *  - `creatorUsername` in `posts` collection
-   * Updates values in multiple places as they are repeated in different collections.
-   */
-  const onUpdateUserName = async () => {
     try {
-      const success = await updateProfile({
-        displayName: userName,
+      const response = await fetch('/api/profile/modify', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `JWT ${token}`, // Include the JWT token in the Authorization header
+        },
+        body: JSON.stringify({
+          username: userName,
+          imageUrl: imageUrl, // Send the imageUrl as part of the request body
+        }),
       });
 
-      if (!success) {
-        throw new Error("Failed to update profile name");
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
       }
-      // Update the creatorDisplayText in comments and creatorUsername in posts
-      await updateUserNameInComments(user!.uid, userName);
-      await updateUserNameInPosts(user!.uid, userName);
-    } catch (error) {
-      console.error("Error: onUpdateUserName: ", error);
+
+      const result = await response.json();
       showToast({
-        title: "Name not Updated",
-        description: "Failed to update profile name",
+        title: "Profile updated",
+        description: "Your profile has been updated",
+        status: "success",
+      });
+
+      // Optionally, refresh user data here if you are using a global state or SWR
+      // For example, if using SWR:
+      // mutate('/api/user'); // Revalidate the user data
+      closeModal(); // Close the modal after successful update
+    } catch (error) {
+      console.error("Error updating profile: ", error);
+      showToast({
+        title: "Profile not updated",
+        description: "Failed to update profile",
         status: "error",
       });
     }
   };
+
 
   /**
    * Updates the state which tracks the name of the user.
@@ -220,11 +192,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
     if (selectedFile) {
       onUpdateImage();
     }
-    if (deleteImage) {
+    if (onDeleteImage) {
       onDeleteImage();
     }
-    if (userName && userName !== user?.displayName) {
-      onUpdateUserName();
+    if (userName && userName !== user?.name) {
+      onUpdateProfile();
     }
     closeModal();
   };
@@ -252,9 +224,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
               <Stack p={5} spacing={5}>
                 {/* image */}
                 <Stack direction="column" align="center" justify="center" p={2}>
-                  {user?.photoURL || selectedFile ? (
+                  {user?.imageUrl || selectedFile ? (
                     <Image
-                      src={selectedFile || (user?.photoURL as string)}
+                      src={selectedFile || (user?.imageUrl as string)}
                       alt="User Photo"
                       height="120px"
                       borderRadius="full"
@@ -269,7 +241,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
                     />
                   )}
                   <Text fontSize="xl" color="gray.700">
-                    {user?.displayName}
+                    {user?.name}
                   </Text>
                 </Stack>
 
@@ -295,8 +267,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
                         flex={1}
                         height={34}
                         variant="outline"
-                        onClick={() => setDeleteImage(true)}
-                        isDisabled={deleteImage}
+                        onClick={() => onDeleteImage(true)}
+                        isDisabled={onDeleteImage}
                       >
                         Delete Image
                       </Button>
@@ -328,7 +300,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
                       >
                         User Name:
                       </Text>
-                      <Text fontSize="12pt">{user?.displayName || ""}</Text>
+                      <Text fontSize="12pt">{user?.name || ""}</Text>
                     </Flex>
                   </Flex>
                 )}
@@ -338,7 +310,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
                       User Name
                     </Text>
                     <Input
-                      name="displayName"
+                      name="name"
                       placeholder="User Name"
                       value={userName}
                       type="text"
@@ -398,3 +370,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
   );
 };
 export default ProfileModal;
+
+function onUpdateImage() {
+  throw new Error("Function not implemented.");
+}

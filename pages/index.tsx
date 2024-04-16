@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+
 import { Post, PostVote } from "@/atoms/postsAtom";
 import CreatePostLink from "@/components/Community/CreatePostLink";
 import PersonalHome from "@/components/Community/PersonalHome";
@@ -10,13 +10,12 @@ import useCommunityData from "@/hooks/useCommunityData";
 import useCustomToast from "@/hooks/useCustomToast";
 import usePosts from "@/hooks/usePosts";
 import { Stack } from "@chakra-ui/react";
-import { Inter } from "@next/font/google";
 import { useEffect, useState } from "react";
-
-const inter = Inter({ subsets: ["latin"] });
+import { useSession } from "next-auth/react";
 
 export default function Home() {
-  const [user, loadingUser] = useAuthState(auth);
+  const { data: session } = useSession();
+  const user = session?.user;
   const [loading, setLoading] = useState(false);
   const { communityStateValue } = useCommunityData();
   const {
@@ -28,42 +27,26 @@ export default function Home() {
   } = usePosts();
   const showToast = useCustomToast();
 
-  /**
-   * Creates a home feed for a currently logged in user.
-   * If the user is a member of any communities, it will display posts from those communities.
-   * If the user is not a member of any communities, it will display generic posts.
-   */
-  const buildUserHomeFeed = async () => {
+  // Function to fetch posts from API
+  const fetchPosts = async (communityId: string) => {
     setLoading(true);
-
     try {
-      if (communityStateValue.mySnippets.length) {
-        const myCommunityIds = communityStateValue.mySnippets.map(
-          (snippet) => snippet.communityId
-        ); // get all community ids that the user is a member of
-        const postQuery = query(
-          collection(firestore, "posts"),
-          where("communityId", "in", myCommunityIds),
-          // orderBy("voteStatus", "desc"),
-          limit(10)
-        ); // get all posts in community with certain requirements
-        const postDocs = await getDocs(postQuery);
-        const posts = postDocs.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })); // get all posts in community
-
-        setPostStateValue((prev) => ({
-          ...prev,
-          posts: posts as Post[],
-        })); // set posts in state
-      } else {
-        buildGenericHomeFeed();
+      const response = await fetch(`/api/posts/get?communityId=${communityId}`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      setPostStateValue((prev) => ({
+        ...prev,
+        posts: data.data as Post[],
+      }));
     } catch (error) {
       showToast({
-        title: "Could not Build Home Feed",
-        description: "There was an error while building your home feed",
+        title: "Could not load posts",
+        description: (error as Error).message,
         status: "error",
       });
     } finally {
@@ -71,103 +54,57 @@ export default function Home() {
     }
   };
 
-  /**
-   * Creates a generic home feed for a user that is not logged in.
-   */
-  const buildGenericHomeFeed = async () => {
-    setLoading(true);
-    try {
-      const postQuery = query(
-        collection(firestore, "posts"),
-        orderBy("voteStatus", "desc"),
-        limit(10)
-      ); // get all posts in community with certain requirements
+  // Function to handle voting on a post
+  // Adjust the handleVote function to match the expected signature
+  const handleVote = async (
+    event: React.MouseEvent<SVGElement, MouseEvent>,
+    post: Post,
+    vote: number,
+    communityId: string
+  ) => {
+    // Assuming you need the postId and voteValue from the post and vote parameters
+    const postId = post.id;
+    const voteValue = vote;
 
-      const postDocs = await getDocs(postQuery); // get all posts in community
-      const posts = postDocs.docs.map((doc) => ({ id: doc.id, ...doc.data() })); // get all posts in community
-      setPostStateValue((prev) => ({
-        ...prev,
-        posts: posts as Post[],
-      })); // set posts in state
-    } catch (error) {
-      console.log("Error: buildGenericHomeFeed", error);
-      showToast({
-        title: "Could not Build Home Feed",
-        description: "There was an error while building your home feed",
-        status: "error",
+    try {
+      const response = await fetch(`/api/posts/vote?id=${postId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ vote: voteValue }),
       });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /**
-   * Gets the votes for the posts that are currently in the home feed.
-   */
-  const getUserPostVotes = async () => {
-    try {
-      const postIds = postStateValue.posts.map((post) => post.id); // get all post ids in home feed
-      const postVotesQuery = query(
-        collection(firestore, `users/${user?.uid}/postVotes`),
-        where("postId", "in", postIds)
-      ); // get all post votes for posts in home feed
-      const postVoteDocs = await getDocs(postVotesQuery);
-      const postVotes = postVoteDocs.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })); // get all post votes for posts in home feed
-
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      // Update the local state with the new vote count
       setPostStateValue((prev) => ({
         ...prev,
-        postVotes: postVotes as PostVote[],
-      })); // set post votes in state
+        posts: prev.posts.map((p) =>
+          p.id === postId ? { ...p, vote: data.data.vote } : p
+        ),
+      }));
     } catch (error) {
-      console.log("Error: getUserPostVotes", error);
       showToast({
-        title: "Could not Get Post Votes",
-        description: "There was an error while getting your post votes",
+        title: "Could not vote on post",
+        description: (error as Error).message,
         status: "error",
       });
     }
   };
 
-  /**
-   * Loads the home feed for authenticated users.
-   * Runs when the community snippets have been fetched when the user
-   */
+  // Load posts when the component mounts or when the community changes
   useEffect(() => {
-    if (communityStateValue.mySnippets) {
-      buildUserHomeFeed();
+    if (communityStateValue.currentCommunity) {
+      fetchPosts(communityStateValue.currentCommunity.id);
     }
-  }, [communityStateValue.snippetFetched]);
+  }, [communityStateValue.currentCommunity]);
 
-  /**
-   * Loads the home feed for unauthenticated users.
-   * Runs when there is no user and the system is no longer attempting to fetch a user.
-   * While the system is attempting to fetch user, the user is null.
-   */
-  useEffect(() => {
-    if (!user && !loadingUser) {
-      buildGenericHomeFeed();
-    }
-  }, [user, loadingUser]);
-
-  /**
-   * Posts need to exist before trying to fetch votes for posts
-   */
-  useEffect(() => {
-    if (user && postStateValue.posts.length) {
-      getUserPostVotes();
-
-      return () => {
-        setPostStateValue((prev) => ({
-          ...prev,
-          postVotes: [],
-        }));
-      };
-    }
-  }, [user, postStateValue.posts]);
-
+  // Replace the onVote prop with handleVote
   return (
     <PageContent>
       <>
@@ -182,14 +119,13 @@ export default function Home() {
                 post={post}
                 onSelectPost={onSelectPost}
                 onDeletePost={onDeletePost}
-                onVote={onVote}
+                onVote={handleVote}
                 userVoteValue={
                   postStateValue.postVotes.find(
                     (item) => item.postId === post.id
                   )?.voteValue
                 }
-                userIsCreator={user?.uid === post.creatorId}
-                // showCommunityImage={true}
+                userIsCreator={user?.id === post.user.id}
               />
             ))}
           </Stack>
