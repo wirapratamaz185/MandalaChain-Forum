@@ -1,36 +1,39 @@
-import { Request, Response } from "express";
-import Formidable from "formidable";
-import fs from "fs";
+// src/pages/api/upload.ts
+import { IncomingForm, File } from 'formidable';
+import fs from 'fs';
+import path from 'path';
+import type { NextApiRequest } from 'next';
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-export default function uploadFormFiles(
-  req: Request,
-  res: Response
-) {
-  return new Promise(async (resolve, reject) => {
-    const form = new Formidable.IncomingForm({
+export default function uploadFormFiles(req: NextApiRequest) {
+  return new Promise<{ fields: any; files: any }>((resolve, reject) => {
+    const form = new IncomingForm({
       multiples: true,
       keepExtensions: true,
     });
 
-    form
-    .on("file", (_name: string, file: Formidable.File) => {
-      const data = fs.readFileSync((file as any).path);
-        fs.writeFileSync(`public/upload/${(file as any).name}`, data);
-        fs.unlinkSync((file as any).path);
-      })
-      .on("aborted", () => {
-        reject(res.status(500).send('Aborted'))  
-      })
-      .on("end", () => {
-        resolve(res.status(200).send('done'));
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        return reject(err);
+      }
+
+      // Process the uploaded files here
+      Object.values(files).forEach((fileArray: File[] | undefined) => {
+        if (fileArray) {
+          fileArray.forEach((file: File) => {
+            const data = fs.readFileSync(file.filepath);
+            const uploadDir = path.join(process.cwd(), 'public', 'upload');
+            if (!fs.existsSync(uploadDir)) {
+              fs.mkdirSync(uploadDir, { recursive: true });
+            }
+            const filePath = path.join(uploadDir, file.originalFilename as string);
+            fs.writeFileSync(filePath, data);
+            fs.unlinkSync(file.filepath);
+          });
+        }
       });
 
-    await form.parse(req)
+      // Resolve with the fields and files
+      resolve({ fields, files });
+    });
   });
 }

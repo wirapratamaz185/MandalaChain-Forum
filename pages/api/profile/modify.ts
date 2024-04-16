@@ -4,7 +4,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { secret } from "../../../utils/auth/secret";
 import { ApiError } from "../../../utils/response/baseError";
-import uploadForm from "../upload";
+import uploadFormFiles from "../upload";
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
@@ -26,21 +27,31 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
     const userId = result;
 
-    const { fields, files } = req.body;
-    const file = files.file;
-    const imageUrl = file ? file.filepath : null;
+    // Wait for the file upload to complete
+    const { fields, files } = await uploadFormFiles(req);
 
+    // extract the username field value
+    const username = Array.isArray(fields.username) ? fields.username[0] : fields.username;
+
+    // Assuming 'file' is the key for the uploaded file
+    const file = files.file ? files.file[0] : null;
+    const imageUrl = file ? `/upload/${uuidv4()}_${file.originalFilename}` : null;4
+
+    // Update the user profile
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
-        username: fields.username,
+        username,
         ...(imageUrl && { imageUrl }),
+      },
+      select: {
+        id: true,
+        username: true,
+        imageUrl: true,
       },
     });
 
-    res
-      .status(200)
-      .json(ApiResponse.success(updatedUser, "Profile updated successfully"));
+    res.status(200).json(ApiResponse.success(updatedUser, "Profile updated successfully"));
   } catch (error) {
     if (error instanceof ApiError) {
       res.status(error.statusCode).json(ApiResponse.error(error.message));
@@ -52,4 +63,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default uploadForm;
+export default handler;
