@@ -35,7 +35,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Assuming 'file' is the key for the uploaded file
     const file = files.file ? files.file[0] : null;
-    const imageUrl = file ? `/upload/${uuidv4()}_${file.originalFilename}` : null;4
+    const imageUrl = file ? `/upload/${uuidv4()}_${file.originalFilename}` : null;
 
     // Update the user profile
     const updatedUser = await prisma.user.update({
