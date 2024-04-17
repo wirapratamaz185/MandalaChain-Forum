@@ -1,54 +1,26 @@
+// src/pages/api/community/logo.ts
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { secret } from "../../../utils/auth/secret";
 import { ApiError } from "../../../utils/response/baseError";
-import multer from "multer";
-import nextConnect from "next-connect";
+import uploadFormFiles from "../upload";
+import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
-interface MulterNextApiRequest extends NextApiRequest {
-  file: Express.Multer.File;
-  env: any;
-}
-
-interface ExtendedNextApiRequest extends NextApiRequest {
-  file: Express.Multer.File;
-}
-
-// Configure multer for file uploads
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // Limit file size to 5MB
+export const config = {
+  api: {
+    bodyParser: false,
   },
-});
+};
 
-const apiRoute = nextConnect({
-  onError(error, req, res) {
-    res
-      .status(501)
-      .json({ error: `Sorry something Happened! ${error.message}` });
-  },
-  onNoMatch(req, res) {
-    res.status(405).json({ error: `Method '${req.method}' Not Allowed` });
-  },
-});
-
-// Add the middleware to handle file upload
-apiRoute.use(upload.single("image"));
-
-apiRoute.patch(async (req: MulterNextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { communityId } = req.query;
 
   let userId;
   try {
-    // Ensure secret is defined before calling MiddlewareAuthorization
-    if (!secret) {
-      throw new ApiError("Secret is undefined", 500);
-    }
-    userId = await MiddlewareAuthorization(req as NextApiRequest, secret);
+    userId = await MiddlewareAuthorization(req, secret!);
   } catch (error) {
     if (error instanceof ApiError) {
       return res
@@ -58,95 +30,155 @@ apiRoute.patch(async (req: MulterNextApiRequest, res: NextApiResponse) => {
     return res.status(500).json(ApiResponse.error("An unknown error occurred"));
   }
 
-  try {
-    const community = await prisma.community.findUnique({
-      where: {
-        id: communityId as string,
-      },
-      select: {
-        owner_id: true,
-        imageUrl: true,
-      },
-    });
+  if (req.method === "PATCH") {
+    try {
+      const community = await prisma.community.findUnique({
+        where: {
+          id: communityId as string,
+        },
+        select: {
+          owner_id: true,
+          imageUrl: true,
+        },
+      });
 
-    if (!community) {
-      return res.status(404).json(ApiResponse.error("Community not found"));
-    }
+      // Check if the community exists
+      if (!community) {
+        return res.status(404).json(ApiResponse.error("Community not found"));
+      }
 
-    if (community.owner_id !== userId) {
-      return res
-        .status(403)
-        .json(
-          ApiResponse.error(
-            "You are not authorized to change the community logo"
-          )
-        );
-    }
+      // Check if the user is the owner of the community
+      if (community.owner_id !== userId) {
+        return res
+          .status(403)
+          .json(
+            ApiResponse.error(
+              "You are not authorized to change the community logo"
+            )
+          );
+      }
 
-    // Check if an image was uploaded
-    if (!req.file) {
-      return res.status(400).json(ApiResponse.error("No image uploaded"));
-    }
+      const { files } = await uploadFormFiles(req);
+      const file = files.image ? files.image[0] : null;
 
-    // If there's an existing logo, delete it from cloud storage
-    if (community.imageUrl) {
-      await deleteImage(community.imageUrl);
-    }
+      // console.log(file, "file:");
 
-    // Upload the new image to cloud storage and get the URL
-    const imageUrl = await uploadImage(req.file.buffer);
+      if (!file) {
+        return res.status(400).json(ApiResponse.error("No image uploaded"));
+      }
 
-    const updatedCommunity = await prisma.community.update({
-      where: {
-        id: communityId as string,
-      },
-      data: {
-        imageUrl: imageUrl, // Update the imageUrl field with the new image URL
-      },
-      select: {
-        id: true,
-        name: true,
-        imageUrl: true,
-        owner: {
-          select: {
-            id: true,
+      // Generate a unique filename for the uploaded image
+      const newFilename = `${uuidv4()}_${file.originalFilename}`;
+      const imageUrl = `/upload/${newFilename}`; // This should be the path or URL to access the image
+
+      const updatedCommunity = await prisma.community.update({
+        where: {
+          id: communityId as string,
+        },
+        data: {
+          imageUrl: imageUrl,
+        },
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
+          owner: {
+            select: {
+              id: true,
+            },
           },
         },
-      },
-    });
+      });
 
+      res
+        .status(200)
+        .json(
+          ApiResponse.success(
+            updatedCommunity,
+            "Community logo updated successfully"
+          )
+        );
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.statusCode).json(ApiResponse.error(error.message));
+      } else if (error instanceof Error) {
+        res.status(500).json(ApiResponse.error(error.message));
+      } else {
+        res.status(500).json(ApiResponse.error("An unknown error occurred"));
+      }
+    }
+  } else if (req.method === "DELETE") {
+    try {
+      const community = await prisma.community.findUnique({
+        where: {
+          id: communityId as string,
+        },
+        select: {
+          owner_id: true,
+          imageUrl: true,
+        },
+      });
+
+      if (!community) {
+        return res.status(404).json(ApiResponse.error("Community not found"));
+      }
+
+      if (community.owner_id !== userId) {
+        return res
+          .status(403)
+          .json(
+            ApiResponse.error(
+              "You are not authorized to delete the community logo"
+            )
+          );
+      }
+
+      // Check if the community already has no logo
+      if (community.imageUrl === null) {
+        return res.status(400).json(ApiResponse.error("No logo to delete"));
+      }
+
+      const updatedCommunity = await prisma.community.update({
+        where: {
+          id: communityId as string,
+        },
+        data: {
+          imageUrl: null,
+        },
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
+          owner: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+
+      res
+        .status(200)
+        .json(
+          ApiResponse.success(
+            updatedCommunity,
+            "Community logo deleted successfully"
+          )
+        );
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.statusCode).json(ApiResponse.error(error.message));
+      } else if (error instanceof Error) {
+        res.status(500).json(ApiResponse.error(error.message));
+      } else {
+        res.status(500).json(ApiResponse.error("An unknown error occurred"));
+      }
+    }
+  } else {
     res
-      .status(200)
-      .json(
-        ApiResponse.success(
-          updatedCommunity,
-          "Community logo updated successfully"
-        )
-      );
-  } catch (error) {
-    console.error("Error updating community logo:", error);
-    res
-      .status(500)
-      .json(
-        ApiResponse.error("An error occurred while updating the community logo")
-      );
+      .status(405)
+      .json(ApiResponse.error(`Method '${req.method}' Not Allowed`));
   }
-});
-
-// ... existing DELETE method code
-
-export default apiRoute;
-
-// Disable the default body parser to allow multer to parse multipart/form-data
-export const config = {
-  api: {
-    bodyParser: false,
-  },
 };
-function deleteImage(imageUrl: string) {
-  throw new Error("Function not implemented.");
-}
 
-function uploadImage(buffer: Buffer) {
-  throw new Error("Function not implemented.");
-}
+export default handler;

@@ -1,3 +1,4 @@
+// api/auth/signup.ts
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcryptjs";

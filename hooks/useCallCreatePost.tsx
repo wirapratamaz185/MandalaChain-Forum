@@ -1,31 +1,33 @@
+// hooks/useCallCreatePost.tsx
 import { authModalState } from "@/atoms/authModalAtom";
 import { useRouter } from "next/router";
 import { useSetRecoilState } from "recoil";
 import useDirectory from "./useDirectory";
+import { useSession } from "next-auth/react"; // Import useSession from NextAuth
 
 const useCallCreatePost = () => {
   const router = useRouter();
-  const [user] = useAuthState(auth);
+  const { data: session } = useSession(); // Use useSession to get the current session
   const setAuthModalState = useSetRecoilState(authModalState);
   const { toggleMenuOpen } = useDirectory();
 
   const onClick = () => {
-    // check if the user is logged in as post cannot be created without user
-    if (!user) {
-      // if user is not logged in
-      setAuthModalState({ open: true, view: "login" }); // open login modal
-      return; // exit function
+    // Check if the user is logged in as post cannot be created without user
+    if (!session) {
+      // If user is not logged in
+      setAuthModalState({ open: true, view: "login" }); // Open login modal
+      return; // Exit function
     }
-    const { communityId } = router.query; // get community id from router
+    const { communityId } = router.query; // Get community id from router
 
     if (communityId) {
-      // if the user is in a community then can post
-      // redirect user to following link
-      router.push(`/community/${communityId}/submit`); // redirect user to create post page
+      // If the user is in a community then can post
+      // Redirect user to following link
+      router.push(`/community/${communityId}/submit`); // Redirect user to create post page
       return;
     } else {
-      // if the user is not in a community then post cannot be made
-      toggleMenuOpen(); // open the menu to select a community
+      // If the user is not in a community then post cannot be made
+      toggleMenuOpen(); // Open the menu to select a community
     }
   };
 
@@ -33,4 +35,5 @@ const useCallCreatePost = () => {
     onClick,
   };
 };
+
 export default useCallCreatePost;
