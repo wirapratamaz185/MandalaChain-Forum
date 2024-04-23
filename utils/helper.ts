@@ -5,7 +5,11 @@ import { compare, hash, genSalt } from "bcrypt";
 import { Payload } from "../utils/interface/jwt";
 import { sign, verify } from "jsonwebtoken";
 import { secret } from "./auth/secret";
-import { NextApiRequest } from "next";
+import next, { NextApiRequest } from "next";
+import {} from '../utils/passport/passport'
+import passport from "passport";
+import cookie from "cookie";
+import jwt from "jsonwebtoken";
 
 export class ApiResponse<T> {
   readonly data: T | null;
@@ -79,6 +83,9 @@ export class ResponseHandler<T> {
 
 //bcrypt
 export class Bcrypt {
+  static async compare(password: string, hadshedpassword: string): Promise<boolean> {
+      throw new Error('Method not implemented.');
+  }
   public static async createHashPassword(
     plainPassword: string
   ): Promise<string> {
@@ -100,49 +107,71 @@ export class Bcrypt {
 }
 
 //jsonwebtoken
-
 export class JWT {
-  public static async generateJWT(payload: Payload): Promise<string> {
-    const token = sign(payload, process.env.JWTSECRET as string, {
-      expiresIn: process.env.EXPIRED,
+  public static async generateJWT(payload: any): Promise<string> {
+    return new Promise((resolve, reject) => {
+      jwt.sign(
+        payload as string | object | Buffer,
+        process.env.SECRET_KEY as string,
+        {
+          expiresIn: "1d", // Set expiresIn to 1 day
+        },
+        (err: any, token: string | undefined) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(token as string);
+          }
+        }
+      );
     });
-
-    return token;
   }
-
-  public static async decodeJWT(
-    token: string,
-    secret: string
-  ): Promise<Payload> {
-    const decode = verify(token, secret);
-
-    return decode as Payload;
+  static sign(payload: any, arg1: string, arg2: { expiresIn: string; }, arg3: (err: any, token: any) => void) {
+    throw new Error("Method not implemented.");
   }
 }
 
+// middleware with passport
+export const passportInitialize = () => {
+  return passport.initialize();
+}
+
+export const passportSession = () => {
+  return passport.session();
+}
+
+// manual JWT middleware
 export const MiddlewareAuthorization = async (
   req: NextApiRequest,
   secret: string
 ): Promise<string | Payload> => {
-  // Extract the token from the Authorization header
-const token = req.headers.authorization?.split(" ")[1];
+  // check if cookies are present in headers
+  if (!req.headers.cookie) {
+    throw new ApiError("Cookies not Present in Header", HttpStatusCode.Unauthorized);
+  }
+
+  // orse the cookes from the request headers
+  const cookies =  cookie.parse(req.headers.cookie);
+  //extract the token from the cookies
+  const token = cookies.token;
 
   if (!token) {
-    throw new ApiError("unauthorization", HttpStatusCode.Unauthorized);
+    throw new ApiError("Invalid or Expired Token", HttpStatusCode.Unauthorized);
   }
 
-  // Verify and decode the token
+  // verify and decode the token
   let decodedToken;
   try {
-    decodedToken = await JWT.decodeJWT(token, secret);
+    decodedToken = verify(token, secret);
   } catch (error) {
-    throw new ApiError("Invalid or expired token", HttpStatusCode.Unauthorized);
+    throw new ApiError("Invalid or Expired Token", HttpStatusCode.Unauthorized);
   }
 
-  console.log("decodedToken:", decodedToken);
+  console.log("Decoded Token", decodedToken);
 
-  // Get the user id from the decoded token
-  const userId = decodedToken.id;
+
+  //get the user id from the decoded token
+  const userId = (decodedToken as Payload).userId;
 
   return userId;
 };
