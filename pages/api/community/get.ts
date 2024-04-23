@@ -1,3 +1,4 @@
+// pages/api/community/get.ts
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
@@ -11,15 +12,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  let userId;
   try {
     if (!secret) {
       throw new ApiError("Secret is undefined", 500);
     }
-    userId = await MiddlewareAuthorization(req, secret);
+    const userId = await MiddlewareAuthorization(req, secret);
+    console.log("==================================");
+    console.log("Authenticated User ID", userId);
+    console.log("==================================");
 
     const { order, limit } = req.query;
-    const communities = await prisma.community.findMany({
+    
+    let communities = await prisma.community.findMany({
       include: {
         community_type: true,
         owner: {
@@ -37,7 +41,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       take: limit ? Number(limit) : undefined,
     });
-
+    
+    // Ensure communities is always an array
+    if (!Array.isArray(communities)) {
+      communities = [];
+    }
+    
     const totalCommunities = communities.length;
 
     return res

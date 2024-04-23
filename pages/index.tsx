@@ -11,11 +11,11 @@ import useCustomToast from "@/hooks/useCustomToast";
 import usePosts from "@/hooks/usePosts";
 import { Stack } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+// import { useSession } from "next-auth/react";
 
 export default function Home() {
-  const { data: session } = useSession();
-  const user = session?.user;
+  // const { data: session } = useSession();
+  // const user = session?.user;
   const [loading, setLoading] = useState(false);
   const { communityStateValue } = useCommunityData();
   const {
@@ -125,7 +125,7 @@ export default function Home() {
                     (item) => item.postId === post.id
                   )?.voteValue
                 }
-                userIsCreator={user?.id === post.user.id}
+                // userIsCreator={user?.id === post.user.id}
               />
             ))}
           </Stack>

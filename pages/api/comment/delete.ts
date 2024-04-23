@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 export default async function DELETE_COMMENT(
   req: NextApiRequest,
   res: NextApiResponse
-): Promise<void> {
+): Promise<void> {git push -u origin revamp
   if (req.method !== "DELETE") {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
