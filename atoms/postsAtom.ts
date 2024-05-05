@@ -1,3 +1,4 @@
+// atoms/postsAtom.ts:
 import { atom } from "recoil";
 
 export type Post = {
@@ -12,7 +13,7 @@ export type Post = {
   voteStatus: number;
   imageURL?: string;
   communityImageURL?: string;
-  createTime: Timestamp;
+  createTime: Date;
 };
 
 /**

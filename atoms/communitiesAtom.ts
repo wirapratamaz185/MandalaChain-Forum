@@ -1,3 +1,4 @@
+// atoms/communitiesAtom.ts
 import { atom } from "recoil";
 
 // Interface representing a community.
@@ -7,8 +8,8 @@ export interface Community {
   id: string;
   creatorId: string;
   numberOfMembers: number;
-  privacyType: "public" | "restricted" | "private";
-  createdAt?: Timestamp;
+  privacyType: "public" | "private";
+  createdAt?: Date;
   imageURL?: string;
 }
 
