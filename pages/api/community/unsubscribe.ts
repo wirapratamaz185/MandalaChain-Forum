@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { ApiResponse } from "../../../utils/helper";
-import jwt from "jsonwebtoken";
+import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { secret } from "../../../utils/auth/secret";
 
 const prisma = new PrismaClient();
@@ -16,22 +15,17 @@ export default async function POST(
 
   console.log("=====================================");
   console.log("handle function called");
-  console.log("req.body:", req.body);
   console.log("=====================================");
 
   const { communityId: communityId } = req.query;
 
-  // Extract the token from the Authorization header
-  const token = req.headers.authorization?.split(" ")[1] || "";
-
-  // Verify and decode the token
-  const decodedToken = jwt.verify(token, secret || "") as jwt.JwtPayload;
-  console.log("decodedToken:", decodedToken);
-
-  // get the user id from the decoded token
-  const userId = decodedToken.id;
-
+  let userId: string;
   try {
+    const payload = await MiddlewareAuthorization(req, secret as string);
+    if (!payload || typeof payload !== "string") {
+      throw new Error("Unauthorized: No userId decoded");
+    }
+    userId = payload;
     const subscription = await prisma.subscriber.findFirst({
       where: {
         community_id: communityId as string,

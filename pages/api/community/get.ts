@@ -2,8 +2,8 @@
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
-import { secret } from "../../../utils/auth/secret";
 import { ApiError } from "../../../utils/response/baseError";
+import { secret } from "../../../utils/auth/secret";
 
 const prisma = new PrismaClient();
 
@@ -12,17 +12,19 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
+  console.log("=====================================");
+  console.log("handle function called");
+  console.log("=====================================");
+
+  let userId: string;
   try {
-    if (!secret) {
-      throw new ApiError("Secret is undefined", 500);
-    }
-    const userId = await MiddlewareAuthorization(req, secret);
-    console.log("==================================");
-    console.log("Authenticated User ID", userId);
-    console.log("==================================");
+    const payload = await MiddlewareAuthorization(req, secret as string);
+    if (!payload || typeof payload !== "string")
+      throw new Error("Unauthorized: No userId decoded");
+    const userId = payload;
 
     const { order, limit } = req.query;
-    
+
     let communities = await prisma.community.findMany({
       include: {
         community_type: true,
@@ -41,12 +43,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       take: limit ? Number(limit) : undefined,
     });
-    
+
     // Ensure communities is always an array
     if (!Array.isArray(communities)) {
       communities = [];
     }
-    
+
     const totalCommunities = communities.length;
 
     return res

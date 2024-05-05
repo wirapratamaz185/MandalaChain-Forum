@@ -15,6 +15,10 @@ export default async function GET(
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
+  console.log("=====================================");
+  console.log("handle function called");
+  console.log("=====================================");
+
   // Extract communityId from the URL params
   const { communityId } = req.query;
 
@@ -24,21 +28,12 @@ export default async function GET(
 
   let userId;
   try {
-    // Ensure secret is defined before calling MiddlewareAuthorization
-    if (!secret) {
-      throw new ApiError("Secret is undefined", 500);
+    const payload = await MiddlewareAuthorization(req, secret as string);
+    if (!payload || typeof payload !== "string") {
+      throw new ApiError("Unauthorized: No userId decoded", 401);
     }
-    userId = await MiddlewareAuthorization(req, secret);
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return res
-        .status(error.statusCode)
-        .json(ApiResponse.error(error.message));
-    }
-    return res.status(500).json(ApiResponse.error("An unknown error occurred"));
-  }
-
-  try {
+    userId = payload;
+    
     const posts = await prisma.post.findMany({
       where: {
         community_id: communityId as string,

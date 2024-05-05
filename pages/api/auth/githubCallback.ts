@@ -1,7 +1,7 @@
 // pages/api/auth/githubCallback.ts
 import passport from "../../../utils/passport/passport";
 import { NextApiRequest, NextApiResponse } from "next";
-import { JWT } from "../../../utils/helper";
+import { JWT, ApiResponse } from "../../../utils/helper";
 import { setCookie } from "cookies-next";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -11,12 +11,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       if (err) {
         return res
           .status(500)
-          .json({ success: false, message: `Error: ${err.message}` });
+          .json(ApiResponse.error(null, `Error: ${err.message}`));
       }
       if (!user) {
-        return res
-          .status(400)
-          .json({ success: false, message: "User not found" });
+        return res.status(400).json(ApiResponse.error(null, "User not found"));
       }
 
       try {

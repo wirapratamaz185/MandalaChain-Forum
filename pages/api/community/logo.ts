@@ -16,19 +16,16 @@ export const config = {
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { communityId } = req.query;
-
   let userId;
   try {
-    userId = await MiddlewareAuthorization(req, secret!);
+    const payload = await MiddlewareAuthorization(req, secret as string);
+    if (!payload || typeof payload !== "string") throw new Error("Unauthorized: No userId decoded");
+    userId = payload;
   } catch (error) {
-    if (error instanceof ApiError) {
-      return res
-        .status(error.statusCode)
-        .json(ApiResponse.error(error.message));
-    }
-    return res.status(500).json(ApiResponse.error("An unknown error occurred"));
+    return res.status(500).json(ApiResponse.error("An unknown error occurred while authenticating"));
   }
+
+  const { communityId } = req.query;
 
   if (req.method === "PATCH") {
     try {

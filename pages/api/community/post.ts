@@ -1,7 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+// pages/api/community/post.ts
+import { PrismaClient, PrivacyType } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
-import {ApiResponse} from '../../../utils/helper';
-import jwt from 'jsonwebtoken';
+import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
+import { ApiError } from "../../../utils/response/baseError";
 import { secret } from "../../../utils/auth/secret";
 
 const prisma = new PrismaClient();
@@ -9,29 +10,30 @@ const prisma = new PrismaClient();
 export default async function POST(
   req: NextApiRequest,
   res: NextApiResponse
-) : Promise<void> {
-  if (req.method !== 'POST') {
+): Promise<void> {
+  if (req.method !== "POST") {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  console.log("=====================================")
+  console.log("=====================================");
   console.log("handle function called");
   console.log("req.body:", req.body);
-  console.log("=====================================")
+  console.log("=====================================");
 
   const { name, communityType } = req.body;
 
-  // Extract the token from the Authorization header
-  const token = req.headers.authorization?.split(" ")[1] || '';
+  // validate communityType
+  if (!Object.values(PrivacyType).includes(communityType)) {
+    return res.status(400).json(ApiResponse.error("Invalid community type"));
+  }
 
-  // Verify and decode the token
-  const decodedToken = jwt.verify(token, secret || '') as jwt.JwtPayload;
-  console.log("decodedToken:", decodedToken);
-
-  // get the user id from the decoded token
-  const userId = decodedToken.id;
-
+  let userId: string;
   try {
+    const payload = await MiddlewareAuthorization(req, secret as string);
+    if (!payload || typeof payload !== "string")
+      throw new Error("Unauthorized: No userId decoded");
+    const userId = payload;
+
     const community = await prisma.community.create({
       data: {
         name,
@@ -62,9 +64,17 @@ export default async function POST(
       },
     });
     console.log("Community created:", community);
-    res.status(201).json(ApiResponse.success(community, "BASE.SUCCESS", undefined));
-  } catch (error) {
-    console.error("Error creating community:", error);
-    res.status(500).json(ApiResponse.error("Internal Server Eror"));
-  }
+    res
+      .status(201)
+      .json(ApiResponse.success(community, "BASE.SUCCESS", undefined));
+    } catch (error) {
+      console.error("Error creating community:", error);
+      if (error instanceof Error && error.message === "Unauthorized: No userId decoded"){
+        return res.status(401).json(ApiResponse.error("Invalid token"));
+      } else if (error instanceof ApiError){
+        return res.status(500).json(ApiResponse.error(error.message));
+      } else {
+        return res.status(500).json(ApiResponse.error("Unknown error occurred"));
+      }
+    }
 }

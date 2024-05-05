@@ -14,6 +14,10 @@ export default async function DELETE(
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
+  console.log("=====================================");
+  console.log("handle function called");
+  console.log("=====================================");
+
   const { postId } = req.query;
 
   if (typeof postId !== 'string') {
@@ -22,22 +26,11 @@ export default async function DELETE(
 
   let userId: string;
   try {
-    const result = await MiddlewareAuthorization(req, secret!);
-    if (typeof result !== 'string') {
-      throw new ApiError("Invalid user ID", 401);
+    const payload = await MiddlewareAuthorization(req, secret as string);
+    if (!payload || typeof payload !== "string") {
+      throw new ApiError("Unauthorized: No userId decoded", 401);
     }
-    userId = result;
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return res.status(error.statusCode).json(ApiResponse.error(error.message));
-    } else if (error instanceof Error) {
-      return res.status(500).json(ApiResponse.error(error.message));
-    } else {
-      return res.status(500).json(ApiResponse.error("An unknown error occurred"));
-    }
-  }
-
-  try {
+    userId = payload;
     const post = await prisma.post.findUnique({
       where: {
         id: postId,

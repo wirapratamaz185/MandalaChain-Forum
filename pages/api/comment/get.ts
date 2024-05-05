@@ -16,59 +16,43 @@ export default async function GET_COMMENTS(
   }
 
   const { postId } = req.query;
-
   if (typeof postId !== "string") {
     return res.status(400).json(ApiResponse.error("Post ID must be a string"));
+  }
+  if (postId.length === 0) {
+    return res.status(400).json(ApiResponse.error("Post ID is required"));
   }
 
   let userId: string;
   try {
-    const result = await MiddlewareAuthorization(req, secret!);
-    if (typeof result !== "string") {
-      throw new ApiError("Invalid user ID", 401);
-    }
-    userId = result;
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return res
-        .status(error.statusCode)
-        .json(ApiResponse.error(error.message));
-    } else if (error instanceof Error) {
-      return res.status(500).json(ApiResponse.error(error.message));
-    } else {
-      return res
-        .status(500)
-        .json(ApiResponse.error("An unknown error occurred"));
-    }
-  }
+    const payload = await MiddlewareAuthorization(req, secret as string);
+    if (!payload || typeof payload !== "string")
+      throw new Error("Unauthorized: No userId decoded");
+    const userId = payload;
 
-  try {
+    // check if the post exists
+    const post = await prisma.post.findFirst({
+      where: { id: postId },
+    });
+    if (!post) {
+      return res.status(404).json(ApiResponse.error("Post not found"));
+    }
+
     const comments = await prisma.comment.findMany({
-      where: {
-        post_id: postId,
-      },
-      select: {
-        id: true,
-        text: true,
-        created_at: true,
+      where: { post_id: postId },
+      include: {
         user: {
-          select: {
-            id: true,
-            username: true,
-            imageUrl: true,
-          },
+          select: { id: true, username: true, imageUrl: true },
         },
       },
-      orderBy: {
-        created_at: "desc",
-      },
+      orderBy: { created_at: "desc" },
     });
 
     res
       .status(200)
       .json(ApiResponse.success(comments, "Comments retrieved successfully"));
   } catch (error) {
-    if (error instanceof Error) {
+    if (error instanceof ApiError) {
       console.error("Error retrieving comments:", error);
       res.status(500).json(ApiResponse.error(error.message));
     } else {

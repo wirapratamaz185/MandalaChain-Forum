@@ -16,13 +16,11 @@ export default async function COMMENT(
   }
 
   const { postId } = req.query;
-
   if (typeof postId !== "string") {
     return res.status(400).json(ApiResponse.error("Post ID must be a string"));
   }
 
   const { text } = req.body;
-
   if (!text || typeof text !== "string") {
     return res
       .status(400)
@@ -31,39 +29,24 @@ export default async function COMMENT(
 
   let userId: string;
   try {
-    const result = await MiddlewareAuthorization(req, secret!);
-    if (typeof result !== "string") {
-      throw new ApiError("Invalid user ID", 401);
-    }
-    userId = result;
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return res
-        .status(error.statusCode)
-        .json(ApiResponse.error(error.message));
-    } else if (error instanceof Error) {
-      return res.status(500).json(ApiResponse.error(error.message));
-    } else {
-      return res
-        .status(500)
-        .json(ApiResponse.error("An unknown error occurred"));
-    }
-  }
+    const payload = await MiddlewareAuthorization(req, secret as string);
+    if (!payload || typeof payload !== "string")
+      throw new Error("Unauthorized: No userId decoded");
+    const userId = payload;
 
-  try {
+    // check if the post exists
+    const post = await prisma.post.findFirst({
+      where: { id: postId },
+    });
+    if (!post) {
+      return res.status(404).json(ApiResponse.error("Post not found"));
+    }
+
     const comment = await prisma.comment.create({
       data: {
         text,
-        user: {
-          connect: {
-            id: userId,
-          },
-        },
-        post: {
-          connect: {
-            id: postId,
-          },
-        },
+        user: { connect: { id: userId } },
+        post: { connect: { id: postId } },
       },
       select: {
         id: true,
@@ -82,15 +65,22 @@ export default async function COMMENT(
         },
       },
     });
+
     res
       .status(201)
       .json(ApiResponse.success(comment, "Comment created successfully"));
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error creating comment:", error);
-      res.status(500).json(ApiResponse.error(error.message));
+    console.error("Error processing comment:", error);
+    if (error instanceof ApiError) {
+      return res
+        .status(error.statusCode)
+        .json(ApiResponse.error(error.message));
+    } else if (error instanceof Error) {
+      return res
+        .status(500)
+        .json(ApiResponse.error(error.message || "Unknown error"));
     } else {
-      res.status(500).json(ApiResponse.error("An unknown error occurred"));
+      return res.status(500).json(ApiResponse.error("Unknown error occurred"));
     }
   }
 }

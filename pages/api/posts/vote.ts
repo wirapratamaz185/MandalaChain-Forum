@@ -14,6 +14,10 @@ export default async function VOTE(
   if (req.method !== "POST") {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
+  console.log("=====================================");
+  console.log("handle function called");
+  console.log("Request Body:", req.body);
+  console.log("=====================================");
 
   const postId = req.query.id as string;
   const { vote } = req.body; // Expecting vote to be either 1 (upvote) or -1 (downvote)
@@ -24,22 +28,11 @@ export default async function VOTE(
 
   let userId: string;
   try {
-    const result = await MiddlewareAuthorization(req, secret!);
-    if (typeof result !== 'string') {
-      throw new ApiError("Invalid user ID", 401);
+    const payload = await MiddlewareAuthorization(req, secret as string);
+    if (!payload || typeof payload !== "string") {
+      throw new ApiError("Unauthorized: No userId decoded", 401);
     }
-    userId = result;
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return res.status(error.statusCode).json(ApiResponse.error(error.message));
-    } else if (error instanceof Error) {
-      return res.status(500).json(ApiResponse.error(error.message));
-    } else {
-      return res.status(500).json(ApiResponse.error("An unknown error occurred"));
-    }
-  }
-
-  try {
+    userId = payload;
     // Update the vote count by incrementing or decrementing based on the vote value
     const updatedPost = await prisma.post.update({
       where: {

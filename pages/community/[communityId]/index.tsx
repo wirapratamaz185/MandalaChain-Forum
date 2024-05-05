@@ -1,3 +1,4 @@
+// pages/community/[communityId]/index.tsx
 import { Community, communityState } from "@/atoms/communitiesAtom";
 import About from "@/components/Community/About";
 import CreatePostLink from "@/components/Community/CreatePostLink";
@@ -7,6 +8,7 @@ import PageContent from "@/components/Layout/PageContent";
 import Posts from "@/components/Posts/Posts";
 import { GetServerSidePropsContext } from "next";
 import React, { useEffect } from "react";
+import { useRouter } from "next/router";
 import { useSetRecoilState } from "recoil";
 import safeJsonStringify from "safe-json-stringify";
 
@@ -24,6 +26,7 @@ type CommunityPageProps = {
  */
 const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
   const setCommunityStateValue = useSetRecoilState(communityState);
+  const router = useRouter();
 
   // store the community data currently available into the state as soon as the component renders
   useEffect(() => {
@@ -91,32 +94,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     console.log("Error: getServerSideProps", error);
     return { props: {} };
   }
-
-  // try {
-  //   const communityDocRef = doc(
-  //     firestore,
-  //     "communities",
-  //     context.query.communityId as string
-  //   );
-  //   const communityDoc = await getDoc(communityDocRef);
-
-  //   if (!communityDoc.exists()) {
-  //     // if the document does not exist, return notFound property
-  //     return { props: {} };
-  //   }
-
-  //   return {
-  //     props: {
-  //       communityData: JSON.parse(
-  //         safeJsonStringify({ id: communityDoc.id, ...communityDoc.data() })
-  //       ),
-  //     },
-  //   };
-  // } catch (error) {
-  //   // todo: add error page
-  //   console.log("Error: getServerSideProps", error);
-  //   return { props: {} };
-  // }
 }
 
 export default CommunityPage;
