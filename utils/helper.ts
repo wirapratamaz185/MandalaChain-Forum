@@ -1,3 +1,4 @@
+// utils/helper.ts
 import { HttpStatusCode } from "axios";
 import { ApiError, BaseError } from "@/utils/response/baseError";
 import { NextResponse, NextRequest } from "next/server";
@@ -10,6 +11,7 @@ import {} from '../utils/passport/passport'
 import passport from "passport";
 import cookie from "cookie";
 import jwt from "jsonwebtoken";
+import { getCookie } from "cookies-next";
 
 export class ApiResponse<T> {
   readonly data: T | null;
@@ -132,43 +134,48 @@ export class JWT {
 }
 
 // middleware with passport
-export const passportInitialize = () => {
-  return passport.initialize();
-}
+// export const passportInitialize = () => {
+//   return passport.initialize();
+// }
 
-export const passportSession = () => {
-  return passport.session();
-}
+// export const passportSession = () => {
+//   return passport.session();
+// }
 
 // manual JWT middleware
 export const MiddlewareAuthorization = async (
   req: NextApiRequest,
   secret: string
 ): Promise<string | Payload> => {
-  // check if cookies are present in headers
-  if (!req.headers.cookie) {
-    throw new ApiError("Cookies not Present in Header", HttpStatusCode.Unauthorized);
-  }
-
-  // orse the cookes from the request headers
-  const cookies =  cookie.parse(req.headers.cookie);
-  //extract the token from the cookies
-  const token = cookies.token;
+  // using cookies-next to get the token
+  const token = getCookie("access_token", { req });
+  console.log("====================================")
+  console.log("Token", token);
+  console.log("====================================")
 
   if (!token) {
+    console.log("====================================")
     throw new ApiError("Invalid or Expired Token", HttpStatusCode.Unauthorized);
+    console.log("====================================")
   }
 
   // verify and decode the token
   let decodedToken;
   try {
-    decodedToken = verify(token, secret);
+    decodedToken = jwt.verify(token as string, secret);
   } catch (error) {
+    console.log("====================================")
+    console.log("Token verification error", error); 
     throw new ApiError("Invalid or Expired Token", HttpStatusCode.Unauthorized);
+    console.log("====================================")
   }
 
   console.log("Decoded Token", decodedToken);
-
+  if (typeof decodedToken === 'object' && 'id' in decodedToken) {
+    return decodedToken.id;
+  }
+  console.log("====================================")
+  throw new ApiError("Payload format incorrect", HttpStatusCode.Unauthorized);
 
   //get the user id from the decoded token
   const userId = (decodedToken as Payload).userId;
