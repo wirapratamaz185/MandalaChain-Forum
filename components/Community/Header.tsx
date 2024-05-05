@@ -1,3 +1,4 @@
+// components/community/header.tsx
 import { Community } from "@/atoms/communitiesAtom";
 import { Box, Button, Flex, Icon, Image, Text } from "@chakra-ui/react";
 import React, { useState } from "react";
@@ -6,6 +7,7 @@ import { useRouter } from "next/router";
 import { FiSettings } from "react-icons/fi";
 import IconItem from "../atoms/Icon";
 import CommunitySettingsModal from "../Modal/CommunitySettings/CommunitySettings";
+import { useAuth } from '@/hooks/useAuth';
 
 /**
  * @param {communityData} - data requiblue to be displayed
@@ -15,11 +17,22 @@ type HeaderProps = {
 };
 
 const Header: React.FC<HeaderProps> = ({ communityData }) => {
-  const { communityStateValue, onJoinOrLeaveCommunity, loading } =
+  const { communityStateValue, joinCommunity, leaveCommunity, loading } =
     useCommunityData();
+
   const isJoined = !!communityStateValue.mySnippets.find(
     (item) => item.communityId === communityData.id
-  ); // check if the user is already subscribed to the community
+  );
+
+  const onJoinOrLeaveCommunity = async () => {
+    if (isJoined) {
+      await leaveCommunity(communityData.id);
+    } else {
+      await joinCommunity(communityData.id);
+    }
+  }
+
+  const { user } = useAuth();
   return (
     <Flex direction="column" width="100%" height="120px">
       <Box height="30%" bg="blue.500" />
@@ -35,7 +48,7 @@ const Header: React.FC<HeaderProps> = ({ communityData }) => {
               <CommunitySettings communityData={communityData} />
               <JoinOrLeaveButton
                 isJoined={isJoined}
-                onClick={() => onJoinOrLeaveCommunity(communityData, isJoined)}
+                onClick={() => onJoinOrLeaveCommunity()}
               />
             </Flex>
           </Flex>
@@ -153,13 +166,13 @@ export const CommunitySettings: React.FC<CommunitySettingsProps> = ({
 }) => {
   const router = useRouter();
   const { communityId } = router.query;
-  const [user] = useAuthState(auth);
+  const { user } = useAuth();
   const [isCommunitySettingsModalOpen, setCommunitySettingsModalOpen] =
     useState(false);
 
   return (
     <>
-      {user?.uid === communityData.creatorId && (
+      {user?.id === communityData.creatorId && (
         <>
           <CommunitySettingsModal
             open={isCommunitySettingsModalOpen}

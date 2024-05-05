@@ -1,3 +1,4 @@
+// compoenents/modal/communitySettings.tsx
 import { Community, communityState } from "@/atoms/communitiesAtom";
 import useCustomToast from "@/hooks/useCustomToast";
 import useSelectFile from "@/hooks/useSelectFile";
@@ -34,6 +35,16 @@ type CommunitySettingsModalProps = {
   communityData: Community;
 };
 
+type CommunityProps = {
+  imageURL?: string | null;
+  name: string;
+  id: string;
+  creatorId: string;
+  numberOfMembers: number;
+  privacyType: 'public' | 'private';
+  createdAt: Date;
+};
+
 /**
  * Allows the admin to change the settings of the community.
  * The following settings can be changed:
@@ -49,14 +60,12 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
   handleClose,
   communityData,
 }) => {
-  const [user] = useAuthState(auth);
-
-  const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile(
+  const { onSelectFile } = useSelectFile(
     300,
     300
   );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const selectFileRef = useRef<HTMLInputElement>(null);
-  // const setCommunityStateValue = useSetRecoilState(communityState);
   const [communityStateValue, setCommunityStateValue] =
     useRecoilState(communityState);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -72,77 +81,37 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
       return;
     }
     setUploadingImage(true); // set uploading image to true
+    const formData = new FormData(); // create form data
+    formData.append("image", selectedFile); // append the selected file to the form data
+    formData.append("communityId", communityData.id); // append the community id to the form data
 
     try {
-      // update image in the community collection
-      const imageRef = ref(storage, `communities/${communityData.id}/image`); // create reference to image in storage
-      await uploadString(imageRef, selectedFile, "data_url"); // upload image to storage
-      const downloadURL = await getDownloadURL(imageRef); // get download url of image
-      await updateDoc(doc(firestore, "communities", communityData.id), {
-        imageURL: downloadURL,
-      }); // update imageURL in firestore
-
-      // update imageURL in all users communitySnippets
-      const usersSnapshot = await getDocs(collection(firestore, "users")); // get all users
-      usersSnapshot.forEach(async (userDoc) => {
-        // loop through all users
-        const communitySnippetDoc = await getDoc(
-          doc(
-            firestore,
-            "users",
-            userDoc.id,
-            "communitySnippets",
-            communityData.id
-          ) // get communitySnippet of the community
-        );
-        if (communitySnippetDoc.exists()) {
-          // if the communitySnippet exists, update the imageURL
-          await updateDoc(
-            doc(
-              firestore,
-              "users",
-              userDoc.id,
-              "communitySnippets",
-              communityData.id
-            ),
-            {
-              imageURL: downloadURL,
-            }
-          );
+      const response = await fetch("/api/community/logo", {
+        method: "PATCH",
+        body: formData,
+      });
+      const data = await response.json();
+      setCommunityStateValue(prevState => {
+        return {
+          ...prevState,
+          currentCommunity: {
+            ...prevState.currentCommunity,
+            imageURL: data.imageUrl,
+            name: data.name,
+            id: data.id as string, 
+            creatorId: data.creatorId as string,
+            numberOfMembers: data.numberOfMembers as number,
+            privacyType: data.privacyType as 'public' | 'private',
+            createdAt: data.createdAt as Date,
+          }
         }
       });
-
-      // update imageURL in current community recoil state
-      setCommunityStateValue((prev) => ({
-        ...prev,
-        currentCommunity: {
-          ...prev.currentCommunity,
-          imageURL: downloadURL,
-        } as Community,
-      }));
-
-      // update mySnippet imageURL in recoil state
-      setCommunityStateValue((prev) => ({
-        ...prev,
-        mySnippets: prev.mySnippets.map((snippet) => {
-          if (snippet.communityId === communityData.id) {
-            return {
-              ...snippet,
-              imageURL: downloadURL,
-            };
-          }
-          return snippet;
-        }),
-      }));
-      console.log("Error: onUploadImage", error);
-      showToast({
-        title: "Image not Updated",
-        description: "There was an error updating the image",
-        status: "error",
-      });
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      showToast({ title: "Failed to Update Image", description: errorMessage, status: "error" });
     } finally {
-      setUploadingImage(false); // set uploading image to false
-      setSelectedFile(""); // clear selected file
+      setUploadingImage(false);
+      setSelectedFile(null);
     }
   };
 
@@ -152,65 +121,33 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
    */
   const onDeleteImage = async (communityId: string) => {
     try {
-      const imageRef = ref(storage, `communities/${communityId}/image`); // create reference to image in storage
-      await deleteObject(imageRef);
-      // await deleteDoc(doc(firestore, "communities", communityId)); // delete image from storage
-      await updateDoc(doc(firestore, "communities", communityId), {
-        imageURL: "",
-      }); // update imageURL in firestore
-
-      // delete imageURL in communitySnippets for all users
-      const usersSnapshot = await getDocs(collection(firestore, "users")); // get all users
-      usersSnapshot.forEach(async (userDoc) => {
-        const communitySnippetDoc = await getDoc(
-          doc(firestore, "users", userDoc.id, "communitySnippets", communityId)
-        ); // get communitySnippet of the community
-        if (communitySnippetDoc.exists()) {
-          // if the communitySnippet exists, update the imageURL
-          await updateDoc(
-            doc(
-              firestore,
-              "users",
-              userDoc.id,
-              "communitySnippets",
-              communityId
-            ),
-            {
-              imageURL: "",
+      const response = await fetch(`/api/community/logo?communityId=${communityData.id}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setCommunityStateValue(prevState => {
+          return {
+            ...prevState,
+            currentCommunity: {
+              ...prevState.currentCommunity,
+              imageURL: data.imageUrl,
+              name: data.name,
+              id: data.id as string, 
+              creatorId: data.creatorId as string,
+              numberOfMembers: data.numberOfMembers as number,
+              privacyType: data.privacyType as 'public' | 'private',
+              createdAt: data.createdAt as Date,
             }
-          ); // update imageURL in firestore
-        }
-      });
-
-      // update imageURL in current community recoil state
-      setCommunityStateValue((prev) => ({
-        ...prev,
-        currentCommunity: {
-          ...prev.currentCommunity,
-          imageURL: "",
-        } as Community,
-      })); // update imageURL in recoil state
-
-      // update mySnippet imageURL in recoil state
-      setCommunityStateValue((prev) => ({
-        ...prev,
-        mySnippets: prev.mySnippets.map((snippet) => {
-          if (snippet.communityId === communityId) {
-            return {
-              ...snippet,
-              imageURL: "",
-            };
           }
-          return snippet;
-        }),
-      }));
+        });
+        showToast({ title: "Image Deleted Successfully", status: "success" });
+      } else {
+        throw new Error(data.message);
+      }
     } catch (error) {
-      console.log("Error: onDeleteImage", error);
-      showToast({
-        title: "Image not Deleted",
-        description: "There was an error deleting the image",
-        status: "error",
-      });
+      const errorMessage = (error as Error).message;
+      showToast({ title: "Failed to Update Image", description: errorMessage, status: "error" });
     }
   };
 
@@ -222,24 +159,35 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
    */
   const onUpdateCommunityPrivacyType = async (privacyType: string) => {
     try {
-      await updateDoc(doc(firestore, "communities", communityData.id), {
-        privacyType,
+      const response = await fetch("/api/community/settings", {
+        method: "PATCH",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ communityId: communityData.id, communityType: privacyType }),
       });
-      // update privacyType in current community recoil state
-      setCommunityStateValue((prev) => ({
-        ...prev,
-        currentCommunity: {
-          ...prev.currentCommunity,
-          privacyType: privacyType,
-        } as Community,
-      }));
+      const data = await response.json();
+      if (response.ok) {
+        setCommunityStateValue(prevState => {
+          return {
+            ...prevState,
+            currentCommunity: {
+              ...prevState.currentCommunity,
+              imageURL: data.imageUrl,
+              name: data.name,
+              id: data.id as string, 
+              creatorId: data.creatorId as string,
+              numberOfMembers: data.numberOfMembers as number,
+              privacyType: data.privacyType as 'public' | 'private',
+              createdAt: data.createdAt as Date,
+            }
+          }
+        });
+        showToast({ title: "Privacy Updated Successfully", status: "success" });
+      } else {
+        throw new Error(data.message);
+      }
     } catch (error) {
-      console.log("Error: onUpdateCommunityPrivacyType", error);
-      showToast({
-        title: "Privacy Type not Updated",
-        description: "There was an error updating the community privacy type",
-        status: "error",
-      });
+      const errorMessage = (error as Error).message;
+      showToast({ title: "Failed to Update Image", description: errorMessage, status: "error" });
     }
   };
 
@@ -253,37 +201,24 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
     setSelectedPrivacyType(event.target.value); // set selected privacy type
   };
 
-  /**
-   * Handles applying changes to the community settings.
-   * Changes can be:
-   * - Changing the privacy type
-   * - Changing the community image
-   * - Deleting the community image
-   */
-  const handleSaveButtonClick = () => {
-    // Save privacy type change
-    if (selectedPrivacyType) {
-      onUpdateCommunityPrivacyType(selectedPrivacyType);
-    }
+  const handleSave = () => {
     if (selectedFile) {
       onUpdateImage();
     }
-    if (deleteImage) {
+    if (!selectedFile && communityData.imageURL) {
       onDeleteImage(communityData.id);
     }
-    showToast({
-      title: "Settings Updated",
-      description: "Your settings have been updated",
-      status: "success",
-    });
-    closeModal();
+    if (selectedPrivacyType && selectedPrivacyType !== communityData.privacyType) {
+      onUpdateCommunityPrivacyType(selectedPrivacyType);
+    }
+    handleClose();
   };
 
   /**
    * Closes the modal and resets the state.
    */
   const closeModal = () => {
-    setSelectedFile("");
+    setSelectedFile(null);
     setSelectedPrivacyType("");
     setDeleteImage(false);
     handleClose();
@@ -314,18 +249,18 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
                   {/* community image */}
                   <Flex align="center" justify="center" p={2}>
                     {communityStateValue.currentCommunity?.imageURL ||
-                    selectedFile ? (
-                      <Image
-                        src={
-                          selectedFile ||
-                          communityStateValue.currentCommunity?.imageURL
-                        }
-                        alt="Community Photo"
-                        height="120px"
-                        borderRadius="full"
-                        shadow="md"
-                      />
-                    ) : (
+                      selectedFile ? (
+                        <Image
+                          src={
+                            selectedFile?.toString() ||
+                            communityStateValue.currentCommunity?.imageURL
+                          }
+                          alt="Community Photo"
+                          height="120px"
+                          borderRadius="full"
+                          shadow="md"
+                        />
+                      ) : (
                       <Icon
                         fontSize={120}
                         mr={1}
@@ -389,7 +324,6 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
                         onChange={handlePrivacyTypeChange}
                       >
                         <option value="public">Public</option>
-                        <option value="restricted">Restricted</option>
                         <option value="private">Private</option>
                       </Select>
                     </Stack>
@@ -414,7 +348,7 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
               <Button
                 width="100%"
                 height="30px"
-                onClick={handleSaveButtonClick}
+                onClick={handleSave}
                 flex={1}
               >
                 Save

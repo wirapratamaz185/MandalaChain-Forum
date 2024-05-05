@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import CommunitySettingsModal from "../Modal/CommunitySettings/CommunitySettings";
+import { useAuth } from "@/hooks/useAuth";
 
 /**
  * @param {string} communityName - Name of the community
@@ -115,7 +116,7 @@ const AboutCommunity: React.FC<AboutCommunityProps> = ({ communityData }) => (
       <Text fontWeight={700}>Created</Text>
       <Text>
         {communityData.createdAt &&
-          moment(new Date(communityData.createdAt.seconds * 1000)).format(
+          moment(new Date(communityData * 1000)).format(
             "MMM DD, YYYY"
           )}
       </Text>
@@ -140,10 +141,10 @@ const AdminSectionAbout: React.FC<AdminSectionAboutProps> = ({
 }) => {
   const [isCommunitySettingsModalOpen, setCommunitySettingsModalOpen] =
     useState(false);
-  const [user] = useAuthState(auth);
-  return (
+    const { user } = useAuth();
+    return (
     <>
-      {user?.uid === communityData?.creatorId && (
+      {user?.id === communityData?.creatorId && (
         <>
           <CommunitySettingsModal
             open={isCommunitySettingsModalOpen}

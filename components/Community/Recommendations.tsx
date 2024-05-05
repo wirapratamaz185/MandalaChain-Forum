@@ -1,3 +1,4 @@
+// components/community/Recommendations.tsx
 import { Community } from "@/atoms/communitiesAtom";
 import useCommunityData from "@/hooks/useCommunityData";
 import useCustomToast from "@/hooks/useCustomToast";
@@ -72,40 +73,35 @@ const SuggestedCommunitiesList: React.FC = () => {
   const { communityStateValue, onJoinOrLeaveCommunity } = useCommunityData();
   const [loading, setLoading] = useState(false);
   const [communities, setCommunities] = useState<Community[]>([]);
-  const router = useRouter();
   const showToast = useCustomToast();
-
+  const router = useRouter();
   /**
    * Gets the top 5 communities with the most members.
    */
-  const getCommunityRecommendations = async () => {
-    setLoading(true);
-    try {
-      const communityQuery = query(
-        collection(firestore, "communities"),
-        orderBy("numberOfMembers", "desc"),
-        limit(5)
-      );
-      const communityDocs = await getDocs(communityQuery);
-      const communities = communityDocs.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setCommunities(communities as Community[]);
-    } catch (error) {
-      console.log("Error: getCommunityRecommendations", error);
-      showToast({
-        title: "Recommendations not Loaded",
-        description: "There was an error loading recommendations",
-        status: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    getCommunityRecommendations();
+    const fetchCommunities = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/community/get?limit=5", {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Could not fetch communities.");
+        setCommunities(data.data.communities);
+      } catch (error) {
+        const errMessage = (error as Error).message;
+        showToast({
+          title: 'Please log in to view this community',
+          status: "error"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCommunities();
   }, []);
   return (
     <Flex direction="column" mb={0}>
@@ -165,7 +161,7 @@ const SuggestedCommunitiesList: React.FC = () => {
                           textOverflow: "ellipsis",
                         }}
                       >
-                        {`${item.id}`}
+                        {`${item.name}`}
                       </span>
                     </Flex>
                   </Flex>
@@ -177,7 +173,7 @@ const SuggestedCommunitiesList: React.FC = () => {
                       variant={isJoined ? "outline" : "solid"}
                       onClick={(event) => {
                         event.preventDefault();
-                        onJoinOrLeaveCommunity(item, isJoined);
+                        onJoinOrLeaveCommunity(item.id, isJoined);
                       }}
                     >
                       {isJoined ? "Unsubscribe" : "Subscribe"}

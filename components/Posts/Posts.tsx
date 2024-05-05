@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+// components/Posts/Posts.tsx
 import { Community } from "@/atoms/communitiesAtom";
 import { Post } from "@/atoms/postsAtom";
 import usePosts from "@/hooks/usePosts";
@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import PostItem from "./PostItem";
 import PostLoader from "../Loaders/PostLoader";
 import useCustomToast from "@/hooks/useCustomToast";
+import { useAuth } from "@/hooks/useAuth";
 
 type PostsProps = {
   communityData: Community;
@@ -14,7 +15,7 @@ type PostsProps = {
 
 
 const Posts: React.FC<PostsProps> = ({ communityData }) => {
-  const [user] = useAuthState(auth);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const {
     postStateValue,
@@ -25,27 +26,34 @@ const Posts: React.FC<PostsProps> = ({ communityData }) => {
   } = usePosts();
   const showToast = useCustomToast();
 
+  // check utlitity function to get all posts in the community
+  const isValidCommunityId = () => communityData && communityData.id;
+
   /**
    * Gets all posts in the community.
    *
    * @returns {Promise<void>} - void
    */
   const getPosts = async () => {
+    if (!isValidCommunityId()) {
+      console.error("Posts Component Error: Community ID not available");
+      return; // Early exit if id is not available
+    }
     try {
       setLoading(true);
-      const postsQuery = query(
-        collection(firestore, "posts"),
-        where("communityId", "==", communityData.id),
-        orderBy("createTime", "desc")
-      ); // get all posts in community with certain requirements
-      const postDocs = await getDocs(postsQuery); // get all posts in community
-      const posts = postDocs.docs.map((doc) => ({ id: doc.id, ...doc.data() })); // get all posts in community
+      const response = await fetch(`/api/posts/get?communityId=${communityData.id}`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message);
+      }
+
       setPostStateValue((prev) => ({
         ...prev,
-        posts: posts as Post[],
-      })); // set posts in state
+        posts: result.posts,
+      }));
     } catch (error: any) {
-      console.log("Error: getPosts", error.message);
+      console.error("Error: getPosts", error.message);
       showToast({
         title: "Posts not Loaded",
         description: "There was an error loading posts",
@@ -54,14 +62,16 @@ const Posts: React.FC<PostsProps> = ({ communityData }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   /**
    * Gets all votes in the community when component mounts (page loads).
    */
   useEffect(() => {
-    getPosts();
-  }, [communityData]);
+    if (isValidCommunityId()) {
+      getPosts();
+    }
+  }, [communityData.id]);
 
   return (
     <>
@@ -76,12 +86,11 @@ const Posts: React.FC<PostsProps> = ({ communityData }) => {
             <PostItem
               key={item.id}
               post={item}
-              userIsCreator={user?.uid === item.creatorId}
+              userIsCreator={user?.id === item.creatorId}
               userVoteValue={
-                postStateValue.postVotes.find((vote) => vote.postId === item.id)
-                  ?.voteValue
+                postStateValue.postVotes.find((vote) => vote.postId === item.id)?.voteValue
               }
-              onVote={onVote}
+              onVote={(e) => onVote(e, item, item.voteStatus, communityData.id)}
               onSelectPost={onSelectPost}
               onDeletePost={onDeletePost}
             />

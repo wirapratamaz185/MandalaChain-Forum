@@ -1,28 +1,34 @@
+// components/Navbar/RightContent/AuthButtons.tsx
 import { authModalState } from "@/atoms/authModalAtom";
 import { Button } from "@chakra-ui/react";
 import React from "react";
 import { useSetRecoilState } from "recoil";
 
-/**
- * Displays 2 authentication buttons which open the authentication modal when clicked:
- *  - `Log In`: opens the log in modal
- *  - `Sign Up`: opens the sign up modal
- * @returns {React.FC} - Authentication buttons (log in and sign up)
- */
 const AuthButtons: React.FC = () => {
-  const setAuthModalState = useSetRecoilState(authModalState); // Set global state
+  const setAuthModalState = useSetRecoilState(authModalState);
   return (
     <>
       <Button
         variant="outline"
         height="28px"
-        display={{ base: "none", md: "flex" }} // on mobile, this button is not displayed
-        width={{ base: "70px", md: "110px" }} // on mobile the width is 70px, on desktop 110px
+        display={{ base: "none", md: "flex" }}
+        width={{ base: "70px", md: "110px" }}
         mr={2}
         ml={2}
-        onClick={() => setAuthModalState({ open: true, view: "login" })} // When clicked execute this function, the modal is opened in the log in view
+        onClick={() => setAuthModalState({ open: true, view: "login" })}
       >
         Log In
+      </Button>
+      <Button
+        variant="outline"
+        height="28px"
+        display={{ base: "none", md: "flex" }}
+        width={{ base: "70px", md: "110px" }}
+        mr={2}
+        ml={2}
+        onClick={() => setAuthModalState({ open: true, view: "signup" })}
+      >
+        Sign Up
       </Button>
     </>
   );

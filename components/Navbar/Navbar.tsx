@@ -1,21 +1,16 @@
+// components/Navbar/Navbar.tsx:
 import { defaultMenuItem } from "@/atoms/directoryMenuAtom";
 import useDirectory from "@/hooks/useDirectory";
 import { Flex, Image, Text } from "@chakra-ui/react";
 import React from "react";
-import { useSession } from 'next-auth/react'; // Import useSession from next-auth/react
+import { useAuth } from "@/hooks/useAuth";
 import Directory from "./Directory/Directory";
 import RightContent from "./RightContent/RightContent";
-import SearchInput from "./SearchInput";
+// import SearchInput from "./SearchInput";
 
 const Navbar: React.FC = () => {
-  const { data: session, status } = useSession(); // Use useSession to get the session and status
   const { onSelectMenuItem } = useDirectory();
-
-  // You can use session data to determine if the user is logged in
-  const user = session?.user;
-
-  // You can also use the status to show loading indicators
-  const loading = status === 'loading';
+  const { user } = useAuth();
 
   return (
     <Flex
@@ -43,7 +38,7 @@ const Navbar: React.FC = () => {
         <Text ml={2}>Mandala Chain</Text>
       </Flex>
       {user && <Directory />}
-      <SearchInput />
+      {/* <SearchInput /> */}
       <RightContent user={user} />
     </Flex>
   );

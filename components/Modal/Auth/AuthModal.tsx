@@ -1,4 +1,4 @@
-import { authModalState } from "@/atoms/authModalAtom";
+import { useState, useEffect } from 'react';
 import {
   Divider,
   Flex,
@@ -6,80 +6,64 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalOverlay,
   ModalHeader,
-  Text,
+  ModalOverlay,
 } from "@chakra-ui/react";
-import React, { useEffect } from "react";
-import { useRecoilState } from "recoil";
-import { useSession } from 'next-auth/react';
+import AuthInputs from "./AuthInput";
 import OAuthButtons from "./OAuthButtons";
+import ResetPassword from "./ResetPassword";
 
 const AuthModal: React.FC = () => {
-  const [modalState, setModalState] = useRecoilState(authModalState);
-  const { data: session, status } = useSession();
-
-  useEffect(() => {
-    if (session) handleClose();
-  }, [session]);
+  const [authMode, setAuthMode] = useState('login');
 
   const handleClose = () => {
-    setModalState((prev) => ({
-      ...prev,
-      open: false,
-    }));
+    setAuthMode('');8
   };
 
-  const getTitle = () => {
-    switch (modalState.view) {
-      case 'login':
-        return 'Log In';
-      case 'signup':
-        return 'Sign Up';
-      case 'resetPassword':
-        return 'Reset Password';
-      default:
-        return '';
-    }
+  const switchMode = (mode: string) => {
+    setAuthMode(mode);
   };
 
   return (
-    <>
-      <Modal isOpen={modalState.open} onClose={handleClose}>
-        <ModalOverlay
-          bg="rgba(0, 0, 0, 0.4)"
-          backdropFilter="auto"
-          backdropBlur="5px"
-        />
-        <ModalContent borderRadius={10}>
-          <ModalHeader>{getTitle()}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            pb={6}
+    <Modal isOpen={authMode !== ''} onClose={handleClose}>
+      <ModalOverlay
+        bg="rgba(0, 0, 0, 0.4)"
+        backdropFilter="auto"
+        backdropBlur="5px"
+      />
+      <ModalContent borderRadius={10}>
+        <ModalHeader textAlign="center">
+          {authMode === "login" && "Login"}
+          {authMode === "signup" && "Sign Up"}
+          {authMode === "resetPassword" && "Reset Password"}
+        </ModalHeader>
+        <ModalCloseButton />
+        <ModalBody
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          pb={6}
+        >
+          <Flex
+            direction="column"
+            align="center"
+            justify="center"
+            width="75%"
           >
-            <Flex
-              direction="column"
-              align="center"
-              justify="center"
-              width="75%"
-            >
-              {modalState.view === "login" || modalState.view === "signup" ? (
-                <>
-                  <OAuthButtons />
-                  <Divider my={4} />
-                  {/* Here you would include your AuthInputs component for login/signup forms */}
-                </>
-              ) : null}
-              {/* Here you would include your ResetPassword component if modalState.view === 'resetPassword' */}
-            </Flex>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </>
+            {authMode === "login" || authMode === "signup" ? (
+              <>
+                <OAuthButtons />
+                <Divider />
+                <AuthInputs/>
+              </>
+            ) : (
+              <ResetPassword />
+            )}
+          </Flex>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
 };
 

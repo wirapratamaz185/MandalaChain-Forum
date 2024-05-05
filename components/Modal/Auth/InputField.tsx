@@ -1,3 +1,4 @@
+// modal/auth/InputField.tsx
 import { Input } from "@chakra-ui/react";
 
 /**
@@ -10,6 +11,7 @@ interface InputFieldProps {
   name: string;
   placeholder: string;
   type: string;
+  value: string;
   onChange: React.ChangeEventHandler<HTMLInputElement>;
 }
 
@@ -26,6 +28,7 @@ const InputField: React.FC<InputFieldProps> = ({
   name,
   placeholder,
   type,
+  value,
   onChange,
 }) => {
   return (
@@ -34,6 +37,7 @@ const InputField: React.FC<InputFieldProps> = ({
       name={name}
       placeholder={placeholder}
       type={type}
+      value={value}
       mb={2}
       onChange={onChange}
       fontSize="10pt"

@@ -1,3 +1,4 @@
+// components/Modal/CreateCommunity/CreateCommunityModal.tsx
 import useCustomToast from "@/hooks/useCustomToast";
 import {
   Box,
@@ -36,12 +37,6 @@ const COMMUNITY_TYPE_OPTIONS = [
     description: "Everyone can view and post",
   },
   {
-    name: "restricted",
-    icon: BsFillEyeFill,
-    label: "Restricted",
-    description: "Everyone can view but only subscribers can post",
-  },
-  {
     name: "private",
     icon: HiLockClosed,
     label: "Private",
@@ -64,8 +59,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
   open,
   handleClose,
 }) => {
-  const [user] = useAuthState(auth);
-  const communityNameLengthLimit = 25; // community names are 25 characters long
+  const communityNameLengthLimit = 25;
   const [communityName, setCommunityName] = useState("");
   const [charRemaining, setCharRemaining] = useState(communityNameLengthLimit);
   const [communityType, setCommunityType] = useState("public");
@@ -87,16 +81,16 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
   };
 
   const handleCreateCommunity = async () => {
+    const apiCommunityType = communityType.toUpperCase();
     if (error) setError("");
-    // prevents community from being created if it has special characters
-    const format: RegExp = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-    if (format.test(communityName)) {
-      setError("Community name can only contain letters and numbers");
+    // prevents community from being created if its too short
+    if (communityName.trim().length < 3) {
+      setError("Community name must be at least 3 characters long");
       return;
     }
-    // prevents community from being created if its too short
-    if (communityName.length < 3) {
-      setError("Community name must be at least 3 characters long");
+    // prevents community from being created if it has special characters
+    if (/[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(communityName)) {
+      setError("Community name can only contain letters and numbers");
       return;
     }
 
@@ -110,10 +104,10 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
         },
         body: JSON.stringify({
           name: communityName,
-          communityType: communityType,
+          communityType: apiCommunityType,
         }),
       });
-      console.log("Response:", response);
+      
 
       if (!response.ok) {
         console.log("help");
@@ -122,8 +116,12 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
 
       const data = await response.json();
 
-      console.log(data);
-
+      console.log("=====================================")
+      console.log("Response:", response);
+      console.log("=====================================")
+      console.log("Data:", data);
+      console.log("=====================================")
+      
       if (typeof data === 'object' && data !== null) {
         router.push(`/community/${data.id as any}`);
         showToast({
@@ -138,7 +136,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
       console.error("Error creating community", error);
       console.log("================================================")
       showToast({
-        title: "Something went wrong",
+        title: "Error creating community",
         status: "error",
       });
     } finally {

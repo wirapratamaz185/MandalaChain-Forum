@@ -1,6 +1,7 @@
 import { authModalState } from "@/atoms/authModalAtom";
 import CustomMenuButton from "@/components/atoms/CustomMenuButton";
 import ProfileModal from "@/components/Modal/Profile/ProfileModal";
+// import { auth } from "@/firebase/clientApp";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
   Flex,
@@ -12,6 +13,7 @@ import {
   Text,
   Image,
 } from "@chakra-ui/react";
+import { signOut, User } from "firebase/auth";
 import React, { useState } from "react";
 import { CgProfile } from "react-icons/cg";
 import { MdAccountCircle, MdOutlineLogin } from "react-icons/md";
@@ -221,10 +223,16 @@ const UserMenuList: React.FC<UserMenuListProps> = ({
                 onClick={logout}
               />
             </>
-            ) : (
-              <></>
-            )}
-          </Stack>
+          ) : (
+            <>
+              <CustomMenuButton
+                icon={<MdOutlineLogin />}
+                text="Log In / Sign Up"
+                onClick={() => setAuthModalState({ open: true, view: "login" })}
+              />
+            </>
+          )}
+        </Stack>
       </Flex>
     </MenuList>
   );
