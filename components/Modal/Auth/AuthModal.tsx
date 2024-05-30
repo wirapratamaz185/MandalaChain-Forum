@@ -48,7 +48,7 @@ const AuthModal: React.FC = () => {
             direction="column"
             align="center"
             justify="center"
-            width="75%"
+            width="110%"
           >
             {authMode === "login" && (
               <>

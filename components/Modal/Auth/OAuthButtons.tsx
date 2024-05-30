@@ -7,7 +7,7 @@ const OAuthButtons: React.FC = () => {
 
   return (
     <Box width="100%">
-      <Stack direction="row" spacing={10} width="100%" mb={1} mt={2}>
+      <Stack direction="row" spacing={10} width="500%" mb={1} mt={2}>
         <Button
           leftIcon={<FaGoogle />}
           backgroundColor={buttonBg} 
