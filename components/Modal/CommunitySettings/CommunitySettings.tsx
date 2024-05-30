@@ -24,37 +24,12 @@ import React, { useRef, useState } from "react";
 import { BsFillPeopleFill } from "react-icons/bs";
 import { useRecoilState } from "recoil";
 
-/**
- * @param {boolean} open - boolean to determine if the modal is open or not
- * @param {function} handleClose - function to close the modal
- * @param {Community} communityData - data required to be displayed
- */
 type CommunitySettingsModalProps = {
   open: boolean;
   handleClose: () => void;
   communityData: Community;
 };
 
-type CommunityProps = {
-  imageURL?: string | null;
-  name: string;
-  id: string;
-  creatorId: string;
-  numberOfMembers: number;
-  privacyType: 'public' | 'private';
-  createdAt: Date;
-};
-
-/**
- * Allows the admin to change the settings of the community.
- * The following settings can be changed:
- *  - Community image
- *  - Visibility of the community
- * @param {open} - boolean to determine if the modal is open or not
- * @param {handleClose} - function to close the modal
- * @param {communityData} - data required to be displayed
- * @returns {React.FC<CommunitySettingsModalProps>} - CommunitySettingsModal component
- */
 const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
   open,
   handleClose,
@@ -64,6 +39,11 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
     300,
     300
   );
+  // debug data structure 
+  const data: any = communityData;
+  const correctData: Community = data.data;
+  // console.log("Fix Data", correctData);
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const selectFileRef = useRef<HTMLInputElement>(null);
   const [communityStateValue, setCommunityStateValue] =
@@ -72,18 +52,18 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
   const [deleteImage, setDeleteImage] = useState(false);
   const showToast = useCustomToast();
 
-  /**
-   * Allows admin to change the image of the community.
+  /** 
+   * Allows admin to change the image of the community. 
    */
   const onUpdateImage = async () => {
     if (!selectedFile) {
-      // if no file is selected, do nothing
+      // if no file is selected, do nothing 
       return;
     }
-    setUploadingImage(true); // set uploading image to true
-    const formData = new FormData(); // create form data
-    formData.append("image", selectedFile); // append the selected file to the form data
-    formData.append("communityId", communityData.id); // append the community id to the form data
+    setUploadingImage(true); // set uploading image to true 
+    const formData = new FormData(); // create form data 
+    formData.append("image", selectedFile); // append the selected file to the form data 
+    formData.append("communityId", correctData.id); // append the community id to the form data 
 
     try {
       const response = await fetch("/api/community/logo", {
@@ -91,21 +71,22 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
         body: formData,
       });
       const data = await response.json();
-      setCommunityStateValue(prevState => {
-        return {
-          ...prevState,
-          currentCommunity: {
-            ...prevState.currentCommunity,
-            imageURL: data.imageUrl,
-            name: data.name,
-            id: data.id as string, 
-            creatorId: data.creatorId as string,
-            numberOfMembers: data.numberOfMembers as number,
-            privacyType: data.privacyType as 'public' | 'private',
-            createdAt: data.createdAt as Date,
-          }
-        }
-      });
+      console.log("Data Community Setting", data);
+      // setCommunityStateValue(prevState => {
+      //   return {
+      //     ...prevState,
+      //     currentCommunity: {
+      //       ...prevState.currentCommunity,
+      //       imageURL: correctData.imageURL,
+      //       name: correctData.name,
+      //       id: correctData.id as string,
+      //       creatorId: correctData.owner_id ?? "",
+      //       numberOfMembers: correctData.subscribers.length as number,
+      //       privacyType: correctData.community_type.type as 'public' | 'private',
+      //       createdAt: correctData.created_at as Date,
+      //     }
+      //   }
+      // });
     } catch (error) {
       const errorMessage = (error as Error).message;
       showToast({ title: "Failed to Update Image", description: errorMessage, status: "error" });
@@ -115,9 +96,9 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
     }
   };
 
-  /**
-   * Deletes the image of the community.
-   * @param {string} communityId - id of the community
+  /** 
+   * Deletes the image of the community. 
+   * @param {string} communityId - id of the community 
    */
   const onDeleteImage = async (communityId: string) => {
     try {
@@ -126,21 +107,21 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
       });
       const data = await response.json();
       if (response.ok) {
-        setCommunityStateValue(prevState => {
-          return {
-            ...prevState,
-            currentCommunity: {
-              ...prevState.currentCommunity,
-              imageURL: data.imageUrl,
-              name: data.name,
-              id: data.id as string, 
-              creatorId: data.creatorId as string,
-              numberOfMembers: data.numberOfMembers as number,
-              privacyType: data.privacyType as 'public' | 'private',
-              createdAt: data.createdAt as Date,
-            }
-          }
-        });
+        // setCommunityStateValue(prevState => {
+        //   return {
+        //     ...prevState,
+        //     currentCommunity: {
+        //       ...prevState.currentCommunity,
+        //       imageURL: correctData.imageURL,
+        //       name: correctData.name,
+        //       id: correctData.id as string,
+        //       creatorId: correctData.owner_id ?? "", // Ensure owner_id is a string
+        //       numberOfMembers: correctData.subscribers.length as number,
+        //       privacyType: correctData.community_type.type as 'public' | 'private',
+        //       createdAt: correctData.created_at as Date,
+        //     }
+        //   }
+        // });
         showToast({ title: "Image Deleted Successfully", status: "success" });
       } else {
         throw new Error(data.message);
@@ -153,52 +134,41 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
 
   const [selectedPrivacyType, setSelectedPrivacyType] = useState("");
 
-  /**
-   * Changes the privacy type of the current community.
-   * @param {string} privacyType - privacy type to be changed to
+  /** 
+   * Changes the privacy type of the current community. 
+   * @param {string} privacyType - privacy type to be changed to 
    */
   const onUpdateCommunityPrivacyType = async (privacyType: string) => {
     try {
-      const response = await fetch("/api/community/settings", {
+      const response = await fetch(`/api/community/settings?communityId=${correctData.id}`, {
         method: "PATCH",
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ communityId: communityData.id, communityType: privacyType }),
+        body: JSON.stringify({ communityType: privacyType }),
       });
       const data = await response.json();
       if (response.ok) {
-        setCommunityStateValue(prevState => {
-          return {
-            ...prevState,
-            currentCommunity: {
-              ...prevState.currentCommunity,
-              imageURL: data.imageUrl,
-              name: data.name,
-              id: data.id as string, 
-              creatorId: data.creatorId as string,
-              numberOfMembers: data.numberOfMembers as number,
-              privacyType: data.privacyType as 'public' | 'private',
-              createdAt: data.createdAt as Date,
-            }
-          }
-        });
         showToast({ title: "Privacy Updated Successfully", status: "success" });
       } else {
-        throw new Error(data.message);
+        if (data.data === "You are not authorized to change the visibility of this community") {
+          showToast({ title: "Authorization Error", description: data.data, status: "error" });
+        } else {
+          throw new Error(data.message);
+        }
       }
     } catch (error) {
       const errorMessage = (error as Error).message;
-      showToast({ title: "Failed to Update Image", description: errorMessage, status: "error" });
+      showToast({ title: "Failed to Update Community Type", description: errorMessage, status: "error" });
     }
   };
 
-  /**
-   * Handles changes to the privacy type select input.
-   * @param {React.ChangeEvent<HTMLInputElement>} event - event when user selects a file
+  /** 
+   * Handles changes to the privacy type select input. 
+   * @param {React.ChangeEvent<HTMLInputElement>} event - event when user selects a file 
    */
   const handlePrivacyTypeChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setSelectedPrivacyType(event.target.value); // set selected privacy type
+    setSelectedPrivacyType(event.target.value); // set selected privacy type 
   };
 
   const handleSave = () => {
@@ -208,14 +178,14 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
     if (!selectedFile && communityData.imageURL) {
       onDeleteImage(communityData.id);
     }
-    if (selectedPrivacyType && selectedPrivacyType !== communityData.privacyType) {
+    if (selectedPrivacyType && selectedPrivacyType !== correctData.community_type.type) {
       onUpdateCommunityPrivacyType(selectedPrivacyType);
     }
     handleClose();
   };
 
-  /**
-   * Closes the modal and resets the state.
+  /** 
+   * Closes the modal and resets the state. 
    */
   const closeModal = () => {
     setSelectedFile(null);
@@ -248,19 +218,19 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
                 <Stack fontSize="10pt" spacing={2} p={5}>
                   {/* community image */}
                   <Flex align="center" justify="center" p={2}>
-                    {communityStateValue.currentCommunity?.imageURL ||
+                    {correctData.imageURL ||
                       selectedFile ? (
-                        <Image
-                          src={
-                            selectedFile?.toString() ||
-                            communityStateValue.currentCommunity?.imageURL
-                          }
-                          alt="Community Photo"
-                          height="120px"
-                          borderRadius="full"
-                          shadow="md"
-                        />
-                      ) : (
+                      <Image
+                        src={
+                          selectedFile?.toString() ||
+                          correctData.imageURL
+                        }
+                        alt="Community Photo"
+                        height="120px"
+                        borderRadius="full"
+                        shadow="md"
+                      />
+                    ) : (
                       <Icon
                         fontSize={120}
                         mr={1}
@@ -281,7 +251,7 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
                       height={34}
                       onClick={() => selectFileRef.current?.click()}
                     >
-                      {communityStateValue.currentCommunity?.imageURL
+                      {correctData.imageURL
                         ? "Change Image"
                         : "Add Image"}
                     </Button>
@@ -293,7 +263,7 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
                       ref={selectFileRef}
                       onChange={onSelectFile}
                     />
-                    {communityStateValue.currentCommunity?.imageURL && (
+                    {correctData.imageURL && (
                       <Button
                         flex={1}
                         height={34}
@@ -315,7 +285,7 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
                         Community Type
                       </Text>
                       <Text fontWeight={500} fontSize="10pt" color="gray.500">
-                        {`Currently ${communityStateValue.currentCommunity?.privacyType}`}
+                        {`Currently ${correctData.community_type.type ?? ''}`}
                       </Text>
 
                       <Select

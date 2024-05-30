@@ -17,7 +17,7 @@ const AuthModal: React.FC = () => {
   const [authMode, setAuthMode] = useState('login');
 
   const handleClose = () => {
-    setAuthMode('');8
+    setAuthMode('');
   };
 
   const switchMode = (mode: string) => {
@@ -33,9 +33,8 @@ const AuthModal: React.FC = () => {
       />
       <ModalContent borderRadius={10}>
         <ModalHeader textAlign="center">
-          {authMode === "login" && "Login"}
           {authMode === "signup" && "Sign Up"}
-          {authMode === "resetPassword" && "Reset Password"}
+          {authMode === "login" && "Login"}
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody
@@ -51,13 +50,19 @@ const AuthModal: React.FC = () => {
             justify="center"
             width="75%"
           >
-            {authMode === "login" || authMode === "signup" ? (
+            {authMode === "login" && (
               <>
                 <OAuthButtons />
                 <Divider />
-                <AuthInputs/>
+                <AuthInputs />
               </>
-            ) : (
+            )}
+            {authMode === "signup" && (
+              <>
+                <AuthInputs />
+              </>
+            )}
+            {authMode === "resetPassword" && (
               <ResetPassword />
             )}
           </Flex>

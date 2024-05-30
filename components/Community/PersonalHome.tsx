@@ -49,16 +49,17 @@ const PersonalHome: React.FC = () => {
             <Text fontWeight={600}>Home</Text>
           </Flex>
           <Stack spacing={3}>
-            <Text fontSize="9pt">
+            <Text fontSize="12pt">
               Home page personalized based on your subscribed communities.
             </Text>
-            <Button height="30px" onClick={onClick}>
+            {/* <Button height="30px" onClick={onClick}>
               Create Post
-            </Button>
+            </Button> */}
             <Button
               variant="outline"
               height="30px"
               onClick={() => setOpen(true)}
+              _hover={{ bg: "blue.500", color: "white" }}
             >
               Create Community
             </Button>

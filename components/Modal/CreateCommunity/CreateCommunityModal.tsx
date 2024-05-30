@@ -89,8 +89,8 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
       return;
     }
     // prevents community from being created if it has special characters
-    if (/[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(communityName)) {
-      setError("Community name can only contain letters and numbers");
+    if (/[^a-zA-Z0-9 ]/.test(communityName)) {
+      setError("Community name can only contain letters, numbers, and spaces");
       return;
     }
 
@@ -107,7 +107,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
           communityType: apiCommunityType,
         }),
       });
-      
+
 
       if (!response.ok) {
         console.log("help");
@@ -121,7 +121,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
       console.log("=====================================")
       console.log("Data:", data);
       console.log("=====================================")
-      
+
       if (typeof data === 'object' && data !== null) {
         router.push(`/community/${data.id as any}`);
         showToast({
@@ -200,6 +200,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                 width="100%"
                 onClick={handleCreateCommunity}
                 isLoading={loading}
+                _hover={{ bg: "blue.500", color: "white" }}
               >
                 Create Community
               </Button>

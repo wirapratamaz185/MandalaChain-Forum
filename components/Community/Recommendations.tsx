@@ -18,15 +18,6 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { IoPeopleCircleOutline } from "react-icons/io5";
 
-/**
- * Displays the top 5 communities with the most members.
- * For each community, displays the community name, number of members, and a button to join or leave the community.
- * Displays a button to view all communities.
- * @returns {React.FC} - Recommendations component
- *
- * @requires SuggestionsHeader - Displays the header for the Recommendations component.
- * @requires SuggestedCommunitiesList - Displays the top 5 communities with the most members.
- */
 const Recommendations: React.FC = () => {
   return (
     <Flex
@@ -71,6 +62,7 @@ const SuggestionsHeader: React.FC = () => {
  */
 const SuggestedCommunitiesList: React.FC = () => {
   const { communityStateValue, onJoinOrLeaveCommunity } = useCommunityData();
+  // console.log("Community State Value:", communityStateValue)
   const [loading, setLoading] = useState(false);
   const [communities, setCommunities] = useState<Community[]>([]);
   const showToast = useCustomToast();
@@ -93,16 +85,19 @@ const SuggestedCommunitiesList: React.FC = () => {
         setCommunities(data.data.communities);
       } catch (error) {
         const errMessage = (error as Error).message;
-        showToast({
-          title: 'Please log in to view this community',
-          status: "error"
-        });
+        // showToast({
+        //   title: 'Please log in to view this community',
+        //   status: "error"
+        // });
       } finally {
         setLoading(false);
       }
     };
     fetchCommunities();
   }, []);
+
+  // console.log("My Snippets:", communityStateValue.mySnippets);
+
   return (
     <Flex direction="column" mb={0}>
       {loading ? (
@@ -120,8 +115,9 @@ const SuggestedCommunitiesList: React.FC = () => {
         <>
           {communities.map((item, index) => {
             const isJoined = !!communityStateValue.mySnippets.find(
-              (snippet) => snippet.communityId === item.id
+              (snippet: { communityId: string; }) => snippet.communityId === item.id
             );
+            // console.log(`Community: ${item.name}, isJoined: ${isJoined}`);
             return (
               <Link key={item.id} href={`/community/${item.id}`}>
                 <Flex
@@ -192,6 +188,7 @@ const SuggestedCommunitiesList: React.FC = () => {
           onClick={() => {
             router.push(`/communities`);
           }}
+          _hover={{ bg: "blue.500", color: "white" }}
         >
           View All
         </Button>

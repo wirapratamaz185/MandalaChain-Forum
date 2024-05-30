@@ -8,6 +8,7 @@ import { FiSettings } from "react-icons/fi";
 import IconItem from "../atoms/Icon";
 import CommunitySettingsModal from "../Modal/CommunitySettings/CommunitySettings";
 import { useAuth } from '@/hooks/useAuth';
+import { HiArrowCircleUp } from "react-icons/hi";
 
 /**
  * @param {communityData} - data requiblue to be displayed
@@ -24,15 +25,22 @@ const Header: React.FC<HeaderProps> = ({ communityData }) => {
     (item) => item.communityId === communityData.id
   );
 
+  const { user } = useAuth();
+  const router = useRouter();
+
+  // debug data structure
+  const data: any = communityData;
+  const correctData: Community = data.data;
+  // console.log("Debug data", correctData);
+
   const onJoinOrLeaveCommunity = async () => {
     if (isJoined) {
-      await leaveCommunity(communityData.id);
+      await leaveCommunity(correctData.id);
     } else {
-      await joinCommunity(communityData.id);
+      await joinCommunity(correctData.id);
     }
   }
 
-  const { user } = useAuth();
   return (
     <Flex direction="column" width="100%" height="120px">
       <Box height="30%" bg="blue.500" />
@@ -40,10 +48,10 @@ const Header: React.FC<HeaderProps> = ({ communityData }) => {
         <Flex width="95%" maxWidth="1200px" align="center">
           {/* using state instead of fetching from db as no refresh of the page is requiblue */}
           <CommunityIcon
-            imageURL={communityStateValue.currentCommunity?.imageURL}
+            imageURL={correctData.imageURL}
           />
           <Flex padding="10px 16px" width="100%">
-            <CommunityName id={communityData.id} name={""} password={""} />
+            <CommunityName name={correctData.name}/>
             <Flex direction="row" flexGrow={1} align="end" justify="end">
               <CommunitySettings communityData={communityData} />
               <JoinOrLeaveButton
@@ -66,13 +74,6 @@ type CommunityIconProps = {
   imageURL?: string;
 };
 
-/**
- * Displays the community icon on the community header.
- * If the community icon is not available, then a default icon is displayed.
- * If the community icon is available, then the community icon is displayed.
- * @param {string} imageURL - URL of the community icon
- * @returns React.FC: Community icon component
- */
 const CommunityIcon = ({ imageURL }: CommunityIconProps) => {
   return imageURL ? (
     // if the community icon is available, then display the community icon
@@ -81,23 +82,21 @@ const CommunityIcon = ({ imageURL }: CommunityIconProps) => {
       borderRadius="full"
       boxSize="66px"
       alt="Community icons"
-      color="blue.500"
+      color="red.500"
       border="3px solid white"
       shadow="md"
     />
   ) : (
-    // if the community icon is not available, then display the default icon
-    <Flex
+    // if the community icon is not available, then display a default icon
+    <Icon
+      as={HiArrowCircleUp}
+      fontSize={64}
+      color="blue.500"
+      border="3px solid white"
       borderRadius="full"
-      boxSize="66px"
-      bg="blue.500"
-      color="white"
-      align="center"
-      justify="center"
+      bg="white"
       shadow="md"
-    >
-      <Icon as={FiSettings} fontSize="30px" />
-    </Flex>
+    />
   );
 };
 
@@ -105,21 +104,14 @@ const CommunityIcon = ({ imageURL }: CommunityIconProps) => {
  * @param {string} id - id of the community
  */
 type CommunityNameProps = {
-  id: string;
   name: string;
-  password: string;
 };
 
-/**
- * Displays the name of the community on the community header.
- * @param {string} id - id of the community
- * @returns {React.FC<CommunityNameProps>} - displays the name of the community
- */
-const CommunityName: React.FC<CommunityNameProps> = ({ id }) => {
+const CommunityName: React.FC<CommunityNameProps> = ({ name }) => {
   return (
     <Flex direction="column" mr={6}>
-      <Text fontWeight={800} fontSize="16pt">
-        {id}
+      <Text fontWeight={600} fontSize="16pt">
+        {name}
       </Text>
     </Flex>
   );
@@ -133,11 +125,6 @@ type JoinOrLeaveButtonProps = {
   onClick: () => void;
 };
 
-/**
- * Button to subscribe or unsubscribe to the community.
- * @param {boolean} isJoined - true if the user is already subscribed to the community
- * @returns
- */
 export const JoinOrLeaveButton: React.FC<JoinOrLeaveButtonProps> = ({
   isJoined,
   onClick,
@@ -170,9 +157,14 @@ export const CommunitySettings: React.FC<CommunitySettingsProps> = ({
   const [isCommunitySettingsModalOpen, setCommunitySettingsModalOpen] =
     useState(false);
 
+  // debug data structure
+  // const data: any = communityData;
+  // const correctData: Community = data.data;
+  // console.log("Debug data", correctData);
+
   return (
     <>
-      {user?.id === communityData.creatorId && (
+      {user?.id === communityData.owner_id && (
         <>
           <CommunitySettingsModal
             open={isCommunitySettingsModalOpen}

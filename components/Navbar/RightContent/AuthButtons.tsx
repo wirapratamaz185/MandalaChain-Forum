@@ -16,6 +16,7 @@ const AuthButtons: React.FC = () => {
         mr={2}
         ml={2}
         onClick={() => setAuthModalState({ open: true, view: "login" })}
+        _hover={{ bg: "blue.500", color: "white" }}
       >
         Log In
       </Button>
@@ -27,6 +28,7 @@ const AuthButtons: React.FC = () => {
         mr={2}
         ml={2}
         onClick={() => setAuthModalState({ open: true, view: "signup" })}
+        _hover={{ bg: "blue.500", color: "white" }}
       >
         Sign Up
       </Button>

@@ -1,12 +1,14 @@
+// components/Posts/Comments/CommentInput.tsx
 import ProfileModal from "@/components/Modal/Profile/ProfileModal";
 import AuthButtons from "@/components/Navbar/RightContent/AuthButtons";
 import { Flex, Textarea, Button, Text, Stack } from "@chakra-ui/react";
-import React, { useState } from "react";
+import { Cookie } from "express-session";
+import React, { useEffect, useState } from "react";
+// import { useAuth } from "@/hooks/useAuth";
 
 type CommentInputProps = {
   commentText: string;
   setCommentText: (value: string) => void;
-  user?: User | null;
   createLoading: boolean;
   onCreateComment: (commentText: string) => void;
 };
@@ -14,19 +16,57 @@ type CommentInputProps = {
 const CommentInput: React.FC<CommentInputProps> = ({
   commentText,
   setCommentText,
-  user,
   createLoading,
   onCreateComment,
 }) => {
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
+  const [user, setUser] = useState<{ email: string } | null>(null);
+  // const { user } = useAuth();
+  // console.log("Logging User", user);
+
+  const fetchUserFromStorage = () => {
+    const userCookie = localStorage.getItem("access_token");
+    // console.log("Access Token for Comment", userCookie)
+
+    if (userCookie) {
+      try {
+        // const parsedUser = JSON.parse(userCookie);
+        // decode the JWT token to get payload
+        const base64Url = userCookie.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map(function (c) {
+              return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join("")
+        );
+        const parsedUser = JSON.parse(jsonPayload);
+        // console.log("Parsed User", parsedUser);
+
+        setUser({ email: parsedUser.email });
+      } catch (error) {
+        console.log("Error Parsing Token", error);
+      }
+    }
+  }
+
+  useEffect(() => {
+    fetchUserFromStorage();
+  }
+    , []);
+
+  // console.log("Logging User from Comment", user)
+
   return (
     <Flex direction="column" position="relative">
       {user ? (
         // If the user is logged in, display the comment input box
         <>
           <ProfileModal
-            handleClose={() => setProfileModalOpen(false)}
-            open={isProfileModalOpen}
+            onClose={() => setProfileModalOpen(false)}
+            isOpen={isProfileModalOpen}
           />
           <Stack direction="row" align="center" spacing={1} mb={2}>
             <Text color="gray.600">Comment as</Text>
@@ -36,7 +76,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
               _hover={{
                 cursor: "pointer",
                 textDecoration: "underline",
-                textColor: "blue.500",
+                textColor: "red.500",
               }}
               onClick={() => setProfileModalOpen(true)}
             >
@@ -94,7 +134,6 @@ const CommentInput: React.FC<CommentInputProps> = ({
           p={4}
         >
           <Text fontWeight={600}>Log in or sign up to comment</Text>
-          <AuthButtons />
         </Flex>
       )}
     </Flex>

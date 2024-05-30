@@ -2,63 +2,46 @@ import { Box, Flex, Icon, Spinner, Stack, Text } from "@chakra-ui/react";
 import React from "react";
 import { CgProfile } from "react-icons/cg";
 
-/**
- * Requiblue props for CommentItem component
- * @param {Comment} comment - comment object
- * @param {onDeleteComment} onDeleteComment - function to handle deleting comment
- * @param {loadingDelete} loadingDelete - is the comment being deleted
- * @param {userId} userId - id of the currently logged in user
- */
 type CommentItemProps = {
   comment: Comment;
   onDeleteComment: (comment: Comment) => void;
+  onEditComment: (comment: Comment) => void;
   loadingDelete: boolean;
   userId?: string;
 };
 
-/**
- * Represents a comment object.
- * @property {string} id - id of the comment
- * @property {string} creatorId - id of the user who created the comment
- * @property {string} creatorDisplayText - display text of the user who created the comment
- * @property {string} communityId - id of the community the comment belongs to
- * @property {string} postId - id of the post the comment belongs to
- * @property {string} postTitle - title of the post the comment belongs to
- * @property {string} text - text of the comment
- * @property {Timestamp} createdAt - time the comment was created
- */
 export type Comment = {
   id: string;
   creatorId: string;
-  creatorDisplayText: string;
+  user: {
+    id: string;
+    username: string;
+  };
   communityId: string;
   postId: string;
   postTitle: string;
   text: string;
-  createdAt: Timestamp;
+  created_at: Date;
 };
 
-/**
- * Renders a comment item.
- * The components displays:
- *  - Comment text
- *  - Creator of the comment
- *  - Time the comment was created
- *  - Delete button if the currently logged in user is the creator of the comment
- *
- * @param {Comment} comment - comment object
- * @param {onDeleteComment} onDeleteComment - function to handle deleting comment
- * @param {loadingDelete} loadingDelete - is the comment being deleted
- * @param {userId} userId - id of the currently logged in user
- *
- * @returns {React.FC<CommentItemProps>} - comment item
- */
 const CommentItem: React.FC<CommentItemProps> = ({
   comment,
   onDeleteComment,
+  onEditComment,
   loadingDelete,
   userId,
 }) => {
+  // const data: any = comment;
+  // const correctData: Comment = {
+  //   id: data.id,
+  //   communityId: data.communityId,
+  //   // postId: data.postId,
+  //   postTitle: data.postTitle,
+  //   text: data.text,
+  //   created_at: data.created_at as Date,
+  // };
+  // console.log(correctData);
+
   return (
     <Flex
       border="1px solid"
@@ -71,11 +54,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
         <Box>
           <Icon as={CgProfile} fontSize={30} color="gray.300" mr={2} />
         </Box>
-        <Stack spacing={1}>
+        <Stack spacing={3}>
           <Stack direction="row" align="center" fontSize="8pt">
-            <Text fontWeight={600}>{comment.creatorDisplayText}</Text>
-            {/* <Text>{createdAtString}</Text> */}
-            {loadingDelete && <Spinner size="sm" />}
+            <Text fontWeight={600}>{comment.user.username}</Text>
+            <Text>{new Date(comment.created_at).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </Text>            {loadingDelete && <Spinner size="sm" />}
           </Stack>
           <Text fontSize="10pt">{comment.text}</Text>
           <Stack
@@ -86,7 +69,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
           >
             {userId === comment.creatorId && (
               <>
-                <Text fontSize="10pt" _hover={{ color: "blue.500" }}>
+                <Text
+                  fontSize="10pt"
+                  _hover={{ color: "blue.500" }}
+                  onClick={() => onEditComment(comment)}
+                >
                   Edit
                 </Text>
                 <Text

@@ -1,3 +1,4 @@
+// components/Community/About.tsx
 import { Community } from "@/atoms/communitiesAtom";
 import { Box, Button, Flex, Icon, Stack, Text } from "@chakra-ui/react";
 import moment from "moment";
@@ -31,11 +32,14 @@ type AboutProps = {
  */
 const About: React.FC<AboutProps> = ({ communityData }) => {
   const router = useRouter();
+  const data: any = communityData;
+  const correctData: Community = data.data;
+  // console.log(correctData);
 
   return (
     // sticky position for the about section
     <Box position="sticky" top="60px" borderRadius={10} shadow="md">
-      <AboutHeaderBar communityName={communityData.id} />
+      <AboutHeaderBar communityName={correctData.name} />
 
       {/* about section */}
       <Flex
@@ -49,8 +53,9 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
           <Button
             width="100%"
             onClick={() => {
-              router.push(`/community/${communityData.id}/submit`);
+              router.push(`/community/${correctData.name}/submit`);
             }}
+            _hover={{ bg: "blue.500", color: "white" }}
           >
             Create Post
           </Button>
@@ -103,26 +108,34 @@ interface AboutCommunityProps {
  * @param {Community} communityData - data requiblue to be displayed
  * @returns {React.FC<AboutCommunityProps>} - About community component
  */
-const AboutCommunity: React.FC<AboutCommunityProps> = ({ communityData }) => (
-  <Flex width="100%" p={2} fontSize="10pt">
-    <Flex direction="column" flexGrow={1}>
-      {/* number of subscribers and date created */}
-      <Text fontWeight={700}>Subscribers</Text>
-      <Text>{communityData.numberOfMembers ? communityData.numberOfMembers.toLocaleString() : 'Loading...'}</Text>
-    </Flex>
+const AboutCommunity: React.FC<AboutCommunityProps> = ({ communityData }) => {
+  const data: any = communityData;
+  const correctData: Community = data.data;
+  // console.log(correctData);
+  return (
+    <>
+      {/* {correctData.id} */}
+      <Flex width="100%" p={2} fontSize="10pt">
+        <Flex direction="column" flexGrow={1}>
+          {/* number of subscribers and date created */}
+          <Text fontWeight={700}>Subscribers</Text>
+          <Text>{correctData.subscribers.length}</Text>
+        </Flex>
 
-    {/* when the community was created */}
-    <Flex direction="column" flexGrow={1}>
-      <Text fontWeight={700}>Created</Text>
-      <Text>
-        {communityData.createdAt &&
-          moment(new Date(communityData * 1000)).format(
-            "MMM DD, YYYY"
-          )}
-      </Text>
-    </Flex>
-  </Flex>
-);
+        {/* when the community was created */}
+        <Flex direction="column" flexGrow={1}>
+          <Text fontWeight={700}>Created</Text>
+          <Text>
+            {correctData.created_at &&
+              moment(new Date(correctData.created_at as any)).format(
+                "MMM DD, YYYY"
+              )}
+          </Text>
+        </Flex>
+      </Flex>
+    </>
+  );
+}
 
 /**
  * @param {string} communityName - Name of the community
@@ -141,10 +154,12 @@ const AdminSectionAbout: React.FC<AdminSectionAboutProps> = ({
 }) => {
   const [isCommunitySettingsModalOpen, setCommunitySettingsModalOpen] =
     useState(false);
-    const { user } = useAuth();
-    return (
+  const { user } = useAuth();
+  // const data: any = communityData;
+  // const correctData: Community = data.data;
+  return (
     <>
-      {user?.id === communityData?.creatorId && (
+      {user?.id === communityData?.owner_id && (
         <>
           <CommunitySettingsModal
             open={isCommunitySettingsModalOpen}
@@ -155,6 +170,7 @@ const AdminSectionAbout: React.FC<AdminSectionAboutProps> = ({
             width="100%"
             variant={"outline"}
             onClick={() => setCommunitySettingsModalOpen(true)}
+            _hover={{ bg: "blue.500", color: "white" }}
           >
             Community Settings
           </Button>
