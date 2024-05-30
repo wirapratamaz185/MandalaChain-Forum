@@ -41,7 +41,7 @@ const usePosts = () => {
       setPostStateValue(prev => ({
         ...prev,
         posts: prev.posts.map(p => p.id === post.id ? { ...p, voteStatus: data.voteStatus } : p),
-        postVotes: data.newVotes, // Assuming your API returns the updated list of votes.
+        postVotes: data.newVotes,
       }));
     } catch (error) {
       showToast({
@@ -56,11 +56,11 @@ const usePosts = () => {
       ...prev,
       selectedPost: post,
     }));
-    router.push(`/community/${post.communityId}/comments/${post.id}`);
+    router.push(`/community/${post.community.name}/comments/${post.id}`);
   };
 
   const onDeletePost = async (post: Post) => {
-    const deleteUrl = `api/posts/delete/${post.id}`;
+    const deleteUrl = `api/posts/delete/?postId=${post.id}`;
 
     if (!isAuthenticated) {
       showToast({
@@ -90,6 +90,43 @@ const usePosts = () => {
       showToast({
         title: "Could not Delete Post",
         description: (error as Error).message,
+        status: "error",
+      });
+      return false;
+    }
+  };
+
+  const onBookmarkPost = async (post: Post) => {
+    const bookmarkUrl = `/api/posts/bookmark?postId=${post.id}`;
+
+    if (!isAuthenticated) {
+      showToast({
+        title: "Authentication Required",
+        description: "You must be logged in to bookmark a post",
+        status: "error",
+      });
+      return false;
+    }
+
+    try {
+      const response = await fetch(bookmarkUrl, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to bookmark post');
+
+      const data = await response.json();
+      setPostStateValue(prev => ({
+        ...prev,
+        posts: prev.posts.map(p => p.id === post.id ? { ...p, bookmarked: data.bookmarked } : p),
+      }));
+      return true;
+    } catch (error) {
+      showToast({
+        title: "Could not Bookmark Post",
         status: "error",
       });
       return false;
@@ -129,7 +166,7 @@ const usePosts = () => {
     }
   }, [isAuthenticated, setPostStateValue]);
 
-  return { postStateValue, setPostStateValue, onSelectPost, onVote, onDeletePost };
+  return { postStateValue, setPostStateValue, onSelectPost, onVote, onDeletePost, onBookmarkPost };
 };
 
 export default usePosts;

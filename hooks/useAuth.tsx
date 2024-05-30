@@ -5,6 +5,7 @@ import { AuthContextType, User } from '@/utils/interface/auth';
 
 export const AuthContext = createContext<AuthContextType>({
   user: null, setUser: () => { },
+  id: undefined
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -18,7 +19,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ id: undefined, user, setUser }}>
       {children}
     </AuthContext.Provider>
   );
