@@ -1,8 +1,6 @@
-// components/Posts/Comments/CommentInput.tsx
 import ProfileModal from "@/components/Modal/Profile/ProfileModal";
 import AuthButtons from "@/components/Navbar/RightContent/AuthButtons";
 import { Flex, Textarea, Button, Text, Stack } from "@chakra-ui/react";
-import { Cookie } from "express-session";
 import React, { useEffect, useState } from "react";
 // import { useAuth } from "@/hooks/useAuth";
 
@@ -65,8 +63,8 @@ const CommentInput: React.FC<CommentInputProps> = ({
         // If the user is logged in, display the comment input box
         <>
           <ProfileModal
-            onClose={() => setProfileModalOpen(false)}
-            isOpen={isProfileModalOpen}
+            handleClose={() => setProfileModalOpen(false)}
+            open={isProfileModalOpen}
           />
           <Stack direction="row" align="center" spacing={1} mb={2}>
             <Text color="gray.600">Comment as</Text>

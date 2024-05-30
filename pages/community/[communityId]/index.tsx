@@ -23,9 +23,7 @@ type CommunityPageProps = {
 const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
   const setCommunityStateValue = useSetRecoilState(communityState);
 
-  // console.log("Component render")
   useEffect(() => {
-    // console.log("Received community data: ", communityData);
     if (communityData) {
       setCommunityStateValue(prev => ({
         ...prev,
@@ -37,7 +35,6 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
   }, []);
 
   if (!communityData || Object.keys(communityData).length === 0) {
-    // if data is not available, return not found page
     return <NotFound />;
   }
 
@@ -47,7 +44,7 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
       <PageContent>
         <>
           {/* <CreatePostLink /> */}
-          <Posts communityPostData={communityData} />
+          <Posts communityId={communityData.id} />
         </>
         <About communityData={communityData} />
       </PageContent>
@@ -56,7 +53,6 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  
   const { communityId } = context.query;
   console.log("Community ID in getServerSideProps:", communityId);
 
@@ -66,7 +62,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   const token = getCookie("access_token", { req: context.req });
-  // console.log("Access Token retrieved in getServerSideProps:", token);
 
   if (!token) {
     console.error("No access token found in cookies.");

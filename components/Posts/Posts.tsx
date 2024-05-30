@@ -10,10 +10,10 @@ import useCustomToast from "@/hooks/useCustomToast";
 import { useAuth } from "@/hooks/useAuth";
 
 type PostsProps = {
-  communityPostData: Post;
+  communityId: string;
 };
 
-const Posts: React.FC<PostsProps> = ({ communityPostData }) => {
+const Posts: React.FC<PostsProps> = ({ communityId }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const { communityStateValue } = useCommunityData();
@@ -27,23 +27,15 @@ const Posts: React.FC<PostsProps> = ({ communityPostData }) => {
   } = usePosts();
   const showToast = useCustomToast();
 
-  // debug 
-  const data: any = communityPostData;
-  const correctData: Post = data.data;
-  // console.log("correctDataPosts", correctData);
-
-  const isValidCommunityId = () => correctData && correctData.id;
-
   const getPosts = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/posts/get?communityId=${correctData.id}`);
+      const response = await fetch(`/api/posts/get?communityId=${communityId}`);
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || 'Failed to get posts');
       }
 
-      // console.log("Received data: ", data.data);
       setPostStateValue((prev) => ({
         ...prev,
         posts: data.data
@@ -61,10 +53,10 @@ const Posts: React.FC<PostsProps> = ({ communityPostData }) => {
   }
 
   useEffect(() => {
-    if (communityStateValue.currentCommunity) {
+    if (communityId) {
       getPosts();
     }
-  }, [communityStateValue.currentCommunity]);
+  }, [communityId]);
 
   useEffect(() => {
     if (postStateValue.posts.length > 0) {
@@ -89,22 +81,12 @@ const Posts: React.FC<PostsProps> = ({ communityPostData }) => {
     }
   }, [postStateValue.posts]);
 
-  // if (!correctData.posts || correctData.posts.length === 0) {
-  //   return <div>No posts available</div>;
-  // }
-
   return (
     <>
-      {/* {correctData.posts[0].title} <br />
-      {correctData.posts[0].body} */}
-
-      {/* If loading is true, display the post loader component */}
       {loading ? (
         <PostLoader />
       ) : (
-        // If the posts are available, display the post item components
         <Stack spacing={3}>
-          {/* For each post (item) iterebly create a post component */}
           {postStateValue.posts.map((item) => (
             <PostItem
               key={item.id}
