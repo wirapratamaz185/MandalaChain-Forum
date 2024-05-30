@@ -2,18 +2,43 @@
 import { atom } from "recoil";
 
 export type Post = {
-  user: any;
-  id?: string; 
-  communityId: string;
-  creatorId: string;
-  creatorUsername: string;
-  title: string;
-  body: string;
-  numberOfComments: number;
-  voteStatus: number;
+  id: string;
+  community_id: string;
+  owner_id: string;
   imageURL?: string;
-  communityImageURL?: string;
-  createTime: Date;
+  created_at: Date;
+  community: {
+    name: string;
+  };
+  user : {
+    id: string;
+    username: string;
+  }
+  body: string;
+  title: string;
+  posts: {
+    id: string;
+    title: string;
+    body: string;
+    image_url: string;
+    user: {
+      id: string;
+      username: string;
+    };
+    comments: {
+      id: string;
+    };
+    bookmarks: {
+      id: string;
+    };
+    votes: {
+      id: string;
+      length: number;
+    };
+    length: number;
+  }
+  voteStatus: number;
+  isBookmarked: boolean;
 };
 
 /**

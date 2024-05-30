@@ -1,3 +1,4 @@
+// atoms/directoryMenuAtom.ts
 import { atom } from "recoil";
 import { IconType } from "react-icons";
 import { TiHome } from "react-icons/ti";

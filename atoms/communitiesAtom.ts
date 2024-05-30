@@ -4,15 +4,20 @@ import { atom } from "recoil";
 // Interface representing a community.
  
 export interface Community {
-  name: any;
   id: string;
-  creatorId: string;
-  numberOfMembers: number;
-  privacyType: "public" | "private";
-  createdAt?: Date;
+  name: string;
+  owner_id: string;
+  community_type: {
+    id: string;
+    type: "public" | "private";
+  }
+  created_at: Date;
   imageURL?: string;
+  subscribers: {
+    length: number;
+    id: string;
+  }
 }
-
 
 // The snippet representing a community a user us subscribed to
 export interface CommunitySnippet {
