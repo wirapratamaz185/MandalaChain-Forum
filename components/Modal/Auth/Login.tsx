@@ -29,6 +29,7 @@ const Login: React.FC = () => {
 
       if (response.ok) {
         const result = await response.json();
+        window.location.href = '/';
         if (result.status === 'success') {
           router.push(result.url || '/');
         } else {
@@ -36,10 +37,11 @@ const Login: React.FC = () => {
         }
       } else {
         const errorData = await response.json();
-        setLoginError(errorData.message);
+        setLoginError(errorData.message || 'An error occurred. Please try again.');
       }
     } catch (error) {
       console.error("Login Error:", error);
+      // setLoginError('An unexpected error occurred. Please try again.');
     }
   };
 
