@@ -1,7 +1,7 @@
 // pages/community/[communityId]/index.tsx
 import { Community, communityState } from "@/atoms/communitiesAtom";
 import About from "@/components/Community/About";
-import CreatePostLink from "@/components/Community/CreatePostLink";
+// import CreatePostLink from "@/components/Community/CreatePostLink";
 import Header from "@/components/Community/Header";
 import NotFound from "@/components/Community/NotFound";
 import PageContent from "@/components/Layout/PageContent";
@@ -11,6 +11,7 @@ import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSetRecoilState } from "recoil";
 import safeJsonStringify from "safe-json-stringify";
+import { getCookie } from "cookies-next";
 
 /**
  * @param {Community} communityData - Community data for the current community
@@ -19,27 +20,24 @@ type CommunityPageProps = {
   communityData: Community;
 };
 
-/**
- * Displays the community page with the community's posts and information.
- * @param {Community} communityData - Community data for the current community
- * @returns {React.FC<CommunityPageProps>} - Community page component
- */
 const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
   const setCommunityStateValue = useSetRecoilState(communityState);
-  const router = useRouter();
 
-  // store the community data currently available into the state as soon as the component renders
+  // console.log("Component render")
   useEffect(() => {
+    // console.log("Received community data: ", communityData);
     if (communityData) {
-      setCommunityStateValue((prev) => ({
+      setCommunityStateValue(prev => ({
         ...prev,
         currentCommunity: communityData,
       }));
+    } else {
+      console.log("No community data available");
     }
-  }, [communityData, setCommunityStateValue]);
+  }, []);
 
   if (!communityData || Object.keys(communityData).length === 0) {
-    //  if community data is not available or empty, return not found page
+    // if data is not available, return not found page
     return <NotFound />;
   }
 
@@ -48,51 +46,54 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
       <Header communityData={communityData} />
       <PageContent>
         <>
-          <CreatePostLink />
-          <Posts communityData={communityData} />
+          {/* <CreatePostLink /> */}
+          <Posts communityPostData={communityData} />
         </>
-        <>
-          <About communityData={communityData} />
-        </>
+        <About communityData={communityData} />
       </PageContent>
     </>
   );
 };
 
-/**
- * Gets the community data for the current community.
- * Returns the community data as props to the client.
- * @param {GetServerSidePropsContext} context - GetServerSidePropsContext object
- * @returns {Promise<{props: {communityData: Community}}>} - Community data for the current community
- */
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  // get the community data and pass it to the client
-  // fetch API get community
+  
+  const { communityId } = context.query;
+  console.log("Community ID in getServerSideProps:", communityId);
+
+  if (!communityId) {
+    console.error("Community ID is not provided.");
+    return { props: { communityData: {} } };
+  }
+
+  const token = getCookie("access_token", { req: context.req });
+  // console.log("Access Token retrieved in getServerSideProps:", token);
+
+  if (!token) {
+    console.error("No access token found in cookies.");
+    return { props: { communityData: {} } };
+  }
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Cookie': `access_token=${token}`,
+  };
+
   try {
-    const response = await fetch(`http://localhost:3000/api/community/get`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        communityId: context.query.communityId as string,
-      },
-    });
-    const data = await response.json();
-    console.log(data);
-    
-    if (!data) {
-      return { props: {} };
+    const url = `http://localhost:3000/api/community/getdetail?communityId=${communityId}`;
+    const response = await fetch(url, { method: "GET", headers });
+    console.log("API response status:", response.status);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data, received status ${response.status}`);
     }
 
+    const data = await response.json();
     return {
-      props: {
-        communityData: JSON.parse(
-          safeJsonStringify({ id: data.id, ...data })
-        ),
-      },
+      props: { communityData: JSON.parse(safeJsonStringify(data)) },
     };
   } catch (error) {
-    console.log("Error: getServerSideProps", error);
-    return { props: {} };
+    console.error("Error in fetching community details:", (error as any).message);
+    return { props: { communityData: {} } };
   }
 }
 

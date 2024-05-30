@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+// pages/community/[communityId]/comments/[pid].tsx
 import { Post } from "@/atoms/postsAtom";
 import About from "@/components/Community/About";
 import PageContent from "@/components/Layout/PageContent";
@@ -11,12 +12,14 @@ import usePosts from "@/hooks/usePosts";
 import { Stack } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { User } from "@/utils/interface/auth";
 
 const PostPage: React.FC = () => {
-  const { postStateValue, setPostStateValue, onDeletePost, onVote } =
+  const { postStateValue, setPostStateValue, onDeletePost, onVote, onBookmarkPost } =
     usePosts();
   const { communityStateValue } = useCommunityData();
-  const [user] = useAuthState(auth);
+  const { user } = useAuth();
   const router = useRouter();
   const showToast = useCustomToast();
   const [hasFetched, setHasFetched] = useState(false);
@@ -27,17 +30,22 @@ const PostPage: React.FC = () => {
     setPostLoading(true);
     try {
       setHasFetched(false); // Reset fetching attempt status
-      const postDocRef = doc(firestore, "posts", postId); // Get post document reference
-      const postDoc = await getDoc(postDocRef); // Get post document
+      const response = await fetch(`/api/posts/getbyId?postId=${postId}`);
+      const data = await response.json();
 
-      if (postDoc.exists()) {
-        // If post exists
+      if (response.ok) {
         setPostStateValue((prev) => ({
           ...prev,
-          selectedPost: { id: postDoc.id, ...(postDoc.data() as Post) },
+          selectedPost: data.data,
         })); // Set post state
         setPostExists(true); // Set post existence to true
       } else {
+        console.error("Error: fetchPost", data.message);
+        showToast({
+          title: "Could not Find Posts",
+          description: data.message,
+          status: "error",
+        });
         // If post does not exist
         setPostExists(false); // Set post existence to false if post not found
       }
@@ -54,7 +62,7 @@ const PostPage: React.FC = () => {
       setPostLoading(false);
     }
   };
-  
+
   useEffect(() => {
     const { pid } = router.query;
 
@@ -83,22 +91,23 @@ const PostPage: React.FC = () => {
                   post={postStateValue.selectedPost}
                   onVote={onVote}
                   onDeletePost={onDeletePost}
+                  onBookmarkPost={onBookmarkPost}
                   userVoteValue={
                     postStateValue.postVotes.find(
                       (item) => item.postId === postStateValue.selectedPost?.id
                     )?.voteValue
                   }
                   userIsCreator={
-                    user?.uid === postStateValue.selectedPost?.creatorId
+                    user?.id === postStateValue.selectedPost?.owner_id
                   }
                   showCommunityImage={true}
                 />
               )}
 
               <Comments
-                user={user as User}
+                user={user}
                 selectedPost={postStateValue.selectedPost}
-                communityId={postStateValue.selectedPost?.communityId as string}
+                communityId={postStateValue.selectedPost?.community_id as string}
               />
             </Stack>
           </>

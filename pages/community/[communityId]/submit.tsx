@@ -1,3 +1,4 @@
+// pages/community/[communityId]/submit.tsx
 import { authModalState } from "@/atoms/authModalAtom";
 import About from "@/components/Community/About";
 import PageContent from "@/components/Layout/PageContent";
@@ -5,22 +6,44 @@ import AuthButtons from "@/components/Navbar/RightContent/AuthButtons";
 import NewPostForm from "@/components/Posts/NewPostForm";
 import useCommunityData from "@/hooks/useCommunityData";
 import { Box, Stack, Text } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSetRecoilState } from "recoil";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/router";
+import { User } from "@/utils/interface/auth";
 
-/**
- * Post submission page where the user can create a new post.
- * If the user is not logged in, they will be prompted to log in.
- * Displays:
- * - Post creation form
- * - Community information card
- * @returns {React.FC} - Submit post page component
- */
 const SubmitPostPage: React.FC = () => {
-  const [user] = useAuthState(auth);
-  // const communityStateValue = useRecoilValue(communityState);
   const { communityStateValue } = useCommunityData();
+  // console.log("communityStateValue", communityStateValue.currentCommunity);
   const setAuthModalState = useSetRecoilState(authModalState);
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+  const { communityId } = router.query;
+  // console.log("communityId want to post", communityId);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const userCookie = localStorage.getItem("access_token");
+      if (userCookie) {
+        try {
+          const base64Url = userCookie.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split("")
+              .map(function (c) {
+                return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+              })
+              .join("")
+          );
+          const parsedUser = JSON.parse(jsonPayload);
+          setUser({ ...parsedUser });
+        } catch (error) {
+          console.log("Error Parsing Token", error);
+        }
+      }
+    }
+  }, []);
 
   return (
     <PageContent>
@@ -33,6 +56,7 @@ const SubmitPostPage: React.FC = () => {
         {user ? (
           <NewPostForm
             user={user}
+            communityId={communityId as string}
             communityImageURL={communityStateValue.currentCommunity?.imageURL}
             currentCommunity={communityStateValue.currentCommunity}
           />

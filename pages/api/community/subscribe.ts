@@ -14,7 +14,7 @@ export default async function POST(
   }
 
   console.log("=====================================");
-  console.log("handle function called");
+  console.log("handle function Subscribe called");
   console.log("=====================================");
 
   const { communityId: communityId } = req.query;

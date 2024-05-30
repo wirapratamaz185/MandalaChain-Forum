@@ -13,7 +13,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   }
 
   console.log("=====================================");
-  console.log("handle function called");
+  console.log("handle function Get Community called");
   console.log("=====================================");
 
   let userId: string;

@@ -17,6 +17,7 @@ export default function uploadFormFiles(req: NextApiRequest) {
       }
 
       // Process the uploaded files here
+      const processedFiles: { [key: string]: string } = {};
       Object.values(files).forEach((fileArray: File[] | undefined) => {
         if (fileArray) {
           fileArray.forEach((file: File) => {
@@ -28,12 +29,13 @@ export default function uploadFormFiles(req: NextApiRequest) {
             const filePath = path.join(uploadDir, file.originalFilename as string);
             fs.writeFileSync(filePath, data);
             fs.unlinkSync(file.filepath);
+            processedFiles[file.originalFilename as string] = `/upload/${file.originalFilename}`;
           });
         }
       });
 
-      // Resolve with the fields and files
-      resolve({ fields, files });
+      // Resolve with the fields and processed file paths
+      resolve({ fields, files: processedFiles });
     });
   });
 }

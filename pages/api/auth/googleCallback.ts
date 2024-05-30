@@ -35,8 +35,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         console.log("JWT generated:", token);
         console.log("==================================");
 
-        setCookie('access_token', token, { req, res, maxAge: 60 * 6 * 24 });
-        return res.redirect(303, "/");
+        setCookie("access_token", token, { req, res, maxAge: 60 * 6 * 24 });
+        return res.redirect(303, `/?token=${token}`);
       } catch (jwtError) {
         console.error("JWT Generation Error:", jwtError);
         return res

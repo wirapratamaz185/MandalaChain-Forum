@@ -11,7 +11,7 @@ import { Button, Flex, Stack } from "@chakra-ui/react";
 
 const Communities: React.FC = () => {
   const { communityStateValue, onJoinOrLeaveCommunity } = useCommunityData();
-  console.log('communityStateValue:', communityStateValue); // Debugging line
+  // console.log('communityStateValue:', communityStateValue); // Debugging line
 
   const [loading, setLoading] = useState(false);
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -19,7 +19,7 @@ const Communities: React.FC = () => {
   const showToast = useCustomToast();
 
   const getCommunities = async (numberOfExtraPosts: number) => {
-    console.log('getCommunities called with:', numberOfExtraPosts); // Debugging line
+    // console.log('getCommunities called with:', numberOfExtraPosts); // Debugging line
     setLoading(true);
     try {
       const response = await fetch(`/api/community/get?order=desc&limit=${5 + numberOfExtraPosts}`);
@@ -27,7 +27,7 @@ const Communities: React.FC = () => {
         throw new Error(`HTTP Error: ${response.statusText}`);
       }
       const data = await response.json();
-      console.log("Fetched communities:", data); // Debugging line
+      // console.log("Fetched communities:", data); // Debugging line
       setCommunities(data.data.communities || []);  // Ensure this path is correct based on response structure
     } catch (error) {
       console.error('Fetching communities failed:', error);
@@ -61,7 +61,7 @@ const Communities: React.FC = () => {
               const isJoined = !!communityStateValue.mySnippets.find(
                 snippet => snippet.communityId === community.id
               );
-              console.log('Rendering community:', community, 'isJoined:', isJoined);
+              // console.log('Rendering community:', community, 'isJoined:', isJoined);
               return (
                 <CommunityItem
                   key={index}
@@ -79,6 +79,7 @@ const Communities: React.FC = () => {
               onClick={() => getCommunities(10)}
               shadow="md"
               isLoading={loading}
+              _hover={{ bg: "blue.500", color: "white" }}
             >
               View More
             </Button>

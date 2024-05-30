@@ -12,10 +12,6 @@ export default async function fetchUser(req: NextApiRequest, res: NextApiRespons
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  console.log("=====================================");
-  console.log("GET /api/auth/me");
-  console.log("=====================================");
-
   let userId: string;
   try {
     const payload = await MiddlewareAuthorization(req, secret as string);

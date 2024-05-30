@@ -1,4 +1,4 @@
-// api/posts/get.ts
+// pages/api/posts/getbyId.ts
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
@@ -7,7 +7,7 @@ import { ApiError } from "../../../utils/response/baseError";
 
 const prisma = new PrismaClient();
 
-export default async function GET(
+export default async function GETID(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
@@ -16,14 +16,14 @@ export default async function GET(
   }
 
   console.log("=====================================");
-  console.log("handle function Get Posts called");
+  console.log("handle function Get Posts ID called");
   console.log("=====================================");
 
   // Extract communityId from the URL params
-  const { communityId } = req.query;
+  const { postId } = req.query;
 
-  if (!communityId) {
-    return res.status(400).json(ApiResponse.error("Community ID is required"));
+  if (!postId) {
+    return res.status(400).json(ApiResponse.error("Post ID is required"));
   }
 
   let userId;
@@ -33,18 +33,12 @@ export default async function GET(
       throw new ApiError("Unauthorized: No userId decoded", 401);
     }
     userId = payload;
-    
-    const posts = await prisma.post.findMany({
+
+    const post = await prisma.post.findUnique({
       where: {
-        community_id: communityId as string,
+        id: postId as string,
       },
       select: {
-        community: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
         id: true,
         title: true,
         body: true,
@@ -58,33 +52,19 @@ export default async function GET(
         },
         created_at: true,
       },
-      orderBy: {
-        created_at: "desc",
-      },
     });
 
-    // Map each post to a new object with a cleaner structure
-    const cleanedPosts = posts.map((post) => ({
-      id: post.id,
-      title: post.title,
-      body: post.body,
-      imageUrl: post.imageUrl,
-      vote: post.vote,
-      createdAt: post.created_at,
-      user: {
-        id: post.user.id,
-        username: post.user.username,
-      },
-      community: {
-        id: post.community.id,
-        name: post.community.name,
-      },
-    }));
+    if (!post) {
+      return res.status(404).json(ApiResponse.error("Post not found"));
+    }
 
-    res
+    return res
       .status(200)
-      .json(ApiResponse.success(cleanedPosts, "Post fetch successfully"));
+      .json(ApiResponse.success(post, "Post fetched successfully"));
   } catch (error) {
-    res.status(500).json(ApiResponse.error("An unknown error occurred"));
+    console.error("Error fetching post by ID: ", error);
+    return res
+      .status(500)
+      .json(ApiResponse.error("An error occurred while fetching post by ID"));
   }
 }

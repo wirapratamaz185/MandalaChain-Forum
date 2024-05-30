@@ -16,7 +16,7 @@ export default async function POST(
   }
 
   console.log("=====================================");
-  console.log("handle function called");
+  console.log("handle function Post Community called");
   console.log("req.body:", req.body);
   console.log("=====================================");
 

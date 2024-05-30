@@ -15,7 +15,7 @@ export default async function PATCH(
   }
 
   console.log("=====================================");
-  console.log("handle function called");
+  console.log("handle function Settings called");
   console.log("req.body:", req.body);
   console.log("=====================================");
 
@@ -28,6 +28,10 @@ export default async function PATCH(
 
     const { communityType } = req.body;
     const { communityId: communityId } = req.query;
+
+    if (!communityId || typeof communityId !== "string") {
+      return res.status(400).json(ApiResponse.error("Invalid communityId"));
+    }
 
     const community = await prisma.community.findUnique({
       where: {

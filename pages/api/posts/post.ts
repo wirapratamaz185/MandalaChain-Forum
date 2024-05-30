@@ -4,10 +4,18 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { secret } from "../../../utils/auth/secret";
 import { ApiError } from "../../../utils/response/baseError";
+import uploadFormFiles from "../upload";
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
-export default async function POST(
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
@@ -20,8 +28,6 @@ export default async function POST(
   if (typeof communityId !== 'string') {
     return res.status(400).json(ApiResponse.error("Community ID must be a string"));
   }
-
-  const { title, body, imageUrl } = req.body;
 
   let userId: string;
   try {
@@ -41,6 +47,23 @@ export default async function POST(
   }
 
   try {
+    // Wait for the file upload to complete
+    const { fields, files } = await uploadFormFiles(req);
+
+    // Extract the title and body fields
+    const title = Array.isArray(fields.title) ? fields.title[0] : fields.title;
+    const body = Array.isArray(fields.body) ? fields.body[0] : fields.body;
+
+    console.log("Title:", title);
+    console.log("Body:", body);
+
+    // Assuming 'file' is the key for the uploaded file
+    const file = files.file ? files.file[0] : null;
+    const imageUrl = file ? `/upload/${uuidv4()}_${file.originalFilename}` : null;
+
+    // console.log("File Upload:", file)
+    console.log("Image URL Upload Success:", imageUrl);
+
     const post = await prisma.post.create({
       data: {
         title,

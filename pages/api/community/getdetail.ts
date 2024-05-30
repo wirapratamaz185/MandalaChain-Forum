@@ -1,6 +1,9 @@
+// pages/api/community/getdetail.ts
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { ApiResponse } from "../../../utils/helper";
+import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
+import { ApiError } from "../../../utils/response/baseError";
+import { secret } from "../../../utils/auth/secret";
 
 const prisma = new PrismaClient();
 
@@ -9,9 +12,21 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  const { communityId } = req.query;
+  console.log("=====================================");
+  console.log("handle function Get Community Detail called");
+  console.log("=====================================");
+
+  let userId: string;
+
+  const { communityId} = req.query;
+  console.log("Received communityId: ", communityId);
 
   try {
+    const payload = await MiddlewareAuthorization(req, secret as string);
+    if (!payload || typeof payload !== "string")
+      throw new Error("Unauthorized: No userId decoded");
+    userId = payload;
+
     const community = await prisma.community.findUnique({
       where: {
         id: communityId as string,
@@ -59,6 +74,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
 
     if (!community) {
+      console.log("No Community found for ID: ", communityId as string)
       return res.status(404).json(ApiResponse.error("Community not found"));
     }
 

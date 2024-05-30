@@ -45,7 +45,7 @@ export default async function GET_COMMENTS(
           select: { id: true, username: true, imageUrl: true },
         },
       },
-      orderBy: { created_at: "desc" },
+      orderBy: { created_at: "asc" },
     });
 
     res

@@ -5,19 +5,17 @@ import { secret } from "../../../utils/auth/secret";
 
 const prisma = new PrismaClient();
 
-export default async function POST(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  if (req.method !== "POST") {
+  if (req.method !== "GET") {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
   console.log("=====================================");
-  console.log("handle function Unsubsribe called");
+  console.log("handle function Snippets called");
   console.log("=====================================");
-
-  const { communityId: communityId } = req.query;
 
   let userId: string;
   try {
@@ -26,30 +24,31 @@ export default async function POST(
       throw new Error("Unauthorized: No userId decoded");
     }
     userId = payload;
-    const subscription = await prisma.subscriber.findFirst({
+
+    const userSnippets = await prisma.subscriber.findMany({
       where: {
-        community_id: communityId as string,
         user_id: userId,
       },
-    });
-
-    if (!subscription) {
-      return res
-        .status(400)
-        .json(ApiResponse.error("You are not subscribed to this community"));
-    }
-
-    const unSubscription = await prisma.subscriber.delete({
-      where: {
-        id: subscription.id,
+      include: {
+        community: true,
       },
     });
+
+    const snippets = userSnippets.map((snippet) => ({
+      communityId: snippet.community.id,
+      communityName: snippet.community.name,
+      owner: snippet.community.owner_id,
+    }));
 
     return res
       .status(200)
-      .json(ApiResponse.success(unSubscription, "Successfully unsubscribed to community"));
+      .json(
+        ApiResponse.success(snippets, "Successfully fetched user snippets")
+      );
   } catch (error) {
-    console.error("Error in community unsubscribe:", error);
-    return res.status(500).json(ApiResponse.error("Internal server error"));
+    console.error("Error in fetching user snippets:", error);
+    return res
+      .status(500)
+      .json(ApiResponse.error("Failed to fetch user snippets"));
   }
 }
