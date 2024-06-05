@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import moment from "moment";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BsBookmark } from "react-icons/bs";
 import { FiShare2 } from "react-icons/fi";
 import {
@@ -27,7 +27,7 @@ import {
 } from "react-icons/io5";
 import { MdOutlineDelete } from "react-icons/md";
 import PostItemError from "../atoms/ErrorMessage";
-import { event } from "firebase-functions/v1/analytics";
+import { set } from "zod";
 
 type PostItemProps = {
   post: Post;
@@ -62,10 +62,31 @@ const PostItem: React.FC<PostItemProps> = ({
   const router = useRouter();
   const showToast = useCustomToast();
   const { onCopy, value, setValue, hasCopied } = useClipboard("");
+  const [voteCount, setVoteCount] = useState<number | null>(null);
   /**
    * If there is no selected post then post is already selected
    */
   const singlePostPage = !onSelectPost;
+
+  // fetch the vote count
+  useEffect(() => {
+    const fetchVoteCount = async () => {
+      try {
+        const response = await fetch(`/api/posts/getvote?postId=${post.id}`);
+        const data = await response.json();
+        // console.log("data", data.data[0].vote);
+        if (response.ok && data.data.length > 0) {
+          setVoteCount(data.data[0].vote);  
+        } else {
+          throw new Error("Failed to get vote count");
+        }
+      } catch (error) {
+        console.error("Error: fetchVoteCount", error);
+      }
+    };
+
+    fetchVoteCount();
+  }, [post.id]);
 
   const handleDelete = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -146,18 +167,6 @@ const PostItem: React.FC<PostItemProps> = ({
     });
   };
 
-  // const handleSave = (
-  //   event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  // ) => {
-  //   event.stopPropagation(); // stop event bubbling up to parent
-
-  //   showToast({
-  //     title: "Functionality Coming Soon",
-  //     description: "Currently, this functionality is not available",
-  //     status: "warning",
-  //   });
-  // };
-
   return (
     <Flex
       border="1px solid"
@@ -185,6 +194,7 @@ const PostItem: React.FC<PostItemProps> = ({
           userVoteValue={userVoteValue}
           onVote={onVote}
           post={post}
+          voteCount={voteCount}
         />
       </Flex>
 
@@ -226,13 +236,17 @@ type VoteSectionProps = {
     community_id: string
   ) => void;
   post: Post;
+  voteCount: number | null;
 };
 
 const VoteSection: React.FC<VoteSectionProps> = ({
   userVoteValue,
   onVote,
   post,
+  voteCount,
 }) => {
+
+  console.log("Vote Count Post", voteCount)
   return (
     <>
       {/* like button */}
@@ -246,7 +260,7 @@ const VoteSection: React.FC<VoteSectionProps> = ({
       />
       {/* number of likes  */}
       <Text fontSize="12pt" color="gray.600">
-        {post.voteStatus}
+        {voteCount !== null ? voteCount : 0}
       </Text>
       {/* dislike button */}
       <Icon

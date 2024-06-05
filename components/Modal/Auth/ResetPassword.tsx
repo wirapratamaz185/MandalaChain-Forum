@@ -5,7 +5,7 @@ import { useSetRecoilState } from "recoil";
 import { authModalState } from "../../../atoms/authModalAtom";
 
 const ResetPassword: React.FC = () => {
-    const setAuthModalState = useSetRecoilState(authModalState);
+    // const setAuthModalState = useSetRecoilState(authModalState);
     const [email, setEmail] = useState("");
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);

@@ -101,7 +101,11 @@ const defaultPostState: PostState = {
  *
  * @see https://recoiljs.org/docs/basic-tutorial/atoms/
  */
-export const postState = atom<PostState>({
+export const postState = atom({
   key: "postState",
-  default: defaultPostState,
+  default: {
+    posts: [] as Post[],
+    postVotes: [] as PostVote[],
+    selectedPost: null as Post | null,
+  },
 });

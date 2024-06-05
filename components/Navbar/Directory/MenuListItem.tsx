@@ -61,13 +61,13 @@ const MenuListItem: React.FC<MenuListItemProps> = ({
       }
     >
       <Flex align="center">
-        <Image
-          src={imageURL ? imageURL : "/images/mandalachain.jpeg"}
+        {/* <Image
+          src={imageURL ? imageURL : ""}
           alt="Community logo"
           borderRadius="full"
           boxSize="18px"
           mr={2}
-        />
+        /> */}
         {displayText}
       </Flex>
     </MenuItem>

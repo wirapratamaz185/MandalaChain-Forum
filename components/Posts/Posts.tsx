@@ -62,7 +62,7 @@ const Posts: React.FC<PostsProps> = ({ communityId }) => {
     if (postStateValue.posts.length > 0) {
       const postIds = postStateValue.posts.map(post => post.id).join(',');
       if (user) {
-        fetch(`/api/posts/getvote?postIds=${postIds}&userId=${user.id}`)
+        fetch(`/api/posts/getvote?postIds=${postIds}`)
           .then(response => response.json())
           .then(data => {
             if (data.status === "error") throw new Error(data.message);
@@ -92,7 +92,7 @@ const Posts: React.FC<PostsProps> = ({ communityId }) => {
               key={item.id}
               post={item}
               userIsCreator={user?.id === item.owner_id}
-              userVoteValue={postStateValue.postVotes.find((vote) => vote.postId === item.id)
+              userVoteValue={postStateValue.postVotes?.find((vote) => vote.postId === item.id)
                 ?.voteValue}
               onVote={onVote}
               onSelectPost={onSelectPost}

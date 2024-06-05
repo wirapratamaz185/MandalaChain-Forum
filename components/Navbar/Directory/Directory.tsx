@@ -35,8 +35,8 @@ const UserMenu: React.FC = () => {
         cursor="pointer"
         padding="0px 6px"
         borderRadius={10}
-        mr={2}
-        ml={{ base: 0, md: 2 }}
+        mr={1200}
+        ml={{ base: 0, md: 0 }}
         _hover={{
           outline: "1px solid",
           outlineColor: "gray.200",
@@ -62,7 +62,7 @@ const UserMenu: React.FC = () => {
                 fontSize={24}
                 mr={{ base: 1, md: 2 }}
                 as={directoryState.selectedMenuItem.icon}
-                color={directoryState.selectedMenuItem.iconColor}
+                color="blue.500" // Set icon color to blue.500
               />
             )}
             <Flex display={{ base: "none", lg: "flex" }}>
@@ -72,13 +72,9 @@ const UserMenu: React.FC = () => {
             </Flex>
           </Flex>
           {directoryState.isOpen ? (
-            <>
-              <ChevronUpIcon />
-            </>
+            <ChevronUpIcon color="blue.500" /> // Set ChevronUpIcon color to blue.500
           ) : (
-            <>
-              <ChevronDownIcon />
-            </>
+            <ChevronDownIcon color="blue.500" /> // Set ChevronDownIcon color to blue.500
           )}
         </Flex>
       </MenuButton>
