@@ -8,7 +8,7 @@ import useDirectory from "./useDirectory";
 const useCallCreatePost = () => {
   const router = useRouter();
   // const { data: session } = useSession(); // Use useSession to get the current session
-  const setAuthModalState = useSetRecoilState(authModalState);
+  // const setAuthModalState = useSetRecoilState(authModalState);
   const { toggleMenuOpen } = useDirectory();
 
   const onClick = () => {

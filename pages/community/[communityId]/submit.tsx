@@ -15,7 +15,7 @@ import { User } from "@/utils/interface/auth";
 const SubmitPostPage: React.FC = () => {
   const { communityStateValue } = useCommunityData();
   // console.log("communityStateValue", communityStateValue.currentCommunity);
-  const setAuthModalState = useSetRecoilState(authModalState);
+  // const setAuthModalState = useSetRecoilState(authModalState);
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const { communityId } = router.query;

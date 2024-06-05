@@ -93,7 +93,7 @@ const PostPage: React.FC = () => {
                   onDeletePost={onDeletePost}
                   onBookmarkPost={onBookmarkPost}
                   userVoteValue={
-                    postStateValue.postVotes.find(
+                    postStateValue.postVotes?.find(
                       (item) => item.postId === postStateValue.selectedPost?.id
                     )?.voteValue
                   }

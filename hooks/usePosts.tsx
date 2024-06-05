@@ -23,14 +23,14 @@ const usePosts = () => {
       return;
     }
 
-    const voteUrl = `/api/posts/vote/${post.id}`; // Assuming you might need to adjust this endpoint according to your backend URL setup for voting.
+    const voteUrl = `/api/posts/vote?postId=${post.id}`;
     try {
       const response = await fetch(voteUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ postId: post.id, voteValue: voteValue, communityId: communityId }),
+        body: JSON.stringify({ status: voteValue > 0 ? "UPVOTE" : "DOWNVOTE" }),
       });
 
       if (!response.ok) {
@@ -136,7 +136,7 @@ const usePosts = () => {
   useEffect(() => {
     if (isAuthenticated && currentCommunity?.id) {
       const fetchVotes = async () => {
-        const votesUrl = `/api/posts/vote?communityId=${currentCommunity.id}`;
+        const votesUrl = `/api/posts/getvote?postId=${currentCommunity.id}`;
         const response = await fetch(votesUrl, {
           headers: {
             'Content-Type': 'application/json',

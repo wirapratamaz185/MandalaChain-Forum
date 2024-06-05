@@ -144,7 +144,7 @@ export default function Home() {
                 onDeletePost={onDeletePost}
                 onBookmarkPost={onBookmarkPost}
                 onVote={onVote}
-                userVoteValue={postStateValue.postVotes.find(
+                userVoteValue={postStateValue.postVotes?.find(
                   (item) => item.postId === post.id
                 )?.voteValue} userIsCreator={false}
               />

@@ -12,9 +12,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  console.log("=====================================");
-  console.log("handle function Get Community called");
-  console.log("=====================================");
+  // console.log("=====================================");
+  // console.log("handle function Get Community called");
+  // console.log("=====================================");
 
   let userId: string;
   try {

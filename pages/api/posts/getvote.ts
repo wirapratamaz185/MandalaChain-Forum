@@ -18,7 +18,8 @@ export default async function getVotes(
   console.log("handle function getVotes called");
   console.log("=====================================");
 
-  const postId = req.query.id as string;
+  const postId = req.query.postId as string; // Use postId instead of id
+  // console.log("PostId", postId);
 
   let userId;
   try {
@@ -27,13 +28,16 @@ export default async function getVotes(
       throw new ApiError("Unauthorized: No userId decoded", 401);
     }
     userId = payload;
-    console.log("Authenticated user ID:", userId);
+    // console.log("Authenticated user ID:", userId);
 
     const votes = await prisma.post.findMany({
       where: {
         id: postId,
       },
       select: {
+        id: true,
+        title: true,
+        body: true,
         vote: true,
       },
     });

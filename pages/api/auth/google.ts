@@ -13,7 +13,7 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       callbackURL:
         process.env.GOOGLE_CALLBACK_URL ||
-        "https://mandala-chain-forum.vercel.app/api/auth/googleCallback",
+        "http://localhost:3000/api/auth/googleCallback",
       scope: ["email", "profile"],
     },
     async (accessToken, refreshToken, profile, done) => {

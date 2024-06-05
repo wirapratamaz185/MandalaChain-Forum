@@ -25,7 +25,7 @@ export default async function getGeneric(
       throw new ApiError("Unauthorized: No userId decoded", 401);
     }
     userId = payload;
-    console.log("Authenticated user ID:", userId);
+    // console.log("Authenticated user ID:", userId);
 
     let posts;
     if (userId) {
