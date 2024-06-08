@@ -5,7 +5,6 @@ import { authModalState } from '../../../atoms/authModalAtom';
 import InputField from './InputField';
 import { useRouter } from 'next/router';
 import useCustomToast from "@/hooks/useCustomToast";
-import useCustomToast from "@/hooks/useCustomToast";
 
 const Login: React.FC = () => {
   const router = useRouter();
@@ -15,13 +14,9 @@ const Login: React.FC = () => {
   const [loginError, setLoginError] = useState('');
   const showToast = useCustomToast();
   const [loading, setLoading] = useState(false);
-  const showToast = useCustomToast();
-  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
-
-    setLoading(true);
 
     setLoading(true);
 
@@ -70,7 +65,6 @@ const Login: React.FC = () => {
 
       {loginError && <Text color="red">{loginError}</Text>}
 
-      <Button type="submit" isLoading={loading}>Log In</Button>
       <Button type="submit" isLoading={loading}>Log In</Button>
       <Flex justifyContent="center">
         No account? <Text color="blue" onClick={() => setAuthModalState({ open: true, view: 'signup' })}>Sign up</Text>

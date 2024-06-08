@@ -282,7 +282,6 @@ const VoteSection: React.FC<VoteSectionProps> = ({
       {/* number of likes  */}
       <Text fontSize="12pt" color="gray.600">
         {voteCount !== null ? voteCount : 0}
-        {voteCount !== null ? voteCount : 0}
       </Text>
       {/* dislike button */}
       <Icon
