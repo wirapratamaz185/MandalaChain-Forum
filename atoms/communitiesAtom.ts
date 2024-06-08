@@ -1,9 +1,11 @@
 // atoms/communitiesAtom.ts
 import { atom } from "recoil";
+import { Post } from "./postsAtom";
 
 // Interface representing a community.
  
 export interface Community {
+  posts: Post[];
   id: string;
   name: string;
   owner_id: string;

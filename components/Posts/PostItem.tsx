@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import moment from "moment";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BsBookmark } from "react-icons/bs";
 import { FiShare2 } from "react-icons/fi";
 import {
@@ -27,7 +27,6 @@ import {
 } from "react-icons/io5";
 import { MdOutlineDelete } from "react-icons/md";
 import PostItemError from "../atoms/ErrorMessage";
-import { event } from "firebase-functions/v1/analytics";
 
 type PostItemProps = {
   post: Post;
@@ -62,10 +61,53 @@ const PostItem: React.FC<PostItemProps> = ({
   const router = useRouter();
   const showToast = useCustomToast();
   const { onCopy, value, setValue, hasCopied } = useClipboard("");
+  const [voteCount, setVoteCount] = useState<number | null>(null);
+  const [fetchedImage, setFetchedImage] = useState<string | null>(null);
   /**
    * If there is no selected post then post is already selected
    */
   const singlePostPage = !onSelectPost;
+
+  // fetch the vote count
+  useEffect(() => {
+    const fetchVoteCount = async () => {
+      try {
+        const response = await fetch(`/api/posts/getvote?postId=${post.id}`);
+        const data = await response.json();
+        // console.log("data", data);
+        if (response.ok && data.data.length > 0) {
+          setVoteCount(data.data[0].vote);  
+        } else {
+          throw new Error("Failed to get vote count");
+        }
+      } catch (error) {
+        console.error("Error: fetchVoteCount", error);
+      }
+    };
+
+    fetchVoteCount();
+  }, [post.id]);
+
+  // fetch the image for the post
+  useEffect(() => {
+    const fetchImage = async () => {
+      try {
+        const response = await fetch(`/api/posts/getbyId?postId=${post.id}`);
+        // console.log("response", response);
+        const data = await response.json();
+        // console.log("data", data.data.imageURL);
+        if (response.ok) {
+          setFetchedImage(data);
+        } else {
+          throw new Error("Failed to get image");
+        }
+      } catch (error) {
+        console.error("Error: fetchImage", error);
+      }
+    };
+
+    fetchImage();
+  }, [post.id]);
 
   const handleDelete = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -85,10 +127,10 @@ const PostItem: React.FC<PostItemProps> = ({
         description: "Your post has been deleted",
         status: "success",
       });
-      // if the user deletes post from the single post page, they should be blueirected to the post's community page
+      // if the user deletes post from the single post page, they should be redirected to the post's community page
       if (singlePostPage) {
         // if the post is on the single post page
-        router.push(`/community/${post.community.name}`); // blueirect to the community page
+        router.push(`/community/${post.community_id}`); // redirect to the community page
       }
     } catch (error: any) {
       setError(error.message);
@@ -135,7 +177,7 @@ const PostItem: React.FC<PostItemProps> = ({
   ) => {
     event.stopPropagation(); // stop event bubbling up to parent
     const baseUrl = `${window.location.protocol}//${window.location.host}`;
-    const postLink = `${baseUrl}/community/${post.community.name}/comments/${post.id}`;
+    const postLink = `${baseUrl}/community/${post.community_id}/comments/${post.id}`;
     setValue(postLink);
     onCopy(); // copy link to clipboard
 
@@ -145,18 +187,6 @@ const PostItem: React.FC<PostItemProps> = ({
       status: "info",
     });
   };
-
-  // const handleSave = (
-  //   event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  // ) => {
-  //   event.stopPropagation(); // stop event bubbling up to parent
-
-  //   showToast({
-  //     title: "Functionality Coming Soon",
-  //     description: "Currently, this functionality is not available",
-  //     status: "warning",
-  //   });
-  // };
 
   return (
     <Flex
@@ -185,6 +215,7 @@ const PostItem: React.FC<PostItemProps> = ({
           userVoteValue={userVoteValue}
           onVote={onVote}
           post={post}
+          voteCount={voteCount}
         />
       </Flex>
 
@@ -226,13 +257,17 @@ type VoteSectionProps = {
     community_id: string
   ) => void;
   post: Post;
+  voteCount: number | null;
 };
 
 const VoteSection: React.FC<VoteSectionProps> = ({
   userVoteValue,
   onVote,
   post,
+  voteCount,
 }) => {
+
+  // console.log("Vote Count Post", voteCount)
   return (
     <>
       {/* like button */}
@@ -242,11 +277,11 @@ const VoteSection: React.FC<VoteSectionProps> = ({
         fontSize={22}
         cursor="pointer"
         _hover={{ color: "blue.300" }}
-        onClick={(event) => onVote(event, post, 1, post.community.name)}
+        onClick={(event) => onVote(event, post, 1, post.community_id)}
       />
       {/* number of likes  */}
       <Text fontSize="12pt" color="gray.600">
-        {post.voteStatus}
+        {voteCount !== null ? voteCount : 0}
       </Text>
       {/* dislike button */}
       <Icon
@@ -259,7 +294,7 @@ const VoteSection: React.FC<VoteSectionProps> = ({
         _hover={{ color: "blue.300" }}
         fontSize={22}
         cursor="pointer"
-        onClick={(event) => onVote(event, post, -1, post.community.name)}
+        onClick={(event) => onVote(event, post, -1, post.community_id)}
       />
     </>
   );
@@ -271,61 +306,54 @@ type PostDetailsProps = {
 };
 
 const PostDetails = ({ showCommunityImage, postDetail }: PostDetailsProps) => {
-  const data: any = postDetail;
-  const correctData: Post = data.data;
-  // console.log("correctData", correctData);
-  // console.log("Data", postDetail)
-
-  const createdAt = moment(postDetail.created_at)
+  const createdAt = moment(postDetail.created_at);
   const formattedDate = createdAt.isValid() ? createdAt.format("MMMM DD, YYYY") : "Invalid date";
 
-  const topText: string = `By ${postDetail.user.username} ${formattedDate}`;
+  const topText: string = `By ${postDetail.user?.username || 'Anonymous'} ${formattedDate}`;
 
   return (
-    <>
-      <Stack
-        direction="row"
-        spacing={0.5}
-        align="center"
-        fontSize="9pt"
-        borderRadius="full"
-        boxSize="18px"
-        mr={2}
-        width="100%"
-      >
-        {showCommunityImage && postDetail.community && (
-          <>
-            {postDetail.imageURL ? (
-              <Image
-                borderRadius="full"
-                boxSize="18px"
-                src={postDetail.imageURL}
-                mr={2}
-                alt="Community logo"
-              />
-            ) : (
-              <Icon
-                as={IoPeopleCircleOutline}
-                mr={1}
-                fontSize="18pt"
-                color="blue.500"
-              />
-            )}
-            <Link href={`/community/${postDetail.community.name}`}>
-              <Text
-                fontWeight={700}
-                _hover={{ textDecoration: "underline" }}
-                pr={2}
-                onClick={(event) => event.stopPropagation()}
-              >
-                {postDetail.community.name}
-              </Text>
-            </Link>
-          </>
-        )}
-        <Text fontWeight={500}>{topText}</Text>
-      </Stack>
-    </>
+    <Stack
+      direction="row"
+      spacing={0.5}
+      align="center"
+      fontSize="9pt"
+      borderRadius="full"
+      boxSize="18px"
+      mr={2}
+      width="100%"
+    >
+      {showCommunityImage && postDetail.community_id && (
+        <>
+          {postDetail.imageUrl ? (
+            <Image
+              borderRadius="full"
+              boxSize="18px"
+              src={postDetail.imageUrl}
+              mr={2}
+              alt="Community logo"
+            />
+          ) : (
+            <Icon
+              as={IoPeopleCircleOutline}
+              mr={1}
+              fontSize="18pt"
+              color="blue.500"
+            />
+          )}
+          <Link href={`/community/${postDetail.community_id}`}>
+            <Text
+              fontWeight={700}
+              _hover={{ textDecoration: "underline" }}
+              pr={2}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {postDetail.community_id}
+            </Text>
+          </Link>
+        </>
+      )}
+      <Text fontWeight={500}>{topText}</Text>
+    </Stack>
   );
 };
 
@@ -334,9 +362,6 @@ type PostTitleProps = {
 };
 
 const PostTitle = ({ post }: PostTitleProps) => {
-  // const data: any = post;
-  // const correctData: Post = data.data;
-  // console.log("correctData", correctData);
   return (
     <Text fontSize="12pt" fontWeight={600}>
       {post.title}
@@ -350,11 +375,7 @@ type PostBodyProps = {
   setLoadingImage: (value: React.SetStateAction<boolean>) => void;
 };
 
-
 const PostBody = ({ post, loadingImage, setLoadingImage }: PostBodyProps) => {
-  // const data: any = post;
-  // const correctData: Post = data.data;
-  // console.log("correctData", correctData);
   return (
     <>
       <Text fontSize="12pt">
@@ -362,14 +383,14 @@ const PostBody = ({ post, loadingImage, setLoadingImage }: PostBodyProps) => {
         {post.body.split(" ").slice(0, 30).join(" ")}
       </Text>
       {/* image (if exists) */}
-      {post.imageURL && (
+      {post.imageUrl && (
         <Flex justify="center" align="center">
           {loadingImage && (
             <Skeleton height="300px" width="100%" borderRadius={10} />
           )}
           <Image
             mt={4}
-            src={post.imageURL}
+            src={post.imageUrl}
             alt="Image for post"
             maxHeight="450px"
             maxWidth="100%"
@@ -383,7 +404,6 @@ const PostBody = ({ post, loadingImage, setLoadingImage }: PostBodyProps) => {
     </>
   );
 };
-
 
 interface PostActionsProps {
   handleDelete: (

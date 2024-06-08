@@ -33,8 +33,8 @@ const AuthModal: React.FC = () => {
       />
       <ModalContent borderRadius={10}>
         <ModalHeader textAlign="center">
-          {authMode === "signup" && "Sign Up"}
-          {authMode === "login" && "Login"}
+          {authMode === "signup"}
+          {authMode === "login"}
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody

@@ -1,4 +1,4 @@
-// hooks/useCommunityData
+// hooks/useCommunityData.tsx
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useRecoilState } from 'recoil';
@@ -106,34 +106,24 @@ const useCommunityData = () => {
   }, [showToast, setLoading, fetchMySnippets]);
 
   const getCommunityData = useCallback(async (communityId: string) => {
-    if (!user) {
-      // showToast({
-      //   title: 'Authentication Error',
-      //   description: 'Please log in to view detail this community',
-      //   status: 'error',
-      // });
-      return;
-    }
-
     setLoading(true);
     try {
-      // not complete
       const response = await fetch(`/api/community/getdetail?communityId=${communityId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      console.log("API response status:", response.status);
+      // console.log("API response status:", response.status);
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Failed to fetch community details');
-      setCommunityStateValue(prev => ({ ...prev, currentCommunity: data }));
+      // if (!response.ok) throw new Error(data.message || 'Failed to fetch community details');
+      setCommunityStateValue(prev => ({ ...prev, currentCommunity: data.data }));
     } catch (error) {
-      showToast({ title: 'Fetch Error', description: (error as any).message, status: 'error' });
+      // showToast({ title: 'Fetch Error', description: (error as any).message, status: 'error' });
     } finally {
       setLoading(false);
     }
-  }, [setCommunityStateValue, showToast, user]);
+  }, [setCommunityStateValue, showToast]);
 
   const onJoinOrLeaveCommunity = async (communityId: string, isJoined: boolean) => {
     if (isJoined) {

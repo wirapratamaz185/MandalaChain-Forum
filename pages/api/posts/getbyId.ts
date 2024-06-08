@@ -15,12 +15,13 @@ export default async function GETID(
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  console.log("=====================================");
-  console.log("handle function Get Posts ID called");
-  console.log("=====================================");
+  // console.log("=====================================");
+  // console.log("handle function Get Posts ID called");
+  // console.log("=====================================");
 
   // Extract communityId from the URL params
   const { postId } = req.query;
+  // console.log("Received post ID: ", postId)
 
   if (!postId) {
     return res.status(400).json(ApiResponse.error("Post ID is required"));
@@ -38,23 +39,24 @@ export default async function GETID(
       where: {
         id: postId as string,
       },
-      select: {
-        id: true,
-        title: true,
-        body: true,
-        imageUrl: true,
-        vote: true,
+      include: {
         user: {
           select: {
             id: true,
             username: true,
           },
         },
-        created_at: true,
+        community: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
     if (!post) {
+      console.log("No Post found for ID: ", postId as string);
       return res.status(404).json(ApiResponse.error("Post not found"));
     }
 

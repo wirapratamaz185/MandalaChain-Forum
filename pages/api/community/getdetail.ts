@@ -18,7 +18,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
   let userId: string;
 
-  const { communityId} = req.query;
+  const { communityId } = req.query;
   console.log("Received communityId: ", communityId);
 
   try {
@@ -41,6 +41,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
         posts: {
+          where: {
+            community_id: communityId as string, // Ensure posts are filtered by communityId
+          },
           include: {
             user: {
               select: {

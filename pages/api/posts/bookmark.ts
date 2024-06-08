@@ -27,7 +27,7 @@ export default async function bookmark(
     }
     userId = payload;
 
-    console.log("Authenticated user ID:", userId);
+    // console.log("Authenticated user ID:", userId);
 
     const { postId } = req.query;
 

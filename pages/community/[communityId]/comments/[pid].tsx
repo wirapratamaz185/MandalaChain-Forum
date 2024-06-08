@@ -12,19 +12,39 @@ import usePosts from "@/hooks/usePosts";
 import { Stack } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { User } from "@/utils/interface/auth";
 
 const PostPage: React.FC = () => {
-  const { postStateValue, setPostStateValue, onDeletePost, onVote, onBookmarkPost } =
-    usePosts();
+  const { postStateValue, setPostStateValue, onDeletePost, onVote, onBookmarkPost } = usePosts();
   const { communityStateValue } = useCommunityData();
-  const { user } = useAuth();
   const router = useRouter();
   const showToast = useCustomToast();
   const [hasFetched, setHasFetched] = useState(false);
   const [postExists, setPostExists] = useState(true);
   const [postLoading, setPostLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  const fetchUserFromStorage = () => {
+    const userCookie = localStorage.getItem("access_token");
+    if (userCookie) {
+      try {
+        const base64Url = userCookie.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map(function (c) {
+              return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join("")
+        );
+        const parsedUser = JSON.parse(jsonPayload);
+        setUser({ id: parsedUser.id, email: parsedUser.email, username: parsedUser.username });
+      } catch (error) {
+        console.log("Error Parsing Token", error);
+      }
+    }
+  };
 
   const fetchPost = async (postId: string) => {
     setPostLoading(true);
@@ -64,6 +84,10 @@ const PostPage: React.FC = () => {
   };
 
   useEffect(() => {
+    fetchUserFromStorage();
+  }, []);
+
+  useEffect(() => {
     const { pid } = router.query;
 
     if (pid && !postStateValue.selectedPost) {
@@ -85,7 +109,7 @@ const PostPage: React.FC = () => {
           <PostLoader />
         ) : (
           <>
-            <Stack spacing={3} direction="column">
+            <Stack spacing={6} direction="column">
               {postStateValue.selectedPost && (
                 <PostItem
                   post={postStateValue.selectedPost}
@@ -93,7 +117,7 @@ const PostPage: React.FC = () => {
                   onDeletePost={onDeletePost}
                   onBookmarkPost={onBookmarkPost}
                   userVoteValue={
-                    postStateValue.postVotes.find(
+                    postStateValue.postVotes?.find(
                       (item) => item.postId === postStateValue.selectedPost?.id
                     )?.voteValue
                   }
@@ -102,7 +126,7 @@ const PostPage: React.FC = () => {
                   }
                   showCommunityImage={true}
                 />
-              )}
+              )} 
 
               <Comments
                 user={user}
@@ -121,4 +145,5 @@ const PostPage: React.FC = () => {
     </PageContent>
   );
 };
+
 export default PostPage;

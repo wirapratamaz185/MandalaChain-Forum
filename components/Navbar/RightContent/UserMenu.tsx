@@ -141,7 +141,7 @@ const UserMenuButton: React.FC<UserMenuButtonProps> = ({
             mr={2}
           >
             <Text fontWeight={700}>
-              {user?.email?.split("@")[0]}
+              {/* {user?.email?.split("@")[0]} */}
             </Text>
           </Flex>
         </>

@@ -15,7 +15,7 @@ const CommunityNotFound: React.FC = () => {
       minHeight="60vh"
     >
       <Text fontSize="2xl" fontWeight="bold" color="gray.600">
-        Sorry, this community does not exist!
+        Sorry, this community does not exist on your profile!
       </Text>
       <Stack direction="row" spacing={4} mt={4}>
         <Link href="/">

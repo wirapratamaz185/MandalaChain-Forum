@@ -1,5 +1,4 @@
 // utils/helper.ts
-import { HttpStatusCode } from "axios";
 import { ApiError, BaseError } from "@/utils/response/baseError";
 import { NextResponse, NextRequest } from "next/server";
 import { compare, hash, genSalt } from "bcrypt";
@@ -7,11 +6,19 @@ import { Payload } from "../utils/interface/jwt";
 import { sign, verify } from "jsonwebtoken";
 import { secret } from "./auth/secret";
 import next, { NextApiRequest } from "next";
-import {} from '../utils/passport/passport'
+import {} from "../utils/passport/passport";
 import passport from "passport";
 import cookie from "cookie";
 import jwt from "jsonwebtoken";
 import { getCookie } from "cookies-next";
+import { HttpStatusCode } from "axios";
+import { z, ZodSchema } from "zod";
+
+interface ValidationError {
+  validation: string
+  code: string
+  message: string
+}
 
 export class ApiResponse<T> {
   readonly data: T | null;
@@ -85,8 +92,11 @@ export class ResponseHandler<T> {
 
 //bcrypt
 export class Bcrypt {
-  static async compare(password: string, hadshedpassword: string): Promise<boolean> {
-      throw new Error('Method not implemented.');
+  static async compare(
+    password: string,
+    hadshedpassword: string
+  ): Promise<boolean> {
+    throw new Error("Method not implemented.");
   }
   public static async createHashPassword(
     plainPassword: string
@@ -128,57 +138,68 @@ export class JWT {
       );
     });
   }
-  static sign(payload: any, arg1: string, arg2: { expiresIn: string; }, arg3: (err: any, token: any) => void) {
+  static sign(
+    payload: any,
+    arg1: string,
+    arg2: { expiresIn: string },
+    arg3: (err: any, token: any) => void
+  ) {
     throw new Error("Method not implemented.");
   }
 }
-
-// middleware with passport
-// export const passportInitialize = () => {
-//   return passport.initialize();
-// }
-
-// export const passportSession = () => {
-//   return passport.session();
-// }
 
 // manual JWT middleware
 export const MiddlewareAuthorization = async (
   req: NextApiRequest,
   secret: string
 ): Promise<string | Payload> => {
-  // using cookies-next to get the token
+  // console.log("All headers received:", req.headers);
   const token = getCookie("access_token", { req });
-  console.log("====================================")
-  console.log("Token", token);
-  console.log("====================================")
+  // console.log("Token directly from headers:", req.headers.authorization);
+  // console.log("====================================");
+  // console.log("Token", token);
+  // console.log("====================================");
 
   if (!token) {
-    console.log("====================================")
-    throw new ApiError("Invalid or Expired Token", HttpStatusCode.Unauthorized);
-    console.log("====================================")
+    console.log("====================================");
+    // console.error("No Token Found in Cookie");
+    throw new ApiError(
+      "Authorization token is missing",
+      HttpStatusCode.Unauthorized
+    );
+    console.log("====================================");
   }
 
   // verify and decode the token
-  let decodedToken;
+  // let decodedToken;
   try {
-    decodedToken = jwt.verify(token as string, secret);
+    const decodedToken = jwt.verify(token as string, secret);
+    if (typeof decodedToken === "object" && "id" in decodedToken) {
+      return decodedToken.id;
+    } else {
+      throw new ApiError(
+        "Payload format incorrect",
+        HttpStatusCode.Unauthorized
+      );
+    }
   } catch (error) {
-    console.log("====================================")
-    console.log("Token verification error", error); 
-    throw new ApiError("Invalid or Expired Token", HttpStatusCode.Unauthorized);
-    console.log("====================================")
+    console.log("====================================");
+    throw new ApiError(
+      `Token validation error: ${(error as any).message}`,
+      HttpStatusCode.Unauthorized
+    );
+    console.log("====================================");
   }
-
-  console.log("Decoded Token", decodedToken);
-  if (typeof decodedToken === 'object' && 'id' in decodedToken) {
-    return decodedToken.id;
-  }
-  console.log("====================================")
-  throw new ApiError("Payload format incorrect", HttpStatusCode.Unauthorized);
-
-  //get the user id from the decoded token
-  const userId = (decodedToken as Payload).userId;
-
-  return userId;
 };
+export const validator = {
+  validate: async (schema: ZodSchema, data: any) => {
+    try {
+      return schema.parseAsync(data);
+    } catch (error:any) {
+      console.error("Validation error:", error);
+      throw new ApiError(error.message, 400);
+    }
+  },
+};
+
+// export const validator = new RequestValidation();

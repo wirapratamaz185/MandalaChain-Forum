@@ -27,17 +27,17 @@ const icons: React.FC = () => {
         borderRight="1px solid"
         borderColor="gray.200"
       >
-        <IconItem
+        {/* <IconItem
           icon={VscGithub}
           fontSize={20}
           onClick={() => {
             router.push("");
           }}
-        />
+        /> */}
       </Flex>
       <>
         {/* Always visible */}
-        <IconItem icon={GrAdd} fontSize={20} onClick={onClick} />
+        {/* <IconItem icon={GrAdd} fontSize={20} onClick={onClick} /> */}
       </>
     </Flex>
   );

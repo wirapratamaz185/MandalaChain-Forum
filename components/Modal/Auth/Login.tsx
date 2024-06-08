@@ -1,10 +1,10 @@
-// modal/auth/Login.tsx
 import { Button, Flex, Text } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { authModalState } from '../../../atoms/authModalAtom';
 import InputField from './InputField';
 import { useRouter } from 'next/router';
+import useCustomToast from "@/hooks/useCustomToast";
 
 const Login: React.FC = () => {
   const router = useRouter();
@@ -12,9 +12,13 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const showToast = useCustomToast();
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
+
+    setLoading(true);
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -25,23 +29,32 @@ const Login: React.FC = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      console.log('Response:', response);
+      showToast({
+        title: "Login",
+        status: response.ok ? "success" : "error",
+        description: response.ok ? "Login successful" : "Login failed",
+      });
 
       if (response.ok) {
         const result = await response.json();
         window.location.href = '/';
-        if (result.status === 'success') {
-          router.push(result.url || '/');
-        } else {
+        window.location.reload();
+        if (result.status !== 'success') {
           setLoginError(result.message);
         }
       } else {
         const errorData = await response.json();
-        setLoginError(errorData.message || 'An error occurred. Please try again.');
+        setLoginError(errorData.message);
+        setTimeout(() => {
+          setLoginError('');
+        }, 3000);
       }
     } catch (error) {
-      console.error("Login Error:", error);
-      // setLoginError('An unexpected error occurred. Please try again.');
+      setTimeout(() => {
+        setLoginError('');
+      }, 5000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,7 +65,7 @@ const Login: React.FC = () => {
 
       {loginError && <Text color="red">{loginError}</Text>}
 
-      <Button type="submit">Log In</Button>
+      <Button type="submit" isLoading={loading}>Log In</Button>
       <Flex justifyContent="center">
         No account? <Text color="blue" onClick={() => setAuthModalState({ open: true, view: 'signup' })}>Sign up</Text>
       </Flex>

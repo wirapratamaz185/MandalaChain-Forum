@@ -15,26 +15,11 @@ type AboutProps = {
   communityData: Community;
 };
 
-/**
- * This about component is used for displaying general information about the community.
- * It displays the following data:
- *  - The number of subscribers in the community
- *  - Date when the community was created
- *  - Button for creating a new post
- *
- * Additional elements are displayed if the current user is an admin:
- *  - Button for opening the community settings modal
- * @param {communityData} - data requiblue to be displayed
- * @returns (React.FC<AboutProps>) - About component
- * @requires AboutHeaderBar - Header bar for the about section.
- * @requires AboutCommunity - Displays the number of subscribers and the date when the community was created.
- * @requires AdminSectionAbout - Displays some additional elements if the current user is an admin.
- */
 const About: React.FC<AboutProps> = ({ communityData }) => {
   const router = useRouter();
-  const data: any = communityData;
-  const correctData: Community = data.data;
-  // console.log(correctData);
+  const data:any = communityData;
+  const correctData: Community = data.data; // Access the nested data property
+  console.log("true data", correctData);
 
   return (
     // sticky position for the about section
@@ -53,7 +38,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
           <Button
             width="100%"
             onClick={() => {
-              router.push(`/community/${correctData.name}/submit`);
+              router.push(`/community/${correctData.id}/submit`);
             }}
             _hover={{ bg: "blue.500", color: "white" }}
           >
@@ -74,12 +59,6 @@ interface AboutHeaderBarProps {
   communityName: string;
 }
 
-/**
- * Header bar for the about section.
- * Contains the name of the community and a button for more options.
- * @param {string} communityName - Name of the community
- * @returns {React.FC<AboutHeaderBarProps>} - Header bar for the about section
- */
 const AboutHeaderBar: React.FC<AboutHeaderBarProps> = ({ communityName }) => (
   <Flex
     justify="space-between"
@@ -97,21 +76,15 @@ const AboutHeaderBar: React.FC<AboutHeaderBarProps> = ({ communityName }) => (
 );
 
 /**
- * @param {Community} communityData - data requiblue to be displayed
+ * @param {Community} communityData - data required to be displayed
  */
 interface AboutCommunityProps {
   communityData: Community;
 }
 
-/**
- * Displays the number of subscribers and the date when the community was created.
- * @param {Community} communityData - data requiblue to be displayed
- * @returns {React.FC<AboutCommunityProps>} - About community component
- */
 const AboutCommunity: React.FC<AboutCommunityProps> = ({ communityData }) => {
-  const data: any = communityData;
-  const correctData: Community = data.data;
-  // console.log(correctData);
+  const data:any = communityData;
+  const correctData: Community = data.data; // Access the nested data property
   return (
     <>
       {/* {correctData.id} */}
@@ -119,7 +92,7 @@ const AboutCommunity: React.FC<AboutCommunityProps> = ({ communityData }) => {
         <Flex direction="column" flexGrow={1}>
           {/* number of subscribers and date created */}
           <Text fontWeight={700}>Subscribers</Text>
-          <Text>{correctData.subscribers.length}</Text>
+          <Text>{correctData.subscribers?.length ?? 0}</Text>
         </Flex>
 
         {/* when the community was created */}
@@ -144,27 +117,22 @@ type AdminSectionAboutProps = {
   communityData: Community;
 };
 
-/**
- * Displays some additional elements if the current user is an admin:
- *  - Button for opening the community settings modal
- * @returns {React.FC<AdminSectionAboutProps>} - Admin section component
- */
 const AdminSectionAbout: React.FC<AdminSectionAboutProps> = ({
   communityData,
 }) => {
   const [isCommunitySettingsModalOpen, setCommunitySettingsModalOpen] =
     useState(false);
   const { user } = useAuth();
-  // const data: any = communityData;
-  // const correctData: Community = data.data;
+  const data:any = communityData;
+  const correctData: Community = data.data; // Access the nested data property
   return (
     <>
-      {user?.id === communityData?.owner_id && (
+      {user?.id === correctData?.owner_id && (
         <>
           <CommunitySettingsModal
             open={isCommunitySettingsModalOpen}
             handleClose={() => setCommunitySettingsModalOpen(false)}
-            communityData={communityData}
+            communityData={correctData}
           />
           <Button
             width="100%"

@@ -13,7 +13,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoDocumentText, IoImageOutline } from "react-icons/io5";
 import { MdOutlineArrowBackIos } from "react-icons/md";
 import ImageUpload from "./PostForm/ImageUpload";
@@ -21,7 +21,6 @@ import TextInputs from "./PostForm/TextInputs";
 import TabItem from "./TabItem";
 import { useAuth } from "@/hooks/useAuth";
 import { User } from "@/utils/interface/auth";
-
 
 type NewPostFormProps = {
   user: User | null;
@@ -54,10 +53,9 @@ const NewPostForm: React.FC<NewPostFormProps> = ({
 }) => {
   const router = useRouter();
 
-  // debug data structure
-  const data: any = currentCommunity;
-  const correctData: Community = data.data;
-  // console.log("Fix data", correctData);
+  // Use currentCommunity directly and add a check
+  const correctData: Community | undefined = currentCommunity;
+  console.log("Fix data", correctData);
 
   const [selectedTab, setSelectedTab] = useState(formTabs[0].title); // formTabs[0] = Post
   const [textInputs, setTextInputs] = useState({
@@ -71,9 +69,18 @@ const NewPostForm: React.FC<NewPostFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const showToast = useCustomToast();
-  const communityLink = `/community/${correctData.id}`;
+  const communityLink = correctData ? `/community/${correctData.id}` : `/community/${communityId}`;
 
   const handleCreatePost = async () => {
+    if (!correctData) {
+      showToast({
+        title: "Community not found",
+        description: "Please select a valid community",
+        status: "error",
+      });
+      return;
+    }
+
     console.log("Community ID POST FORM:", correctData.id);
 
     setLoading(true);

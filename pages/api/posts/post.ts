@@ -58,8 +58,9 @@ export default async function handler(
     console.log("Body:", body);
 
     // Assuming 'file' is the key for the uploaded file
-    const file = files.file ? files.file[0] : null;
-    const imageUrl = file ? `/upload/${uuidv4()}_${file.originalFilename}` : null;
+    const file = files.file;
+    console.log("File:", file);
+    const imageUrl = file ? file.filePath : null;
 
     // console.log("File Upload:", file)
     console.log("Image URL Upload Success:", imageUrl);

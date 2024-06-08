@@ -15,9 +15,9 @@ export default async function getGeneric(
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  console.log("=====================================");
-  console.log("handle function Generic Public called");
-  console.log("=====================================");
+  // console.log("=====================================");
+  // console.log("handle function Generic Public called");
+  // console.log("=====================================");
 
   let userId;
   try {

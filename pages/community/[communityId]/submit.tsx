@@ -13,13 +13,11 @@ import { useRouter } from "next/router";
 import { User } from "@/utils/interface/auth";
 
 const SubmitPostPage: React.FC = () => {
-  const { communityStateValue } = useCommunityData();
-  // console.log("communityStateValue", communityStateValue.currentCommunity);
-  const setAuthModalState = useSetRecoilState(authModalState);
+  const { communityStateValue, getCommunityData } = useCommunityData();
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const { communityId } = router.query;
-  // console.log("communityId want to post", communityId);
+  console.log("communityId want to post", communityId);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -44,6 +42,12 @@ const SubmitPostPage: React.FC = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (communityId) {
+      getCommunityData(communityId as string);
+    }
+  }, [communityId]);
 
   return (
     <PageContent>

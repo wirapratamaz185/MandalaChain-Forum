@@ -22,6 +22,7 @@ model User {
   communities Community[]
   accounts    Account[]
   sessions    Session[]
+  votes       Vote[]
 }
 
 model Account {
@@ -93,12 +94,13 @@ model Post {
   title        String
   body         String
   imageUrl     String? //nullable
-  vote         Int
+  vote         Int        @default(0) // Default value for vote count
   community_id String     @db.Uuid
   community    Community  @relation(fields: [community_id], references: [id])
   comments     Comment[]
   created_at   DateTime   @default(now())
   Bookmark     Bookmark[]
+  Vote         Vote[]
 }
 
 model Comment {
@@ -127,4 +129,16 @@ model Bookmark {
   user_id String @db.Uuid
   user    User   @relation(fields: [user_id], references: [id])
   created_at DateTime @default(now())
+}
+
+model Vote {
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id String @db.Uuid
+  user    User   @relation(fields: [user_id], references: [id])
+  post_id String @db.Uuid
+  post    Post   @relation(fields: [post_id], references: [id])
+  status  String
+  created_at DateTime @default(now())
+
+  @@unique([user_id, post_id]) // a user can only vote once on per post
 }

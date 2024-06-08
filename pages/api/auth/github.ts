@@ -13,7 +13,7 @@ passport.use(
       clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
       callbackURL:
         process.env.GITHUB_CALLBACK_URL ||
-        "https://mandala-chain-forum.vercel.app/api/auth/githubCallback",
+        "http://localhost:3000/api/auth/githubCallback",
       scope: ["user:email", "read:user"],
     },
     async (

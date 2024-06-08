@@ -13,14 +13,20 @@ export default function uploadFormFiles(req: NextApiRequest) {
 
     form.parse(req, (err, fields, files) => {
       if (err) {
+        console.error("Error parsing form:", err);
         return reject(err);
       }
 
+      console.log("Fields:", fields);
+      console.log("Files:", files);
+
       // Process the uploaded files here
-      const processedFiles: { [key: string]: string } = {};
-      Object.values(files).forEach((fileArray: File[] | undefined) => {
-        if (fileArray) {
+      const processedFiles: { [key: string]: any } = {};
+      Object.keys(files).forEach((key) => {
+        const fileArray = files[key];
+        if (Array.isArray(fileArray)) {
           fileArray.forEach((file: File) => {
+            console.log("Processing file:", file);
             const data = fs.readFileSync(file.filepath);
             const uploadDir = path.join(process.cwd(), 'public', 'upload');
             if (!fs.existsSync(uploadDir)) {
@@ -29,10 +35,15 @@ export default function uploadFormFiles(req: NextApiRequest) {
             const filePath = path.join(uploadDir, file.originalFilename as string);
             fs.writeFileSync(filePath, data);
             fs.unlinkSync(file.filepath);
-            processedFiles[file.originalFilename as string] = `/upload/${file.originalFilename}`;
+            processedFiles[key] = {
+              originalFilename: file.originalFilename,
+              filePath: `/upload/${file.originalFilename}`,
+            };
           });
         }
       });
+
+      console.log("Processed Files:", processedFiles);
 
       // Resolve with the fields and processed file paths
       resolve({ fields, files: processedFiles });

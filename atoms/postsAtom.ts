@@ -2,10 +2,12 @@
 import { atom } from "recoil";
 
 export type Post = {
+  [x: string]: any;
+  user_id: string | undefined;
   id: string;
   community_id: string;
   owner_id: string;
-  imageURL?: string;
+  imageURL: string;
   created_at: Date;
   community: {
     name: string;
@@ -101,7 +103,11 @@ const defaultPostState: PostState = {
  *
  * @see https://recoiljs.org/docs/basic-tutorial/atoms/
  */
-export const postState = atom<PostState>({
+export const postState = atom({
   key: "postState",
-  default: defaultPostState,
+  default: {
+    posts: [] as Post[],
+    postVotes: [] as PostVote[],
+    selectedPost: null as Post | null,
+  },
 });

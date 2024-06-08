@@ -32,8 +32,7 @@ const Communities: React.FC = () => {
     } catch (error) {
       console.error('Fetching communities failed:', error);
       showToast({
-        title: "Could not find communities",
-        description: (error as Error).message,
+        title: "Please log in to see the community",
         status: "error",
       });
     } finally {

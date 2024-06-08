@@ -61,6 +61,7 @@ export default function Home() {
   const buildUserHomeFeed = async () => {
     const endpoint = user ? `/api/posts/homefeed?userId=${user.id}` : '/api/posts/generic';
     await fetchPosts(endpoint);
+    console.log("User home feed built");
   };
 
   useEffect(() => {
@@ -144,7 +145,7 @@ export default function Home() {
                 onDeletePost={onDeletePost}
                 onBookmarkPost={onBookmarkPost}
                 onVote={onVote}
-                userVoteValue={postStateValue.postVotes.find(
+                userVoteValue={postStateValue.postVotes?.find(
                   (item) => item.postId === post.id
                 )?.voteValue} userIsCreator={false}
               />

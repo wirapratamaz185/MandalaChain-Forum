@@ -14,11 +14,9 @@ export default async function getVotes(
   if (req.method !== "GET") {
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
-  console.log("=====================================");
-  console.log("handle function getVotes called");
-  console.log("=====================================");
 
-  const postId = req.query.id as string;
+  const postId = req.query.postId as string; // Use postId instead of id
+  // console.log("PostId", postId);
 
   let userId;
   try {
@@ -27,18 +25,21 @@ export default async function getVotes(
       throw new ApiError("Unauthorized: No userId decoded", 401);
     }
     userId = payload;
-    console.log("Authenticated user ID:", userId);
+    // console.log("Authenticated user ID:", userId);
 
     const votes = await prisma.post.findMany({
       where: {
         id: postId,
       },
       select: {
+        id: true,
+        title: true,
+        body: true,
         vote: true,
       },
     });
 
-    console.log("Votes fetched:", votes.length);
+    // console.log("Votes fetched:", votes.length);
 
     if (votes.length === 0) {
       console.log("No votes available to display");

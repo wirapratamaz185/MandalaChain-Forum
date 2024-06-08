@@ -5,13 +5,19 @@ import About from "@/components/Community/About";
 import Header from "@/components/Community/Header";
 import NotFound from "@/components/Community/NotFound";
 import PageContent from "@/components/Layout/PageContent";
-import Posts from "@/components/Posts/Posts";
+import PostItem from "@/components/Posts/PostItem";
+import PostLoader from "@/components/Loaders/PostLoader";
 import { GetServerSidePropsContext } from "next";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useSetRecoilState } from "recoil";
 import safeJsonStringify from "safe-json-stringify";
 import { getCookie } from "cookies-next";
+import { Stack } from "@chakra-ui/react";
+import useCommunityData from "@/hooks/useCommunityData";
+import usePosts from "@/hooks/usePosts";
+import useCustomToast from "@/hooks/useCustomToast";
+import { User } from "@/utils/interface/auth";
 
 /**
  * @param {Community} communityData - Community data for the current community
@@ -21,18 +27,58 @@ type CommunityPageProps = {
 };
 
 const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
-  const setCommunityStateValue = useSetRecoilState(communityState);
+  const data: any = communityData;
+  const correctData: Community = data.data;
+  // console.log("Community Data in CommunityPage:", correctData);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { communityStateValue } = useCommunityData();
+  const {
+    postStateValue,
+    setPostStateValue,
+    onVote,
+    onDeletePost,
+    onSelectPost,
+    onBookmarkPost,
+  } = usePosts();
+  const showToast = useCustomToast();
+
+  // console.log("postStateValue looks like:", postStateValue.posts);
+
+  const fetchUserFromStorage = () => {
+    const userCookie = localStorage.getItem("access_token");
+    if (userCookie) {
+      try {
+        const base64Url = userCookie.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map(function (c) {
+              return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join("")
+        );
+        const parsedUser = JSON.parse(jsonPayload);
+        setUser({ id: parsedUser.id, email: parsedUser.email, username: parsedUser.username });
+      } catch (error) {
+        console.log("Error Parsing Token", error);
+      }
+    }
+  };
 
   useEffect(() => {
-    if (communityData) {
-      setCommunityStateValue(prev => ({
-        ...prev,
-        currentCommunity: communityData,
-      }));
-    } else {
-      console.log("No community data available");
-    }
+    fetchUserFromStorage();
   }, []);
+
+  useEffect(() => {
+    if (correctData.posts) {
+      setPostStateValue((prev) => ({
+        ...prev,
+        posts: correctData.posts,
+      }));
+    }
+  }, [correctData.posts]);
 
   if (!communityData || Object.keys(communityData).length === 0) {
     return <NotFound />;
@@ -44,7 +90,25 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
       <PageContent>
         <>
           {/* <CreatePostLink /> */}
-          <Posts communityId={communityData.id} />
+          {loading ? (
+            <PostLoader />
+          ) : (
+            <Stack spacing={3}>
+              {postStateValue.posts.map((item) => (
+                <PostItem
+                  key={item.id}
+                  post={item}
+                  userIsCreator={user?.id === item.user_id}
+                  userVoteValue={postStateValue.postVotes?.find((vote) => vote.postId === item.id)
+                    ?.voteValue}
+                  onVote={onVote}
+                  onSelectPost={onSelectPost}
+                  onDeletePost={onDeletePost} 
+                  onBookmarkPost={onBookmarkPost}
+                />
+              ))}
+            </Stack>
+          )}
         </>
         <About communityData={communityData} />
       </PageContent>
@@ -83,6 +147,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     }
 
     const data = await response.json();
+    // console.log("Community Data:", data.data);
     return {
       props: { communityData: JSON.parse(safeJsonStringify(data)) },
     };
