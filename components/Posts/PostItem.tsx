@@ -16,6 +16,7 @@ import {
 import moment from "moment";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BsBookmark } from "react-icons/bs";
 import { FiShare2 } from "react-icons/fi";
 import {
@@ -216,6 +217,7 @@ const PostItem: React.FC<PostItemProps> = ({
           onVote={onVote}
           post={post}
           voteCount={voteCount}
+          voteCount={voteCount}
         />
       </Flex>
 
@@ -258,12 +260,14 @@ type VoteSectionProps = {
   ) => void;
   post: Post;
   voteCount: number | null;
+  voteCount: number | null;
 };
 
 const VoteSection: React.FC<VoteSectionProps> = ({
   userVoteValue,
   onVote,
   post,
+  voteCount,
   voteCount,
 }) => {
 
@@ -281,6 +285,7 @@ const VoteSection: React.FC<VoteSectionProps> = ({
       />
       {/* number of likes  */}
       <Text fontSize="12pt" color="gray.600">
+        {voteCount !== null ? voteCount : 0}
         {voteCount !== null ? voteCount : 0}
       </Text>
       {/* dislike button */}
