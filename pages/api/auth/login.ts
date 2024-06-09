@@ -44,7 +44,7 @@ export default function login(req: LoginRequest, res: NextApiResponse) {
         console.log("JWT generated:", token);
         console.log("==================================");
 
-        setCookie("access_token", token, { req, res, maxAge: 60 * 6 * 24 });
+        setCookie("access_token", token, { req, res, maxAge: 12 * 60 * 60 });
         return res.redirect(303, `/?token=${token}`);
 
         // This line will never be reached due to the redirect above

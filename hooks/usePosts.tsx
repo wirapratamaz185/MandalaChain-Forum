@@ -58,8 +58,8 @@ const usePosts = () => {
     }));
 
     // Ensure the community property exists before accessing its name
-    const communityName = post.community?.name || post.community_id;
-    router.push(`/community/${communityName}/comments/${post.id}`);
+    const communityId = post.community_id;
+    router.push(`/community/${communityId}/comments/${post.id}`);
   };
 
   const onDeletePost = async (post: Post) => {
@@ -136,28 +136,28 @@ const usePosts = () => {
     }
   };
 
-  useEffect(() => {
-    if (isAuthenticated && currentCommunity?.id) {
-      const fetchVotes = async () => {
-        const votesUrl = `/api/posts/getvote?postId=${currentCommunity.id}`;
-        const response = await fetch(votesUrl, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+  // useEffect(() => {
+  //   if (isAuthenticated && currentCommunity?.id) {
+  //     const fetchVotes = async () => {
+  //       const votesUrl = `/api/posts/getvote?postId=${currentCommunity.id}`;
+  //       const response = await fetch(votesUrl, {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //       });
 
-        if (response.ok) {
-          const postVotes = await response.json();
-          setPostStateValue(prev => ({
-            ...prev,
-            postVotes,
-          }));
-        }
-      };
+  //       if (response.ok) {
+  //         const postVotes = await response.json();
+  //         setPostStateValue(prev => ({
+  //           ...prev,
+  //           postVotes,
+  //         }));
+  //       }
+  //     };
 
-      fetchVotes();
-    }
-  }, [isAuthenticated, currentCommunity, setPostStateValue]);
+  //     fetchVotes();
+  //   }
+  // }, [isAuthenticated, currentCommunity, setPostStateValue]);
 
   // Clear votes when user logs out
   useEffect(() => {

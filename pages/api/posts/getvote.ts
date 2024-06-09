@@ -42,7 +42,7 @@ export default async function getVotes(
     // console.log("Votes fetched:", votes.length);
 
     if (votes.length === 0) {
-      console.log("No votes available to display");
+      // console.log("No votes available to display");
       return res.status(404).json(ApiResponse.error("No votes available"));
     }
 

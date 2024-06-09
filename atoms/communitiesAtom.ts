@@ -5,7 +5,6 @@ import { Post } from "./postsAtom";
 // Interface representing a community.
  
 export interface Community {
-  posts: Post[];
   id: string;
   name: string;
   owner_id: string;
@@ -14,11 +13,14 @@ export interface Community {
     type: "public" | "private";
   }
   created_at: Date;
-  imageURL?: string;
+  // imageURL?: string;
+  imageUrl?: string;
   subscribers: {
     length: number;
     id: string;
   }
+  data: Community | undefined;
+  posts: Post[];
 }
 
 // The snippet representing a community a user us subscribed to

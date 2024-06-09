@@ -57,7 +57,7 @@ export default async function getGeneric(
           },
         },
       },
-      take: 10,
+      take: 5,
     });
 
     if (posts.length === 0) {

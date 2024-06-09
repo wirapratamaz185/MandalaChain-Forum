@@ -347,7 +347,7 @@ const PostDetails = ({ showCommunityImage, postDetail }: PostDetailsProps) => {
               pr={2}
               onClick={(event) => event.stopPropagation()}
             >
-              {postDetail.community_id}
+              {postDetail.community?.name}
             </Text>
           </Link>
         </>

@@ -27,6 +27,7 @@ export default async function fetchUser(req: NextApiRequest, res: NextApiRespons
         id: true,
         username: true,
         email: true,
+        imageUrl: true,
       },
     });
 

@@ -98,6 +98,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ open, handleClose }) => {
         throw new Error(result.message);
       }
       setUser((prevUser) => prevUser ? { ...prevUser, imageUrl: result.data.imageUrl } : null);
+      console.log("Profile image updated:", result.data.imageUrl); // Add logging
       showToast({
         title: "Profile updated",
         description: "Your profile image has been updated",

@@ -31,7 +31,7 @@ export default function Home() {
   const fetchPosts = async (endpoint: string) => {
     setLoading(true);
     try {
-      const response = await fetch(endpoint);
+      const response = await fetch('/api/posts/generic');
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || 'Failed to fetch posts');

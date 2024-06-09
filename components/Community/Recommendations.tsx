@@ -133,9 +133,9 @@ const SuggestedCommunitiesList: React.FC = () => {
                       <Text>{index + 1}</Text>
                     </Flex>
                     <Flex align="center" width="80%">
-                      {item.imageURL ? (
+                      {item.imageUrl ? (
                         <Image
-                          src={item.imageURL}
+                          src={item.imageUrl}
                           borderRadius="full"
                           boxSize="28px"
                           mr={2}

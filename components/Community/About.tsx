@@ -17,9 +17,12 @@ type AboutProps = {
 
 const About: React.FC<AboutProps> = ({ communityData }) => {
   const router = useRouter();
-  const data:any = communityData;
-  const correctData: Community = data.data; // Access the nested data property
-  console.log("true data", correctData);
+  const correctData: Community | undefined = communityData?.data; // Access the nested data property
+  // console.log(correctData);
+
+  if (!correctData) {
+    return null; // or render a loading spinner or a placeholder
+  }
 
   return (
     // sticky position for the about section
@@ -83,8 +86,13 @@ interface AboutCommunityProps {
 }
 
 const AboutCommunity: React.FC<AboutCommunityProps> = ({ communityData }) => {
-  const data:any = communityData;
-  const correctData: Community = data.data; // Access the nested data property
+  const correctData: Community | undefined = communityData?.data; // Access the nested data property
+  // console.log(correctData);
+
+  if (!correctData) {
+    return null; // or render a loading spinner or a placeholder
+  }
+
   return (
     <>
       {/* {correctData.id} */}
@@ -123,8 +131,12 @@ const AdminSectionAbout: React.FC<AdminSectionAboutProps> = ({
   const [isCommunitySettingsModalOpen, setCommunitySettingsModalOpen] =
     useState(false);
   const { user } = useAuth();
-  const data:any = communityData;
-  const correctData: Community = data.data; // Access the nested data property
+  const correctData: Community | undefined = communityData?.data; // Access the nested data property
+
+  if (!correctData) {
+    return null; // or render a loading spinner or a placeholder
+  }
+
   return (
     <>
       {user?.id === correctData?.owner_id && (

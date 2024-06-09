@@ -123,7 +123,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
       console.log("=====================================")
 
       if (typeof data === 'object' && data !== null) {
-        router.push(`/community/${data.id as any}`);
+        router.push(`/community/${data.data.id}`);
         showToast({
           title: "Community created successfully",
           status: "success",
