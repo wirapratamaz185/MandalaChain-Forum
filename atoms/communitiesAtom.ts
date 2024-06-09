@@ -13,7 +13,7 @@ export interface Community {
     type: "public" | "private";
   }
   created_at: Date;
-  // imageURL?: string;
+  imageURL?: string;
   imageUrl?: string;
   subscribers: {
     length: number;
