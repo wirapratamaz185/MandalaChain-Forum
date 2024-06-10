@@ -1,5 +1,4 @@
 // api/posts/vote.ts
-import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
   ApiResponse,
@@ -10,8 +9,7 @@ import { secret } from "../../../utils/auth/secret";
 import { ApiError } from "../../../utils/response/baseError";
 import { VoteValidator } from "../../../utils/schema";
 import { z } from "zod";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../../prisma/prisma";
 
 type ErrorResponseZod = {
   code: string;

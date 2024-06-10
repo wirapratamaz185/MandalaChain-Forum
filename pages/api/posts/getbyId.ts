@@ -1,11 +1,9 @@
 // pages/api/posts/getbyId.ts
-import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { secret } from "../../../utils/auth/secret";
 import { ApiError } from "../../../utils/response/baseError";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../../prisma/prisma";
 
 export default async function GETID(
   req: NextApiRequest,

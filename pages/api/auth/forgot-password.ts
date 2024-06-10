@@ -1,12 +1,10 @@
 // api/auth/forgot-password.ts
-import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { sendEmail } from "../../../utils/email/email";
 import { ApiResponse } from "../../../utils/helper";
 import jwt from "jsonwebtoken";
 import { secret } from "../../../utils/auth/secret";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../../prisma/prisma";
 
 export default async function forgotPassword(
   req: NextApiRequest,

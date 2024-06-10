@@ -1,11 +1,10 @@
 // pages/api/community/post.ts
-import { PrismaClient, PrivacyType } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { ApiError } from "../../../utils/response/baseError";
 import { secret } from "../../../utils/auth/secret";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../../prisma/prisma";
+import { PrivacyType } from "@prisma/client";
 
 export default async function POST(
   req: NextApiRequest,

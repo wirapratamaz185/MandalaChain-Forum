@@ -1,13 +1,11 @@
 // src/pages/api/posts/post.ts
-import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { secret } from "../../../utils/auth/secret";
 import { ApiError } from "../../../utils/response/baseError";
 import uploadFormFiles from "../upload";
 import { v4 as uuidv4 } from 'uuid';
-
-const prisma = new PrismaClient();
+import { prisma } from "../../../prisma/prisma";
 
 export const config = {
   api: {

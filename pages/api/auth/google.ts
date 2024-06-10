@@ -2,9 +2,8 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../../prisma/prisma";
 
-const prisma = new PrismaClient();
 
 passport.use(
   new GoogleStrategy(

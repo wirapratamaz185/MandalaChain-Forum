@@ -1,11 +1,9 @@
 // pages/api/community/get.ts
-import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { ApiError } from "../../../utils/response/baseError";
 import { secret } from "../../../utils/auth/secret";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../../prisma/prisma";
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {

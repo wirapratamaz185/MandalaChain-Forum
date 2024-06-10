@@ -1,9 +1,8 @@
 import passport from "passport";
 import { Strategy as GithubStrategy } from "passport-github2";
-import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
+import { prisma } from "../../../prisma/prisma";
 
-const prisma = new PrismaClient();
 
 // Initialize GitHub OAuth Strategy
 passport.use(
