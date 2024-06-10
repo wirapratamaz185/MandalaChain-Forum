@@ -46,6 +46,15 @@ export default async function POST(
             id: userId,
           },
         },
+        subscribers: {
+          create: {
+            user: {
+              connect: {
+                id: userId,
+              },
+            },
+          },
+        },
       },
       select: {
         id: true,

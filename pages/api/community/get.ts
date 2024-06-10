@@ -37,7 +37,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         posts: true,
       },
       orderBy: {
-        created_at: order === "asc" ? "asc" : "desc",
+        subscribers: {
+          _count: "desc",
+        }
       },
       take: limit ? Number(limit) : undefined,
     });

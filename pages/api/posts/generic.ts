@@ -25,7 +25,7 @@ export default async function getGeneric(
     }
     userId = payload;
 
-    console.log("Authenticated user ID:", userId);
+    // console.log("Authenticated user ID:", userId);
 
     const posts = await prisma.post.findMany({
       where: {

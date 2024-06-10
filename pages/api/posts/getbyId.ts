@@ -50,6 +50,14 @@ export default async function GETID(
             name: true,
           },
         },
+        Bookmark: {
+          where: {
+            user_id: userId,
+          },
+          select: {
+            id: true,
+          }
+        },
       },
     });
 

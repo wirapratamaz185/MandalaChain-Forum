@@ -1,4 +1,3 @@
-// components/Posts/PostItem.tsx
 import { Post } from "@/atoms/postsAtom";
 import useCustomToast from "@/hooks/useCustomToast";
 import {
@@ -16,7 +15,7 @@ import {
 import moment from "moment";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { BsBookmark } from "react-icons/bs";
+import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { FiShare2 } from "react-icons/fi";
 import {
   IoArrowDownCircleOutline,
@@ -63,10 +62,31 @@ const PostItem: React.FC<PostItemProps> = ({
   const { onCopy, value, setValue, hasCopied } = useClipboard("");
   const [voteCount, setVoteCount] = useState<number | null>(null);
   const [fetchedImage, setFetchedImage] = useState<string | null>(null);
+  const [bookmarked, setBookmarked] = useState(false); // State for bookmark status
   /**
    * If there is no selected post then post is already selected
    */
   const singlePostPage = !onSelectPost;
+
+  // Fetch the bookmark status
+  useEffect(() => {
+    const fetchBookmarkedPosts = async () => {
+      try {
+        const response = await fetch(`/api/posts/bookmarked`);
+        const data = await response.json();
+        if (response.ok) {
+          setBookmarked(data.data.includes(post.id));
+          // console.log("Set Bookmarked", data.data.includes(post.id));
+        } else {
+          throw new Error("Failed to fetch bookmarked posts");
+        }
+      } catch (error) {
+        console.error("Error: fetchBookmarkedPosts", error);
+      }
+    };
+
+    fetchBookmarkedPosts();
+  }, [post.id]);
 
   // fetch the vote count
   useEffect(() => {
@@ -76,7 +96,7 @@ const PostItem: React.FC<PostItemProps> = ({
         const data = await response.json();
         // console.log("data", data);
         if (response.ok && data.data.length > 0) {
-          setVoteCount(data.data[0].vote);  
+          setVoteCount(data.data[0].vote);
         } else {
           throw new Error("Failed to get vote count");
         }
@@ -157,20 +177,23 @@ const PostItem: React.FC<PostItemProps> = ({
       }
 
       showToast({
-        title: post.isBookmarked ? "Post Unbookmarked" : "Post Bookmarked",
-        description: post.isBookmarked ? "This post has been unbookmarked" : "This post has been bookmarked",
+        title: bookmarked ? "Post Unbookmarked" : "Post Bookmarked",
+        description: bookmarked ? "This post has been unbookmarked" : "This post has been bookmarked",
         status: "success",
       });
 
       // Toggle the bookmark state
-      // setPostStateValue(prev => ({
-      //   ...prev,
-      //   posts: prev.posts.map((p: Post) => p.id === post.id ? { ...p, isBookmarked: !p.isBookmarked } : p),
-      // }));
+      setBookmarked(!bookmarked);
+    } catch (error) {
+      console.error("Error in handleBookmark:", error);
+      showToast({
+        title: "Could not Bookmark Post",
+        status: "error",
+      });
     } finally {
       setLoadingBookmark(false);
     }
-  }
+  };
 
   const handleShare = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -231,6 +254,7 @@ const PostItem: React.FC<PostItemProps> = ({
           />
         </Stack>
         <PostActions
+          post={{ ...post, bookmarked }}
           handleDelete={handleDelete}
           loadingDelete={loadingDelete}
           userIsCreator={userIsCreator}
@@ -266,8 +290,6 @@ const VoteSection: React.FC<VoteSectionProps> = ({
   post,
   voteCount,
 }) => {
-
-  // console.log("Vote Count Post", voteCount)
   return (
     <>
       {/* like button */}
@@ -406,6 +428,7 @@ const PostBody = ({ post, loadingImage, setLoadingImage }: PostBodyProps) => {
 };
 
 interface PostActionsProps {
+  post: Post;
   handleDelete: (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => Promise<void>;
@@ -417,41 +440,44 @@ interface PostActionsProps {
 }
 
 const PostActions: React.FC<PostActionsProps> = ({
+  post,
   handleDelete,
   loadingDelete,
   loadingBookmark,
   userIsCreator,
   handleShare,
   handleBookmark,
-}) => (
-  <Stack
-    ml={1}
-    mb={1}
-    color="gray.500"
-    fontWeight={600}
-    direction="row"
-    spacing={1}
-  >
-    <Button variant="action" height="32px" onClick={handleShare}>
-      <Icon as={FiShare2} mr={2} />
-      <Text fontSize="9pt">Share</Text>
-    </Button>
-
-    <Button variant="action" height="32px" onClick={handleBookmark} isLoading={loadingBookmark}>
-      <Icon as={BsBookmark} mr={2} />
-      <Text fontSize="9pt">Save</Text>
-    </Button>
-
-    {userIsCreator && (
-      <Button
-        variant="action"
-        height="32px"
-        onClick={handleDelete}
-        isLoading={loadingDelete}
-      >
-        <Icon as={MdOutlineDelete} mr={2} />
-        <Text fontSize="9pt">Delete</Text>
+}) => {
+  return (
+    <Stack
+      ml={1}
+      mb={1}
+      color="gray.500"
+      fontWeight={600}
+      direction="row"
+      spacing={1}
+    >
+      <Button variant="action" height="32px" onClick={handleShare}>
+        <Icon as={FiShare2} mr={2} />
+        <Text fontSize="9pt">Share</Text>
       </Button>
-    )}
-  </Stack>
-);
+
+      <Button variant="action" height="32px" onClick={handleBookmark} isLoading={loadingBookmark}>
+        <Icon as={post.bookmarked ? BsBookmarkFill : BsBookmark} mr={2} color={post.bookmarked ? "gray.500" : "gray.300"} />
+        <Text fontSize="9pt">{post.bookmarked ? "Unsave" : "Save"}</Text>
+      </Button>
+
+      {userIsCreator && (
+        <Button
+          variant="action"
+          height="32px"
+          onClick={handleDelete}
+          isLoading={loadingDelete}
+        >
+          <Icon as={MdOutlineDelete} mr={2} />
+          <Text fontSize="9pt">Delete</Text>
+        </Button>
+      )}
+    </Stack>
+  );
+};

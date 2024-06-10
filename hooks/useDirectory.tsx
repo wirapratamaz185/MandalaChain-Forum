@@ -9,25 +9,12 @@ import { useEffect } from "react";
 import { IoPeopleCircleOutline } from "react-icons/io5";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-/**
- * Hook for managing the directory menu from various components.
- * Functionality includes:
- * - Selecting a community from the directory menu
- * - Toggling the directory menu open or closed
- * @returns {DirectoryMenuState} directoryState - object containing the current directory state
- */
 const useDirectory = () => {
   const [directoryState, setDirectoryState] =
     useRecoilState(directoryMenuState);
   const router = useRouter();
   const communityStateValue = useRecoilValue(communityState);
 
-  /**
-   * Allows the user to select a menu item from the directory menu.
-   * If the user is already on the page that the menu item links to, then the menu will close.
-   * If the user is not on the page that the menu item links to, then the user will be redirected to the page.
-   * @param {DirectoryMenuItem} menuItem - object representing the menu item that was selected
-   */
   const onSelectMenuItem = (menuItem: DirectoryMenuItem) => {
     // updates the selected menu item on state
     setDirectoryState((prev) => ({
@@ -42,10 +29,7 @@ const useDirectory = () => {
     }
   };
 
-  /**
-   * Toggles the directory menu open or closed.
-   * If the menu is open, then the menu will close.
-   */
+
   const toggleMenuOpen = () => {
     setDirectoryState((prev) => ({
       ...prev,
@@ -69,7 +53,7 @@ const useDirectory = () => {
       setDirectoryState((prev) => ({
         ...prev,
         selectedMenuItem: {
-          displayText: currentCommunity?.id,
+          displayText: currentCommunity?.name,
           link: `community/${currentCommunity?.id}`,
           imageURL: currentCommunity?.imageURL,
           icon: IoPeopleCircleOutline,

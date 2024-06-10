@@ -4,6 +4,7 @@ import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { secret } from "../../../utils/auth/secret";
 import { ApiError } from "../../../utils/response/baseError";
 import { prisma } from "../../../prisma/prisma";
+import bookmark from "./bookmark";
 
 export default async function GET(
   req: NextApiRequest,
@@ -55,6 +56,14 @@ export default async function GET(
           },
         },
         created_at: true,
+        Bookmark: {
+          where: {
+            user_id: userId,
+          },
+          select: {
+            id: true,
+          },
+        },
       },
       orderBy: {
         created_at: "desc",
@@ -77,6 +86,7 @@ export default async function GET(
         id: post.community.id,
         name: post.community.name,
       },
+      bookmark: post.Bookmark.length > 0,
     }));
 
     res

@@ -117,24 +117,22 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
       const data = await response.json();
 
       console.log("=====================================")
-      console.log("Response:", response);
+      console.log("Response Post:", response);
       console.log("=====================================")
-      console.log("Data:", data);
+      console.log("Data Post:", data);
       console.log("=====================================")
 
       if (typeof data === 'object' && data !== null) {
         router.push(`/community/${data.data.id}`);
         showToast({
-          title: "Community created successfully",
+          title: "Community created and subscribed successfully",
           status: "success",
         });
       } else {
         throw new Error('Unexpected API response: ' + JSON.stringify(data));
       }
     } catch (error) {
-      console.log("================================================")
       console.error("Error creating community", error);
-      console.log("================================================")
       showToast({
         title: "Error creating community",
         status: "error",

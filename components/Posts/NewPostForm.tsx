@@ -55,7 +55,7 @@ const NewPostForm: React.FC<NewPostFormProps> = ({
 
   // Use currentCommunity directly and add a check
   const correctData: Community | undefined = currentCommunity;
-  console.log("Fix data", correctData);
+  // console.log("Fix data", correctData);
 
   const [selectedTab, setSelectedTab] = useState(formTabs[0].title); // formTabs[0] = Post
   const [textInputs, setTextInputs] = useState({
@@ -137,7 +137,7 @@ const NewPostForm: React.FC<NewPostFormProps> = ({
         selectedTab={selectedTab}
         setSelectedTab={setSelectedTab}
       />
-      <BackToCommunityButton communityId={communityId} />
+      <BackToCommunityButton communityId={communityId} communityName={correctData?.name || communityId} />
       <PostBody
         selectedTab={selectedTab}
         handleCreatePost={handleCreatePost}
@@ -182,10 +182,12 @@ const TabList: React.FC<TabListProps> = ({
 
 interface BackToCommunityButtonProps {
   communityId: string;
+  communityName: string;
 }
 
 const BackToCommunityButton: React.FC<BackToCommunityButtonProps> = ({
   communityId,
+  communityName,
 }) => {
   const router = useRouter();
   const communityLink = `/community/${communityId}`;
@@ -202,7 +204,7 @@ const BackToCommunityButton: React.FC<BackToCommunityButtonProps> = ({
       onClick={() => router.push(communityLink)}
     >
       <Icon as={MdOutlineArrowBackIos} mr={2} />
-      {`Back to ${communityId}`}
+      {`Back to ${communityName}`}
     </Button>
   );
 };
