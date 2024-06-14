@@ -37,9 +37,9 @@ export default async function VOTE(
   try {
     // Validate request body
     const bodyReq = await validator.validate(VoteValidator, req.body);
-    const { status } = bodyReq;
+    const { up } = bodyReq;
 
-    if (!["UPVOTE", "DOWNVOTE"].includes(status)) {
+    if (typeof up !== "boolean") {
       return res.status(400).json(ApiResponse.error("Invalid vote status"));
     }
 
@@ -62,7 +62,7 @@ export default async function VOTE(
 
     if (existingVote) {
       // If user already voted, toggle the vote
-      if (existingVote.status === status) {
+      if (existingVote.up === up) {
         // Remove the vote if the same vote is cast again
         await prisma.vote.delete({
           where: {
@@ -78,7 +78,7 @@ export default async function VOTE(
           where: { id: postId },
           data: {
             vote: {
-              decrement: status === "UPVOTE" ? 1 : -1,
+              decrement: up ? 1 : -1,
             },
           },
         });
@@ -95,7 +95,7 @@ export default async function VOTE(
               post_id: postId,
             },
           },
-          data: { status },
+          data: { up },
         });
 
         // Update the vote count on the post
@@ -103,7 +103,7 @@ export default async function VOTE(
           where: { id: postId },
           data: {
             vote: {
-              increment: status === "UPVOTE" ? 1 : -1,
+              increment: up ? 2 : -2,
             },
           },
         });
@@ -118,7 +118,7 @@ export default async function VOTE(
         data: {
           user_id: userId,
           post_id: postId,
-          status,
+          up,
         },
       });
 
@@ -127,7 +127,7 @@ export default async function VOTE(
         where: { id: postId },
         data: {
           vote: {
-            increment: status === "UPVOTE" ? 1 : -1,
+            increment: up ? 1 : -1,
           },
         },
       });

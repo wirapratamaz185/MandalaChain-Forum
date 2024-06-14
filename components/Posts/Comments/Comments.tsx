@@ -54,7 +54,7 @@ const Comments: React.FC<CommentsProps> = ({
       if (!response.ok) {
         throw new Error(data.message || "Something went wrong");
       }
-      setComments(prev => [data.data, ...prev])
+      setComments(prev => [{ ...data.data, created_at: new Date(data.data.created_at) }, ...prev]);
       setCommentText("");
       showToast({
         title: "Comment Created",
@@ -98,6 +98,7 @@ const Comments: React.FC<CommentsProps> = ({
       });
     }
   };
+
   const getPostComments = async () => {
     setIsLoading(true);
     if (selectedPost) {
@@ -107,7 +108,10 @@ const Comments: React.FC<CommentsProps> = ({
         if (!response.ok) {
           throw new Error(data.message || "Something went wrong");
         }
-        setComments(data.data);
+        setComments(data.data.map((comment: Comment) => ({
+          ...comment,
+          created_at: new Date(comment.created_at),
+        })));
       } catch (error) {
         showToast({
           title: "Error",
@@ -122,7 +126,7 @@ const Comments: React.FC<CommentsProps> = ({
   const onEditComment = async (comment: Comment) => {
     setEditingComment(comment);
     setCommentText(comment.text);
-  }
+  };
 
   const onUpdateComment = async () => {
     if (!editingComment) return;
@@ -145,7 +149,7 @@ const Comments: React.FC<CommentsProps> = ({
       }
       setComments(prev => prev.map(comment => {
         if (comment.id === editingComment.id) {
-          return data.data;
+          return { ...data.data, created_at: new Date(data.data.created_at) };
         }
         return comment;
       }));
@@ -166,7 +170,7 @@ const Comments: React.FC<CommentsProps> = ({
     } finally {
       setCreateLoading(false);
     }
-  }
+  };
 
   /**
    * Fetch comments for the selected post when selected post changes.
@@ -243,4 +247,5 @@ const Comments: React.FC<CommentsProps> = ({
     </Flex>
   );
 };
+
 export default Comments;

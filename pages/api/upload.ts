@@ -17,7 +17,7 @@ export default function uploadFormFiles(req: NextApiRequest) {
         return reject(err);
       }
 
-      console.log("Fields:", fields);
+      // console.log("Fields:", fields);
       console.log("Files:", files);
 
       // Process the uploaded files here

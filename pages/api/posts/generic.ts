@@ -1,4 +1,4 @@
-//pages/api/posts/generic.ts
+// pages/api/posts/generic.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { secret } from "../../../utils/auth/secret";
@@ -30,9 +30,7 @@ export default async function getGeneric(
     const posts = await prisma.post.findMany({
       where: {
         community: {
-          community_type: {
-            type: "PUBLIC",
-          },
+          is_private: false, // for public posts
         },
       },
       orderBy: [
@@ -54,6 +52,14 @@ export default async function getGeneric(
             name: true,
           },
         },
+        Vote: {
+          where: {
+            user_id: userId,
+          },
+          select: {
+            up: true,
+          },
+        }
       },
       take: 5,
     });

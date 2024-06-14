@@ -1,4 +1,3 @@
-// components/community/Recommendations.tsx
 import { Community } from "@/atoms/communitiesAtom";
 import useCommunityData from "@/hooks/useCommunityData";
 import useCustomToast from "@/hooks/useCustomToast";
@@ -61,18 +60,14 @@ const SuggestionsHeader: React.FC = () => {
  * @returns {React.FC} - Suggested communities list component
  */
 const SuggestedCommunitiesList: React.FC = () => {
-  const { communityStateValue, onJoinOrLeaveCommunity } = useCommunityData();
-  // console.log("Community State Value:", communityStateValue)
-  const [loading, setLoading] = useState(false);
+  const { onJoinOrLeaveCommunity, loading } = useCommunityData();
   const [communities, setCommunities] = useState<Community[]>([]);
+  const [subscribedCommunities, setSubscribedCommunities] = useState<{ communityId: string }[]>([]);
   const showToast = useCustomToast();
   const router = useRouter();
-  /**
-   * Gets the top 5 communities with the most members.
-   */
+
   useEffect(() => {
     const fetchCommunities = async () => {
-      setLoading(true);
       try {
         const response = await fetch("/api/community/get?limit=5", {
           method: 'GET',
@@ -86,17 +81,33 @@ const SuggestedCommunitiesList: React.FC = () => {
       } catch (error) {
         const errMessage = (error as Error).message;
         // showToast({
-        //   title: 'Please log in to view this community',
+        //   title: 'Error fetching communities',
+        //   description: errMessage,
         //   status: "error"
         // });
-      } finally {
-        setLoading(false);
       }
     };
     fetchCommunities();
   }, []);
 
-  // console.log("My Snippets:", communityStateValue.mySnippets);
+  useEffect(() => {
+    const fetchSubscribedCommunities = async () => {
+      try {
+        const response = await fetch("/api/community/getsubscribe");
+        const data = await response.json();
+        if (data.status) { // Check for the correct status field
+          setSubscribedCommunities(data.data);
+          // console.log("Fetched subscribed communities:", data.data);
+        } else {
+          console.error("Failed to fetch subscribed communities:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching subscribed communities:", error);
+      }
+    };
+
+    fetchSubscribedCommunities();
+  }, []);
 
   return (
     <Flex direction="column" mb={0}>
@@ -114,8 +125,8 @@ const SuggestedCommunitiesList: React.FC = () => {
       ) : (
         <>
           {communities.map((item, index) => {
-            const isJoined = !!communityStateValue.mySnippets.find(
-              (snippet: { communityId: string; }) => snippet.communityId === item.id
+            const isJoined = subscribedCommunities.some(
+              (sub) => sub.communityId === item.id
             );
             // console.log(`Community: ${item.name}, isJoined: ${isJoined}`);
             return (
@@ -167,10 +178,17 @@ const SuggestedCommunitiesList: React.FC = () => {
                       width="100px"
                       fontSize="8pt"
                       variant={isJoined ? "outline" : "solid"}
-                      onClick={(event) => {
+                      onClick={async (event) => {
                         event.preventDefault();
-                        onJoinOrLeaveCommunity(item.id, isJoined);
+                        // console.log(`Toggling subscription for community: ${item.name}`);
+                        await onJoinOrLeaveCommunity(item.id, isJoined);
+                        setSubscribedCommunities((prev) =>
+                          isJoined
+                            ? prev.filter((sub) => sub.communityId !== item.id)
+                            : [...prev, { communityId: item.id }]
+                        );
                       }}
+                      isLoading={loading}
                     >
                       {isJoined ? "Unsubscribe" : "Subscribe"}
                     </Button>

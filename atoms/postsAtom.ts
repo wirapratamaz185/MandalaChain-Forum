@@ -35,11 +35,11 @@ export type Post = {
     };
     votes: {
       id: string;
+      up: boolean;
       length: number;
     };
     length: number;
   }
-  voteStatus: number;
   isBookmarked: boolean;
 };
 

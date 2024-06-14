@@ -48,6 +48,7 @@ export default async function GETID(
           select: {
             id: true,
             name: true,
+            imageUrl: true,
           },
         },
         Bookmark: {

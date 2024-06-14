@@ -8,12 +8,8 @@ export interface Community {
   id: string;
   name: string;
   owner_id: string;
-  community_type: {
-    id: string;
-    type: "public" | "private";
-  }
+  is_private: boolean;
   created_at: Date;
-  imageURL?: string;
   imageUrl?: string;
   subscribers: {
     length: number;

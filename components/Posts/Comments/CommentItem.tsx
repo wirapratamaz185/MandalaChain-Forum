@@ -1,6 +1,7 @@
 import { Box, Flex, Icon, Spinner, Stack, Text } from "@chakra-ui/react";
 import React from "react";
 import { CgProfile } from "react-icons/cg";
+import { formatDate } from "@/utils/formatDate";
 
 type CommentItemProps = {
   comment: Comment;
@@ -9,7 +10,6 @@ type CommentItemProps = {
   loadingDelete: boolean;
   userId?: string;
 };
-
 export type Comment = {
   id: string;
   creatorId: string;
@@ -21,7 +21,7 @@ export type Comment = {
   postId: string;
   postTitle: string;
   text: string;
-  created_at: Date;
+  created_at: string | Date;
 };
 
 const CommentItem: React.FC<CommentItemProps> = ({
@@ -31,17 +31,6 @@ const CommentItem: React.FC<CommentItemProps> = ({
   loadingDelete,
   userId,
 }) => {
-  // const data: any = comment;
-  // const correctData: Comment = {
-  //   id: data.id,
-  //   communityId: data.communityId,
-  //   // postId: data.postId,
-  //   postTitle: data.postTitle,
-  //   text: data.text,
-  //   created_at: data.created_at as Date,
-  // };
-  // console.log(correctData);
-
   return (
     <Flex
       border="1px solid"
@@ -57,8 +46,8 @@ const CommentItem: React.FC<CommentItemProps> = ({
         <Stack spacing={3}>
           <Stack direction="row" align="center" fontSize="8pt">
             <Text fontWeight={600}>{comment.user.username}</Text>
-            <Text>{new Date(comment.created_at).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </Text>            {loadingDelete && <Spinner size="sm" />}
+            <Text>{formatDate(comment.created_at)}</Text>
+            {loadingDelete && <Spinner size="sm" />}
           </Stack>
           <Text fontSize="10pt">{comment.text}</Text>
           <Stack
@@ -91,4 +80,5 @@ const CommentItem: React.FC<CommentItemProps> = ({
     </Flex>
   );
 };
+
 export default CommentItem;

@@ -19,13 +19,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const payload = await MiddlewareAuthorization(req, secret as string);
     if (!payload || typeof payload !== "string")
       throw new Error("Unauthorized: No userId decoded");
-    const userId = payload;
+    userId = payload;
 
     const { order, limit } = req.query;
 
     let communities = await prisma.community.findMany({
       include: {
-        community_type: true,
         owner: {
           select: {
             id: true,

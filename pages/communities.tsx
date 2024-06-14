@@ -10,16 +10,14 @@ import useCustomToast from "@/hooks/useCustomToast";
 import { Button, Flex, Stack } from "@chakra-ui/react";
 
 const Communities: React.FC = () => {
-  const { communityStateValue, onJoinOrLeaveCommunity } = useCommunityData();
-  // console.log('communityStateValue:', communityStateValue); // Debugging line
-
+  const { onJoinOrLeaveCommunity } = useCommunityData();
   const [loading, setLoading] = useState(false);
   const [communities, setCommunities] = useState<Community[]>([]);
+  const [subscribedCommunities, setSubscribedCommunities] = useState<{ communityId: string }[]>([]);
 
   const showToast = useCustomToast();
 
   const getCommunities = async (numberOfExtraPosts: number) => {
-    // console.log('getCommunities called with:', numberOfExtraPosts); // Debugging line
     setLoading(true);
     try {
       const response = await fetch(`/api/community/get?order=desc&limit=${5 + numberOfExtraPosts}`);
@@ -27,7 +25,6 @@ const Communities: React.FC = () => {
         throw new Error(`HTTP Error: ${response.statusText}`);
       }
       const data = await response.json();
-      // console.log("Fetched communities:", data); // Debugging line
       setCommunities(data.data.communities || []);  // Ensure this path is correct based on response structure
     } catch (error) {
       console.error('Fetching communities failed:', error);
@@ -41,8 +38,26 @@ const Communities: React.FC = () => {
   };
 
   useEffect(() => {
-    // console.log('useEffect called'); // Debugging line
     getCommunities(0);
+  }, []);
+
+  useEffect(() => {
+    const fetchSubscribedCommunities = async () => {
+      try {
+        const response = await fetch("/api/community/getsubscribe");
+        const data = await response.json();
+        if (data.status) { // Check for the correct status field
+          setSubscribedCommunities(data.data);
+          // console.log("Fetched subscribed communities:", data.data);
+        } else {
+          console.error("Failed to fetch subscribed communities:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching subscribed communities:", error);
+      }
+    };
+
+    fetchSubscribedCommunities();
   }, []);
 
   return (
@@ -57,16 +72,22 @@ const Communities: React.FC = () => {
             </Stack>
           ) : (
             communities.map((community, index) => {
-              const isJoined = !!communityStateValue.mySnippets.find(
-                snippet => snippet.communityId === community.id
+              const isJoined = subscribedCommunities.some(
+                (sub) => sub.communityId === community.id
               );
-              // console.log('Rendering community:', community, 'isJoined:', isJoined);
               return (
                 <CommunityItem
                   key={index}
                   community={community}
                   isJoined={isJoined}
-                  onJoinOrLeaveCommunity={() => onJoinOrLeaveCommunity(community.id, isJoined)}
+                  onJoinOrLeaveCommunity={async () => {
+                    await onJoinOrLeaveCommunity(community.id, isJoined);
+                    setSubscribedCommunities((prev) =>
+                      isJoined
+                        ? prev.filter((sub) => sub.communityId !== community.id)
+                        : [...prev, { communityId: community.id }]
+                    );
+                  }}
                 />
               );
             })

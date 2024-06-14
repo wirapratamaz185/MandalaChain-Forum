@@ -24,8 +24,8 @@ export default async function PATCH(
       throw new Error("Unauthorized: No userId decoded");
     userId = payload;
 
-    const { communityType } = req.body;
-    const { communityId: communityId } = req.query;
+    const { is_private } = req.body;
+    const { communityId } = req.query;
 
     if (!communityId || typeof communityId !== "string") {
       return res.status(400).json(ApiResponse.error("Invalid communityId"));
@@ -59,20 +59,12 @@ export default async function PATCH(
         id: communityId as string,
       },
       data: {
-        community_type: {
-          update: {
-            type: communityType,
-          },
-        },
+        is_private,
       },
       select: {
         id: true,
         name: true,
-        community_type: {
-          select: {
-            type: true,
-          },
-        },
+        is_private: true,
         owner: {
           select: {
             id: true,

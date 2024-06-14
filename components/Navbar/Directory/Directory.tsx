@@ -36,7 +36,7 @@ const UserMenu: React.FC = () => {
         padding="0px 6px"
         borderRadius={10}
         mr={1200}
-        ml={{ base: 0, md: 0 }}
+        ml={6}
         _hover={{
           outline: "1px solid",
           outlineColor: "gray.200",
@@ -56,6 +56,7 @@ const UserMenu: React.FC = () => {
                 borderRadius="full"
                 boxSize="24px"
                 mr={2}
+                ml={2}
               />
             ) : (
               <Icon

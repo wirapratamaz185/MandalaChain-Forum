@@ -13,8 +13,7 @@ export default async function getVotes(
     return res.status(405).json(ApiResponse.error("Method not allowed"));
   }
 
-  const postId = req.query.postId as string; // Use postId instead of id
-  // console.log("PostId", postId);
+  const postId = req.query.postId as string;
 
   let userId;
   try {
@@ -23,9 +22,8 @@ export default async function getVotes(
       throw new ApiError("Unauthorized: No userId decoded", 401);
     }
     userId = payload;
-    // console.log("Authenticated user ID:", userId);
 
-    const votes = await prisma.post.findMany({
+    const postWithVotes = await prisma.post.findUnique({
       where: {
         id: postId,
       },
@@ -34,19 +32,32 @@ export default async function getVotes(
         title: true,
         body: true,
         vote: true,
+        Vote: {
+          where: {
+            user_id: userId,
+          },
+          select: {
+            up: true,
+          },
+        },
       },
     });
 
-    // console.log("Votes fetched:", votes.length);
-
-    if (votes.length === 0) {
-      // console.log("No votes available to display");
+    if (!postWithVotes) {
       return res.status(404).json(ApiResponse.error("No votes available"));
     }
 
+    const response = {
+      id: postWithVotes.id,
+      title: postWithVotes.title,
+      body: postWithVotes.body,
+      vote: postWithVotes.vote,
+      userVote: postWithVotes.Vote.length > 0 ? postWithVotes.Vote[0].up : null,
+    };
+
     res
       .status(200)
-      .json(ApiResponse.success(votes, "Votes fetched successfully"));
+      .json(ApiResponse.success(response, "Votes fetched successfully"));
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error fetching votes:", error);

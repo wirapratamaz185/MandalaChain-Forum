@@ -138,12 +138,12 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
    * Changes the privacy type of the current community. 
    * @param {string} privacyType - privacy type to be changed to 
    */
-  const onUpdateCommunityPrivacyType = async (privacyType: string) => {
+  const onUpdateCommunityPrivacyType = async (is_private: boolean) => {
     try {
       const response = await fetch(`/api/community/settings?communityId=${correctData.id}`, {
         method: "PATCH",
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ communityType: privacyType }),
+        body: JSON.stringify({ is_private }),
       });
       const data = await response.json();
       if (response.ok) {
@@ -175,11 +175,11 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
     if (selectedFile) {
       onUpdateImage();
     }
-    if (!selectedFile && communityData.imageURL) {
+    if (!selectedFile && communityData.imageUrl) {
       onDeleteImage(communityData.id);
     }
-    if (selectedPrivacyType && selectedPrivacyType !== correctData.community_type.type) {
-      onUpdateCommunityPrivacyType(selectedPrivacyType);
+    if (selectedPrivacyType && selectedPrivacyType !== (correctData.is_private ? 'private' : 'public')) {
+      onUpdateCommunityPrivacyType(selectedPrivacyType === 'private');
     }
     handleClose();
   };
@@ -218,12 +218,12 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
                 <Stack fontSize="10pt" spacing={2} p={5}>
                   {/* community image */}
                   <Flex align="center" justify="center" p={2}>
-                    {correctData.imageURL ||
+                    {correctData.imageUrl ||
                       selectedFile ? (
                       <Image
                         src={
                           selectedFile?.toString() ||
-                          correctData.imageURL
+                          correctData.imageUrl
                         }
                         alt="Community Photo"
                         height="120px"
@@ -251,7 +251,7 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
                       height={34}
                       onClick={() => selectFileRef.current?.click()}
                     >
-                      {correctData.imageURL
+                      {correctData.imageUrl
                         ? "Change Image"
                         : "Add Image"}
                     </Button>
@@ -263,7 +263,7 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
                       ref={selectFileRef}
                       onChange={onSelectFile}
                     />
-                    {correctData.imageURL && (
+                    {correctData.imageUrl && (
                       <Button
                         flex={1}
                         height={34}
@@ -285,7 +285,7 @@ const CommunitySettingsModal: React.FC<CommunitySettingsModalProps> = ({
                         Community Type
                       </Text>
                       <Text fontWeight={500} fontSize="10pt" color="gray.500">
-                        {`Currently ${correctData.community_type.type ?? ''}`}
+                        {`Currently ${correctData.is_private ? 'Private' : 'Public'}`}
                       </Text>
 
                       <Select

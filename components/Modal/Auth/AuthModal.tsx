@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+// components/Modal/Auth/AuthModal.tsx
+import { useRecoilState } from 'recoil';
+import { authModalState } from '../../../atoms/authModalAtom';
 import {
   Divider,
   Flex,
@@ -14,18 +16,17 @@ import OAuthButtons from "./OAuthButtons";
 import ResetPassword from "./ResetPassword";
 
 const AuthModal: React.FC = () => {
-  const [authMode, setAuthMode] = useState('login');
+  const [modalState, setModalState] = useRecoilState(authModalState);
 
   const handleClose = () => {
-    setAuthMode('');
-  };
-
-  const switchMode = (mode: string) => {
-    setAuthMode(mode);
+    setModalState((prev) => ({
+      ...prev,
+      open: false,
+    }));
   };
 
   return (
-    <Modal isOpen={authMode !== ''} onClose={handleClose}>
+    <Modal isOpen={modalState.open} onClose={handleClose}>
       <ModalOverlay
         bg="rgba(0, 0, 0, 0.4)"
         backdropFilter="auto"
@@ -33,8 +34,9 @@ const AuthModal: React.FC = () => {
       />
       <ModalContent borderRadius={10}>
         <ModalHeader textAlign="center">
-          {authMode === "signup"}
-          {authMode === "login"}
+          {modalState.view === "signup" && "Sign Up"}
+          {modalState.view === "login" && "Log In"}
+          {modalState.view === "resetPassword" && "Reset Password"}
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody
@@ -50,19 +52,19 @@ const AuthModal: React.FC = () => {
             justify="center"
             width="110%"
           >
-            {authMode === "login" && (
+            {modalState.view === "login" && (
               <>
                 <OAuthButtons />
                 <Divider />
                 <AuthInputs />
               </>
             )}
-            {authMode === "signup" && (
+            {modalState.view === "signup" && (
               <>
                 <AuthInputs />
               </>
             )}
-            {authMode === "resetPassword" && (
+            {modalState.view === "resetPassword" && (
               <ResetPassword />
             )}
           </Flex>

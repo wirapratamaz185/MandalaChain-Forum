@@ -1,4 +1,3 @@
-// hooks/useCommunityData.tsx
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useRecoilState } from 'recoil';
@@ -23,7 +22,6 @@ const useCommunityData = () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `{access_token}`,
         },
       });
       const data = await response.json();
@@ -46,7 +44,7 @@ const useCommunityData = () => {
     }
   }, [user, setCommunityStateValue, showToast]);
 
-  const joinCommunity = async (communityId: string) => {
+  const toggleCommunitySubscription = async (communityId: string) => {
     setLoading(true);
     try {
       const response = await fetch(`/api/community/subscribe?communityId=${communityId}`, {
@@ -55,19 +53,22 @@ const useCommunityData = () => {
           'Content-Type': 'application/json',
         },
       });
-
-      if (!response.ok) throw new Error('Already joined the community');
+  
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to toggle community subscription');
+  
+      const action = data.message.includes('unsubscribed') ? 'left' : 'joined';
+      // console.log("Checking data:", data.message);
       showToast({
-        title: 'Joined Community',
-        description: 'You have successfully joined the community.',
+        title: `Community ${action}`,
+        description: `You have successfully ${action} the community.`,
         status: 'success',
       });
-
-      // Optionally update community data
+  
       fetchMySnippets();
     } catch (error) {
       showToast({
-        title: 'Failed to Join',
+        title: 'Failed to toggle subscription',
         description: (error as Error).message,
         status: 'error',
       });
@@ -75,35 +76,6 @@ const useCommunityData = () => {
       setLoading(false);
     }
   };
-
-  const leaveCommunity = useCallback(async (communityId: any) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/community/unsubscribe?communityId=${communityId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to leave the community');
-      showToast({
-        title: "Community Left",
-        description: "You have successfully left the community.",
-        status: "success",
-      });
-
-      fetchMySnippets();
-    } catch (error) {
-      showToast({
-        title: "Leave community failed",
-        description: (error as Error).message,
-        status: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [showToast, setLoading, fetchMySnippets]);
 
   const getCommunityData = useCallback(async (communityId: string) => {
     setLoading(true);
@@ -114,23 +86,17 @@ const useCommunityData = () => {
           'Content-Type': 'application/json',
         },
       });
-      // console.log("API response status:", response.status);
       const data = await response.json();
-      // if (!response.ok) throw new Error(data.message || 'Failed to fetch community details');
       setCommunityStateValue(prev => ({ ...prev, currentCommunity: data.data }));
     } catch (error) {
-      // showToast({ title: 'Fetch Error', description: (error as any).message, status: 'error' });
+      showToast({ title: 'Fetch Error', description: (error as any).message, status: 'error' });
     } finally {
       setLoading(false);
     }
   }, [setCommunityStateValue, showToast]);
 
   const onJoinOrLeaveCommunity = async (communityId: string, isJoined: boolean) => {
-    if (isJoined) {
-      await leaveCommunity(communityId);
-    } else {
-      await joinCommunity(communityId);
-    }
+    await toggleCommunitySubscription(communityId);
   }
 
   useEffect(() => {
@@ -138,14 +104,12 @@ const useCommunityData = () => {
     if (communityId && typeof communityId === 'string' && !communityStateValue.currentCommunity) {
       getCommunityData(communityId);
     }
-    // Fetch user snippets when the component mounts
     fetchMySnippets();
   }, [communityStateValue.currentCommunity, getCommunityData, router.query, fetchMySnippets]);
 
   return {
     communityStateValue,
-    joinCommunity,
-    leaveCommunity,
+    toggleCommunitySubscription,
     getCommunityData,
     onJoinOrLeaveCommunity,
     loading,

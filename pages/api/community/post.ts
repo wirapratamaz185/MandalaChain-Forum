@@ -4,7 +4,6 @@ import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { ApiError } from "../../../utils/response/baseError";
 import { secret } from "../../../utils/auth/secret";
 import { prisma } from "../../../prisma/prisma";
-import { PrivacyType } from "@prisma/client";
 
 export default async function POST(
   req: NextApiRequest,
@@ -19,10 +18,10 @@ export default async function POST(
   console.log("req.body:", req.body);
   console.log("=====================================");
 
-  const { name, communityType } = req.body;
+  const { name, is_private } = req.body;
 
-  // validate communityType
-  if (!Object.values(PrivacyType).includes(communityType)) {
+  // Validate is_private field
+  if (typeof is_private !== "boolean") {
     return res.status(400).json(ApiResponse.error("Invalid community type"));
   }
 
@@ -31,16 +30,12 @@ export default async function POST(
     const payload = await MiddlewareAuthorization(req, secret as string);
     if (!payload || typeof payload !== "string")
       throw new Error("Unauthorized: No userId decoded");
-    const userId = payload;
+    userId = payload;
 
     const community = await prisma.community.create({
       data: {
         name,
-        community_type: {
-          create: {
-            type: communityType,
-          },
-        },
+        is_private,
         owner: {
           connect: {
             id: userId,
@@ -59,11 +54,7 @@ export default async function POST(
       select: {
         id: true,
         name: true,
-        community_type: {
-          select: {
-            type: true,
-          },
-        },
+        is_private: true,
         owner: {
           select: {
             id: true,
@@ -75,14 +66,14 @@ export default async function POST(
     res
       .status(201)
       .json(ApiResponse.success(community, "BASE.SUCCESS", undefined));
-    } catch (error) {
-      console.error("Error creating community:", error);
-      if (error instanceof Error && error.message === "Unauthorized: No userId decoded"){
-        return res.status(401).json(ApiResponse.error("Invalid token"));
-      } else if (error instanceof ApiError){
-        return res.status(500).json(ApiResponse.error(error.message));
-      } else {
-        return res.status(500).json(ApiResponse.error("Unknown error occurred"));
-      }
+  } catch (error) {
+    console.error("Error creating community:", error);
+    if (error instanceof Error && error.message === "Unauthorized: No userId decoded") {
+      return res.status(401).json(ApiResponse.error("Invalid token"));
+    } else if (error instanceof ApiError) {
+      return res.status(500).json(ApiResponse.error(error.message));
+    } else {
+      return res.status(500).json(ApiResponse.error("Unknown error occurred"));
     }
+  }
 }

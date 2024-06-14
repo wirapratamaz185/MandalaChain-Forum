@@ -45,7 +45,11 @@ export const CommunityValidator = z.object({
 
 // Vote Validator
 export const VoteValidator = z.object({
-  status: z.string({required_error: "Vote status is required",message:"invalid type, expected string"})})
+  up: z.boolean({
+    required_error: "Vote status is required",
+    message: "Invalid type, expected boolean",
+  }),
+});
 
 // Account Validator
 export const AccountValidator = z.object({

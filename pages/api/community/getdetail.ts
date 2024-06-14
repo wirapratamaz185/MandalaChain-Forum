@@ -1,3 +1,4 @@
+// pages/api/community/getdetail.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { ApiError } from "../../../utils/response/baseError";
@@ -29,7 +30,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         id: communityId as string,
       },
       include: {
-        community_type: true,
         owner: {
           select: {
             id: true,
@@ -65,7 +65,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             },
           },
           orderBy: {
-            vote: 'desc', // Order posts by vote in ascending order
+            vote: 'desc', // Order posts by vote in descending order
           },
         },
         subscribers: {

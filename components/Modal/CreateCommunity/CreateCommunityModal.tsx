@@ -35,12 +35,14 @@ const COMMUNITY_TYPE_OPTIONS = [
     icon: BsFillPersonFill,
     label: "Public",
     description: "Everyone can view and post",
+    is_private: false,
   },
   {
     name: "private",
     icon: HiLockClosed,
     label: "Private",
     description: "Only subscribers can view and post",
+    is_private: true,
   },
 ];
 
@@ -81,7 +83,11 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
   };
 
   const handleCreateCommunity = async () => {
-    const apiCommunityType = communityType.toUpperCase();
+    const selectedOption = COMMUNITY_TYPE_OPTIONS.find(
+      (option) => option.name === communityType
+    );
+    const is_private = selectedOption ? selectedOption.is_private : false;
+
     if (error) setError("");
     // prevents community from being created if its too short
     if (communityName.trim().length < 3) {
@@ -104,7 +110,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
         },
         body: JSON.stringify({
           name: communityName,
-          communityType: apiCommunityType,
+          is_private,
         }),
       });
 

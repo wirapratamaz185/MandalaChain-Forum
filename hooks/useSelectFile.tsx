@@ -7,7 +7,7 @@ const useSelectFile = (maxHeight: number, maxWidth: number) => {
 
   const onSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]; // get the first file
-    const maxImageSize = 10; // 10MB
+    const maxImageSize = 5; // 5MB
     const allowedFileTypes = ["image/jpeg", "image/png", "image/gif"]; // only allow image file types
 
     // check if file exists
@@ -35,15 +35,6 @@ const useSelectFile = (maxHeight: number, maxWidth: number) => {
       const image = new Image();
       image.src = URL.createObjectURL(file);
       image.onload = () => {
-        if (image.width > maxWidth || image.height > maxHeight) {
-          showToast({
-            title: "Image dimensions are too large",
-            description: `Maximum dimensions are ${maxWidth}x${maxHeight}.`,
-            status: "error",
-          });
-          return; // exit function
-        }
-
         // resize image
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");

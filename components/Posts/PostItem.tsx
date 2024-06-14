@@ -1,4 +1,5 @@
 import { Post } from "@/atoms/postsAtom";
+import { Community } from "@/atoms/communitiesAtom";
 import useCustomToast from "@/hooks/useCustomToast";
 import {
   Button,
@@ -29,16 +30,15 @@ import PostItemError from "../atoms/ErrorMessage";
 
 type PostItemProps = {
   post: Post;
-  userIsCreator: boolean; // is the currently logged in user the creator of post
-  userVoteValue?: number; // value of the vote of the currently logged in user
+  userIsCreator: boolean;
+  userVoteValue?: number;
   onVote: (
     event: React.MouseEvent<SVGElement, MouseEvent>,
     post: Post,
     vote: number,
-    community_id: string
-  ) => void; // function to handle voting
-  onDeletePost: (post: Post) => Promise<boolean>; // function to handle deleting post
-  onSelectPost?: (post: Post) => void; // optional because once a post is selected it cannot be reselected
+  ) => void;
+  onDeletePost: (post: Post) => Promise<boolean>;
+  onSelectPost?: (post: Post) => void;
   onBookmarkPost: (post: Post) => Promise<boolean>;
   showCommunityImage?: boolean;
 };
@@ -62,13 +62,12 @@ const PostItem: React.FC<PostItemProps> = ({
   const { onCopy, value, setValue, hasCopied } = useClipboard("");
   const [voteCount, setVoteCount] = useState<number | null>(null);
   const [fetchedImage, setFetchedImage] = useState<string | null>(null);
-  const [bookmarked, setBookmarked] = useState(false); // State for bookmark status
-  /**
-   * If there is no selected post then post is already selected
-   */
+  const [bookmarked, setBookmarked] = useState(false);
+  const [communities, setCommunities] = useState<Community[]>([]);
+  const [loading, setLoading] = useState(false);
+
   const singlePostPage = !onSelectPost;
 
-  // Fetch the bookmark status
   useEffect(() => {
     const fetchBookmarkedPosts = async () => {
       try {
@@ -76,7 +75,6 @@ const PostItem: React.FC<PostItemProps> = ({
         const data = await response.json();
         if (response.ok) {
           setBookmarked(data.data.includes(post.id));
-          // console.log("Set Bookmarked", data.data.includes(post.id));
         } else {
           throw new Error("Failed to fetch bookmarked posts");
         }
@@ -88,36 +86,16 @@ const PostItem: React.FC<PostItemProps> = ({
     fetchBookmarkedPosts();
   }, [post.id]);
 
-  // fetch the vote count
   useEffect(() => {
-    const fetchVoteCount = async () => {
-      try {
-        const response = await fetch(`/api/posts/getvote?postId=${post.id}`);
-        const data = await response.json();
-        // console.log("data", data);
-        if (response.ok && data.data.length > 0) {
-          setVoteCount(data.data[0].vote);
-        } else {
-          throw new Error("Failed to get vote count");
-        }
-      } catch (error) {
-        console.error("Error: fetchVoteCount", error);
-      }
-    };
-
-    fetchVoteCount();
-  }, [post.id]);
-
-  // fetch the image for the post
-  useEffect(() => {
-    const fetchImage = async () => {
+    const fetchPost = async () => {
       try {
         const response = await fetch(`/api/posts/getbyId?postId=${post.id}`);
-        // console.log("response", response);
         const data = await response.json();
-        // console.log("data", data.data.imageURL);
-        if (response.ok) {
+        if (response.ok && data.data) {
           setFetchedImage(data);
+          setVoteCount(data.data.vote);
+          setCommunities([data.data.community])
+          // console.log("Communities:", data.data.community.imageUrl);
         } else {
           throw new Error("Failed to get image");
         }
@@ -126,20 +104,19 @@ const PostItem: React.FC<PostItemProps> = ({
       }
     };
 
-    fetchImage();
+    fetchPost();
   }, [post.id]);
 
   const handleDelete = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    event.stopPropagation(); // stop event bubbling up to parent
+    event.stopPropagation();
     setLoadingDelete(true);
     try {
-      const success: boolean = await onDeletePost(post); // call the delete function from usePosts hook
+      const success: boolean = await onDeletePost(post);
 
       if (!success) {
-        // if the post was not deleted successfully
-        throw new Error("Post could not be deleted"); // throw error
+        throw new Error("Post could not be deleted");
       }
 
       showToast({
@@ -147,10 +124,8 @@ const PostItem: React.FC<PostItemProps> = ({
         description: "Your post has been deleted",
         status: "success",
       });
-      // if the user deletes post from the single post page, they should be redirected to the post's community page
       if (singlePostPage) {
-        // if the post is on the single post page
-        router.push(`/community/${post.community_id}`); // redirect to the community page
+        router.push(`/community/${post.community_id}`);
       }
     } catch (error: any) {
       setError(error.message);
@@ -167,7 +142,7 @@ const PostItem: React.FC<PostItemProps> = ({
   const handleBookmark = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    event.stopPropagation(); // stop event bubbling up to parent
+    event.stopPropagation();
     setLoadingBookmark(true);
     try {
       const success: boolean = await onBookmarkPost(post);
@@ -182,7 +157,6 @@ const PostItem: React.FC<PostItemProps> = ({
         status: "success",
       });
 
-      // Toggle the bookmark state
       setBookmarked(!bookmarked);
     } catch (error) {
       console.error("Error in handleBookmark:", error);
@@ -198,17 +172,47 @@ const PostItem: React.FC<PostItemProps> = ({
   const handleShare = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    event.stopPropagation(); // stop event bubbling up to parent
+    event.stopPropagation();
     const baseUrl = `${window.location.protocol}//${window.location.host}`;
     const postLink = `${baseUrl}/community/${post.community_id}/comments/${post.id}`;
     setValue(postLink);
-    onCopy(); // copy link to clipboard
+    onCopy();
 
     showToast({
       title: "Link Copied",
       description: "Link to the post has been saved to your clipboard",
       status: "info",
     });
+  };
+
+  const handleVote = async (
+    event: React.MouseEvent<SVGElement, MouseEvent>,
+    post: Post,
+    vote: number
+  ) => {
+    event.stopPropagation();
+    try {
+      await onVote(event, post, vote);
+
+      // Fetch the updated vote count from the API
+      const response = await fetch(`/api/posts/getvote?postId=${post.id}`);
+      const data = await response.json();
+
+      // console.log("API response:", data);
+
+      if (response.ok && data.data) {
+        setVoteCount(data.data.vote);
+        // console.log("Updated vote count:", data.data.vote);
+
+        const userVote = data.data.userVote;
+        // console.log("isUp vote:", userVote);
+        // setUserVote(userVote);
+      } else {
+        throw new Error("Failed to get updated vote count");
+      }
+    } catch (error) {
+      console.error("Error in handleVote:", error);
+    }
   };
 
   return (
@@ -221,11 +225,7 @@ const PostItem: React.FC<PostItemProps> = ({
         borderColor: singlePostPage ? "none" : "gray.400",
         boxShadow: !singlePostPage && "xl",
       }}
-      cursor={singlePostPage ? "unset" : "pointer"}
-      onClick={() => onSelectPost && onSelectPost(post)} // if a post is selected then open post
-      shadow="md"
     >
-      {/* Left Section */}
       <Flex
         direction="column"
         align="center"
@@ -236,17 +236,16 @@ const PostItem: React.FC<PostItemProps> = ({
       >
         <VoteSection
           userVoteValue={userVoteValue}
-          onVote={onVote}
+          onVote={handleVote}
           post={post}
           voteCount={voteCount}
         />
       </Flex>
 
-      {/* Right Section  */}
       <Flex direction="column" width="100%">
         <Stack spacing={1} p="10px">
-          <PostDetails showCommunityImage={true} postDetail={post} />
-          <PostTitle post={post} />
+          <PostDetails showCommunityImage={true} postDetail={post} communities={communities} />
+          <PostTitle post={post} onSelectPost={onSelectPost} />
           <PostBody
             post={post}
             loadingImage={loadingImage}
@@ -278,7 +277,6 @@ type VoteSectionProps = {
     event: React.MouseEvent<SVGElement, MouseEvent>,
     post: Post,
     vote: number,
-    community_id: string
   ) => void;
   post: Post;
   voteCount: number | null;
@@ -290,49 +288,82 @@ const VoteSection: React.FC<VoteSectionProps> = ({
   post,
   voteCount,
 }) => {
-  return (
-    <>
-      {/* like button */}
-      <Icon
-        as={userVoteValue === 1 ? IoArrowUpCircleSharp : IoArrowUpCircleOutline}
-        color={userVoteValue === 1 ? "blue.500" : "gray.500"}
-        fontSize={22}
-        cursor="pointer"
-        _hover={{ color: "blue.300" }}
-        onClick={(event) => onVote(event, post, 1, post.community_id)}
-      />
-      {/* number of likes  */}
-      <Text fontSize="12pt" color="gray.600">
-        {voteCount !== null ? voteCount : 0}
-      </Text>
-      {/* dislike button */}
-      <Icon
-        as={
-          userVoteValue === -1
-            ? IoArrowDownCircleSharp
-            : IoArrowDownCircleOutline
+  const data: any = post;
+  const correctData: Post = {
+    ...data,
+    posts: data.posts || { votes: { up: null } },
+  };
+
+  const [voteStatus, setVoteStatus] = useState(correctData.posts.votes.up);
+
+  // useEffect(() => {
+  //   setVoteStatus(correctData.posts.votes.up);
+  // }, [correctData.posts.votes.up]);
+
+  useEffect(() => {
+    const fetchVoteStatus = async () => {
+      try {
+        const response = await fetch(`/api/posts/getvote?postId=${post.id}`);
+        const result = await response.json();
+        if (response.ok && result.data) {
+          setVoteStatus(result.data.vote === 1);
+        } else {
+          throw new Error('Failed to fetch vote status');
         }
-        color={userVoteValue === -1 ? "blue.500" : "gray.500"}
+      } catch (error) {
+        console.error('Error fetching vote status:', error);
+      }
+    };
+
+    fetchVoteStatus();
+  }, [post.id]);
+
+  const handleVote = (event: React.MouseEvent<SVGElement, MouseEvent>, vote: number) => {
+    onVote(event, post, vote);
+    setVoteStatus(vote === 1);
+  };
+
+  const renderedOutput = (
+    <>
+      <Icon
+        as={voteStatus === true ? IoArrowUpCircleSharp : IoArrowUpCircleOutline}
+        color={voteStatus === true ? "blue.500" : "gray.500"}
+        fontSize={22}
+        cursor="pointer"
+        _hover={{ color: "blue.300" }}
+        onClick={(event) => handleVote(event, 1)}
+      />
+      <Text fontSize="12pt" color="gray.600">
+        {voteCount || 0}
+      </Text>
+      <Icon
+        as={voteStatus === false ? IoArrowDownCircleSharp : IoArrowDownCircleOutline}
+        color={voteStatus === false ? "blue.500" : "gray.500"}
         _hover={{ color: "blue.300" }}
         fontSize={22}
         cursor="pointer"
-        onClick={(event) => onVote(event, post, -1, post.community_id)}
+        onClick={(event) => handleVote(event, -1)}
       />
     </>
   );
+
+  return renderedOutput;
 };
 
 type PostDetailsProps = {
   showCommunityImage?: boolean;
   postDetail: Post;
+  // communityDetail: Community;
+  communities: Community[];
 };
 
-const PostDetails = ({ showCommunityImage, postDetail }: PostDetailsProps) => {
+const PostDetails = ({ showCommunityImage, postDetail, communities }: PostDetailsProps) => {
   const createdAt = moment(postDetail.created_at);
   const formattedDate = createdAt.isValid() ? createdAt.format("MMMM DD, YYYY") : "Invalid date";
 
   const topText: string = `By ${postDetail.user?.username || 'Anonymous'} ${formattedDate}`;
 
+  // console.log("Community Detail:", communityDetail);
   return (
     <Stack
       direction="row"
@@ -344,24 +375,17 @@ const PostDetails = ({ showCommunityImage, postDetail }: PostDetailsProps) => {
       mr={2}
       width="100%"
     >
-      {showCommunityImage && postDetail.community_id && (
+      {showCommunityImage && communities.length > 0 && (
         <>
-          {postDetail.imageUrl ? (
+        <Link href={`/community/${communities[0].id}`}>
             <Image
               borderRadius="full"
               boxSize="18px"
-              src={postDetail.imageUrl}
+              src={communities[0].imageUrl}
               mr={2}
               alt="Community logo"
             />
-          ) : (
-            <Icon
-              as={IoPeopleCircleOutline}
-              mr={1}
-              fontSize="18pt"
-              color="blue.500"
-            />
-          )}
+          </Link>
           <Link href={`/community/${postDetail.community_id}`}>
             <Text
               fontWeight={700}
@@ -381,13 +405,15 @@ const PostDetails = ({ showCommunityImage, postDetail }: PostDetailsProps) => {
 
 type PostTitleProps = {
   post: Post;
+  onSelectPost?: (post: Post) => void;
 };
 
-const PostTitle = ({ post }: PostTitleProps) => {
+const PostTitle = ({ post, onSelectPost }: PostTitleProps) => {
   return (
-    <Text fontSize="12pt" fontWeight={600}>
+    <Text fontSize="12pt" fontWeight={600} _hover={{ textDecoration: "underline" }}
+      onClick={() => onSelectPost && onSelectPost(post)}>
       {post.title}
-    </Text>
+    </Text >
   );
 };
 
@@ -401,10 +427,8 @@ const PostBody = ({ post, loadingImage, setLoadingImage }: PostBodyProps) => {
   return (
     <>
       <Text fontSize="12pt">
-        {/* only displays the first 30 words for descriptions that are too long */}
         {post.body.split(" ").slice(0, 30).join(" ")}
       </Text>
-      {/* image (if exists) */}
       {post.imageUrl && (
         <Flex justify="center" align="center">
           {loadingImage && (

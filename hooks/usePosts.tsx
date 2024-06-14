@@ -15,14 +15,14 @@ const usePosts = () => {
   const router = useRouter();
   const showToast = useCustomToast();
 
-  const onVote = async (event: React.MouseEvent, post: Post, voteValue: number, communityId: string) => {
+  const onVote = async (event: React.MouseEvent, post: Post, voteValue: number) => {
     event.preventDefault();
-
+  
     if (!isAuthenticated) {
       setAuthModalState({ open: true, view: "login" });
       return;
     }
-
+  
     const voteUrl = `/api/posts/vote?postId=${post.id}`;
     try {
       const response = await fetch(voteUrl, {
@@ -30,17 +30,17 @@ const usePosts = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: voteValue > 0 ? "UPVOTE" : "DOWNVOTE" }),
+        body: JSON.stringify({ up: voteValue > 0 }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to vote');
       }
-
+  
       const data = await response.json();
       setPostStateValue(prev => ({
         ...prev,
-        posts: prev.posts.map(p => p.id === post.id ? { ...p, voteStatus: data.voteStatus } : p),
+        posts: prev.posts.map(p => p.id === post.id ? { ...p, voteCount: data.voteCount, up: data.up } : p),
         postVotes: data.newVotes,
       }));
     } catch (error) {

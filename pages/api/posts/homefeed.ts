@@ -1,4 +1,4 @@
-// pages/api/posts/homefeed
+// pages/api/posts/homefeed.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse, MiddlewareAuthorization } from "../../../utils/helper";
 import { secret } from "../../../utils/auth/secret";
@@ -36,13 +36,11 @@ export default async function getGeneric(
       posts = subscriptions.flatMap((sub) => sub.community.posts);
       console.log("posts fetched from subscription", posts.length);
     } else {
-      // fetch generic feed pots from public communities
+      // fetch generic feed posts from public communities
       posts = await prisma.post.findMany({
         where: {
           community: {
-            community_type: {
-              type: "PUBLIC",
-            },
+            is_private: false,
           },
         },
         orderBy: {

@@ -29,6 +29,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ email: string; imageUrl?: string } | null>(null);
+  const [imageProfile, setImageProfile] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserFromStorage = () => {
@@ -57,6 +59,32 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
     fetchUserFromStorage();
   }, []);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch('/api/auth/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.message);
+        }
+
+        setImageProfile(result.data.imageUrl);
+        setUsername(result.data.username);
+        // console.log("User data fetched:", result.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   /**
    * Toggles the menu open and closed.
    */
@@ -76,7 +104,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
       />
 
       <Menu isOpen={isMenuOpen} onOpen={toggle} onClose={toggle}>
-        <UserMenuButton user={currentUser} isMenuOpen={isMenuOpen} />
+        <UserMenuButton user={currentUser} isMenuOpen={isMenuOpen} imageProfile={imageProfile} username={username} />
         <UserMenuList user={currentUser} setProfileModalOpen={setProfileModalOpen} setCurrentUser={setCurrentUser} />
       </Menu>
     </>
@@ -87,15 +115,20 @@ export default UserMenu;
 /**
  * @param {User | null | undefined} user - user currently logged in if any
  * @param {boolean} isMenuOpen - whether the menu is open or not
+ * @param {string | null} imageProfile - profile image URL
  */
 interface UserMenuButtonProps {
   user: { email: string; imageUrl?: string } | null | undefined;
   isMenuOpen: boolean;
+  imageProfile: string | null;
+  username: string | null;
 }
 
 const UserMenuButton: React.FC<UserMenuButtonProps> = ({
   user,
   isMenuOpen,
+  imageProfile,
+  username,
 }) => (
   <MenuButton
     cursor="pointer"
@@ -112,10 +145,10 @@ const UserMenuButton: React.FC<UserMenuButtonProps> = ({
       {user ? (
         // If user is authenticated, display user icon and name
         <>
-          {user.imageUrl ? (
+          {imageProfile ? (
             <>
               <Image
-                src={user.imageUrl}
+                src={imageProfile}
                 alt="User Profile Photo"
                 height="30px"
                 borderRadius="full"
@@ -123,14 +156,12 @@ const UserMenuButton: React.FC<UserMenuButtonProps> = ({
               />
             </>
           ) : (
-            <>
-              <Icon
-                fontSize={30}
-                mr={1}
-                color="gray.300"
-                as={MdAccountCircle}
-              />
-            </>
+            <Icon
+              fontSize={30}
+              mr={1}
+              color="gray.300"
+              as={MdAccountCircle}
+            />
           )}
 
           <Flex
@@ -140,8 +171,8 @@ const UserMenuButton: React.FC<UserMenuButtonProps> = ({
             align="flex-start"
             mr={2}
           >
-            <Text fontWeight={700}>
-              {/* {user?.email?.split("@")[0]} */}
+            <Text fontWeight={700} fontSize={10}>
+              {username}
             </Text>
           </Flex>
         </>

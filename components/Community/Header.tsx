@@ -1,4 +1,4 @@
-// components/community/header.tsx
+// components/Community/Header.tsx
 import { Community } from "@/atoms/communitiesAtom";
 import { Box, Button, Flex, Icon, Image, Text } from "@chakra-ui/react";
 import React, { useState } from "react";
@@ -11,15 +11,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { HiArrowCircleUp } from "react-icons/hi";
 
 /**
- * @param {communityData} - data requiblue to be displayed
+ * @param {communityData} - data required to be displayed
  */
 type HeaderProps = {
   communityData: Community;
 };
 
 const Header: React.FC<HeaderProps> = ({ communityData }) => {
-  const { communityStateValue, joinCommunity, leaveCommunity, loading } =
-    useCommunityData();
+  const { communityStateValue, onJoinOrLeaveCommunity, loading } = useCommunityData();
 
   const isJoined = !!communityStateValue.mySnippets.find(
     (item) => item.communityId === communityData.id
@@ -28,35 +27,19 @@ const Header: React.FC<HeaderProps> = ({ communityData }) => {
   const { user } = useAuth();
   const router = useRouter();
 
-  // debug data structure
-  const data: any = communityData;
-  const correctData: Community = data.data;
-  // console.log("Debug data", correctData);
-
-  const onJoinOrLeaveCommunity = async () => {
-    if (isJoined) {
-      await leaveCommunity(correctData.id);
-    } else {
-      await joinCommunity(correctData.id);
-    }
-  }
-
   return (
     <Flex direction="column" width="100%" height="120px">
       <Box height="30%" bg="blue.500" />
       <Flex justify="center" bg="white" flexGrow={1}>
         <Flex width="95%" maxWidth="1200px" align="center">
-          {/* using state instead of fetching from db as no refresh of the page is requiblue */}
-          <CommunityIcon
-            imageURL={correctData.imageURL}
-          />
+          <CommunityIcon imageURL={communityData.imageUrl} />
           <Flex padding="10px 16px" width="100%">
-            <CommunityName name={correctData.name}/>
+            <CommunityName name={communityData.name} />
             <Flex direction="row" flexGrow={1} align="end" justify="end">
               <CommunitySettings communityData={communityData} />
               <JoinOrLeaveButton
                 isJoined={isJoined}
-                onClick={() => onJoinOrLeaveCommunity()}
+                onClick={() => onJoinOrLeaveCommunity(communityData.id , isJoined )}
               />
             </Flex>
           </Flex>
@@ -76,7 +59,6 @@ type CommunityIconProps = {
 
 const CommunityIcon = ({ imageURL }: CommunityIconProps) => {
   return imageURL ? (
-    // if the community icon is available, then display the community icon
     <Image
       src={imageURL}
       borderRadius="full"
@@ -87,7 +69,6 @@ const CommunityIcon = ({ imageURL }: CommunityIconProps) => {
       shadow="md"
     />
   ) : (
-    // if the community icon is not available, then display a default icon
     <Icon
       as={HiArrowCircleUp}
       fontSize={64}
@@ -101,7 +82,7 @@ const CommunityIcon = ({ imageURL }: CommunityIconProps) => {
 };
 
 /**
- * @param {string} id - id of the community
+ * @param {string} name - name of the community
  */
 type CommunityNameProps = {
   name: string;
@@ -156,11 +137,6 @@ export const CommunitySettings: React.FC<CommunitySettingsProps> = ({
   const { user } = useAuth();
   const [isCommunitySettingsModalOpen, setCommunitySettingsModalOpen] =
     useState(false);
-
-  // debug data structure
-  // const data: any = communityData;
-  // const correctData: Community = data.data;
-  // console.log("Debug data", correctData);
 
   return (
     <>
