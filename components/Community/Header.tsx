@@ -18,6 +18,7 @@ type HeaderProps = {
 };
 
 const Header: React.FC<HeaderProps> = ({ communityData }) => {
+  // console.log("Community Data", communityData.data?.imageUrl)
   const { communityStateValue, onJoinOrLeaveCommunity, loading } = useCommunityData();
 
   const isJoined = !!communityStateValue.mySnippets.find(
@@ -32,14 +33,14 @@ const Header: React.FC<HeaderProps> = ({ communityData }) => {
       <Box height="30%" bg="blue.500" />
       <Flex justify="center" bg="white" flexGrow={1}>
         <Flex width="95%" maxWidth="1200px" align="center">
-          <CommunityIcon imageURL={communityData.imageUrl} />
+          <CommunityIcon imageURL={communityData.data?.imageUrl} />
           <Flex padding="10px 16px" width="100%">
-            <CommunityName name={communityData.name} />
+            <CommunityName name={communityData.data?.name || ''} />
             <Flex direction="row" flexGrow={1} align="end" justify="end">
               <CommunitySettings communityData={communityData} />
               <JoinOrLeaveButton
                 isJoined={isJoined}
-                onClick={() => onJoinOrLeaveCommunity(communityData.id , isJoined )}
+                onClick={() => onJoinOrLeaveCommunity(communityData.id, isJoined)}
               />
             </Flex>
           </Flex>

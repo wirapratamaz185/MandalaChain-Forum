@@ -411,7 +411,9 @@ type PostTitleProps = {
 const PostTitle = ({ post, onSelectPost }: PostTitleProps) => {
   return (
     <Text fontSize="12pt" fontWeight={600} _hover={{ textDecoration: "underline" }}
-      onClick={() => onSelectPost && onSelectPost(post)}>
+      onClick={() => onSelectPost && onSelectPost(post)}
+      cursor="pointer"
+      >
       {post.title}
     </Text >
   );
