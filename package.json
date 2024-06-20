@@ -9,7 +9,7 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",
-    "docker:compose": "docker-compose -f docker/docker-compose.yml up --build",
+    "docker:compose": "docker-compose -f docker/docker-compose.yml up --build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.6.0",
