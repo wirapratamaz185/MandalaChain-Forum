@@ -1,0 +1,13 @@
+{
+    "build": {
+      "env": {
+        "DATABASE_URL": "postgresql://postgres:lnjAzGulYLsiJCgaiPeaUppZteRXRDQT@viaduct.proxy.rlwy.net:47729/railway"
+      }
+    },
+    "builds": [
+      {
+        "src": "package.json",
+        "use": "@vercel/node"
+      }
+    ]
+  }
